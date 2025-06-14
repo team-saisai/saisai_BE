@@ -1,0 +1,17 @@
+services:
+  mysql:
+    image: mysql:8.0
+    restart: always
+    container_name: ${CONTAINER_NAME}
+    ports:
+      - "${DB_PORT}:3306"
+    volumes:
+      - ./data/mysql/mysql:/var/lib/mysql # 실제 MySql 데이터 파일들이 저장되는 볼륨
+      - ./data/mysql/config/my.cnf:/etc/mysql/conf.d/my.cnf # MySQL 설정 파일 마운트
+    environment:
+      TZ: Asia/Seoul
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+      MYSQL_DATABASE: ${DB}
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci

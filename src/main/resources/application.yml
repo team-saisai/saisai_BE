@@ -1,0 +1,46 @@
+spring:
+  application:
+    name: saisai
+  config:
+    import: optional:file:.env[.properties]
+
+
+  datasource:
+    url: jdbc:mysql://localhost:${DB_PORT}/${DB}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    properties:
+      hibernate:
+        show_sql: true
+        format_sql: true
+        dialect: org.hibernate.dialect.MySQL8Dialect
+        default_batch_fetch_size: 100
+
+server:
+  error:
+    include-message: always
+
+jwt:
+  secret:
+    key: ${JWT_SECRET_KEY}
+
+image:
+  s3:
+    bucket: ${S3_BUCKET_NAME}
+    region: ${S3_REGION}
+    access-key: ${S3_ACCESS_KEY}
+    secret-key: ${S3_SECRET_KEY}
+  file:
+    path: src/main/webapp/images
+    endpoint: http://localhost:8080/images
+
+springdoc:
+  swagger-ui:
+    persist-authorization: true
+    default-models-expand-depth: -1
+    path: /api-docs
