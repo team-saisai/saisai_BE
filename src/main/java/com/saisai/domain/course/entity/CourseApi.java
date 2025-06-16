@@ -5,7 +5,9 @@ import com.saisai.domain.common.exception.ExceptionCode;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.URL;
+import java.net.URLEncoder;
 import lombok.extern.slf4j.Slf4j;
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.springframework.beans.factory.annotation.Value;
@@ -18,7 +20,7 @@ public class CourseApi {
     @Value("${durunubi.secret}")
     private String API_SECERET_KEY;
 
-    public JSONObject callCourseAPI(int page) throws CustomException {
+    public JSONObject callCourseApiBody(int page) throws CustomException {
         try {
             String result = " ";
 
@@ -31,6 +33,7 @@ public class CourseApi {
                 "&numOfRows=10" +
                 "&_type=json"
             );
+            log.info(String.valueOf(url));
 
             BufferedReader bf = new BufferedReader(new InputStreamReader(url.openStream(), "UTF-8"));
             result = bf.readLine();
@@ -44,5 +47,35 @@ public class CourseApi {
             exception.printStackTrace();
             throw new CustomException(ExceptionCode.DATABASE_ERROR);
         }
+    }
+
+    public JSONArray callCourseApiItems(String courseName) throws CustomException {
+        try {
+            String result = "";
+
+            URL url = new URL("\thttps://apis.data.go.kr/B551011/Durunubi/courseList" +
+                "?MobileOS=ETC" +
+                "&MobileApp=saisai" +
+                "&ServiceKey=" + API_SECERET_KEY +
+                "&brdDiv=DNBW" +
+                "&crsKorNm=" + URLEncoder.encode(courseName, "UTF-8") +
+                "&_type=json"
+            );
+
+            BufferedReader bf = new BufferedReader(new InputStreamReader(url.openStream(), "UTF-8"));
+            result = bf.readLine();
+
+            JSONParser jsonParser = new JSONParser();
+            JSONObject jsonObject = (JSONObject) jsonParser.parse(result);
+            JSONObject response = (JSONObject) jsonObject.get("response");
+            JSONObject body = (JSONObject) response.get("body");
+            JSONObject items = (JSONObject) body.get("items");
+            JSONArray courseItem = (JSONArray) items.get("item");
+            return courseItem;
+        } catch (Exception exception) {
+            exception.printStackTrace();
+            throw new CustomException(ExceptionCode.DATABASE_ERROR);
+        }
+
     }
 }
