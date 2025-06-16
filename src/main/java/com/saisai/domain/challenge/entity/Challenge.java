@@ -25,7 +25,7 @@ import lombok.NoArgsConstructor;
 @Table(name = "challenge", uniqueConstraints = {
     @UniqueConstraint(
         name = "COURSE_REWARD_UNIQUE",
-        columnNames = {"course_id","reward_id"}
+        columnNames = {"course_name","reward_id"}
     )
 })
 @Getter
@@ -38,13 +38,12 @@ public class Challenge extends BaseEntity {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "course_id", nullable = false)
+    @JoinColumn(name = "course_name", nullable = false)
     private Course course;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "reward_id", nullable = false)
     private Reward reward;
-
 
     @Column(name = "status", nullable = false, length = 15)
     @Enumerated(EnumType.STRING)

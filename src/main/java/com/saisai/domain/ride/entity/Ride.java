@@ -35,7 +35,7 @@ public class Ride extends BaseEntity {
     private User user;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "course_id", nullable = false)
+    @JoinColumn(name = "course_name", nullable = false)
     private Course course;
 
     @Column(name = "status", nullable = false, length = 15)

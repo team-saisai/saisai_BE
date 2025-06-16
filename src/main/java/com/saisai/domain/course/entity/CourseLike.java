@@ -22,7 +22,7 @@ import org.springframework.data.annotation.CreatedDate;
 @Table(name = "course_likes", uniqueConstraints = {
     @UniqueConstraint(
         name = "USER_COURSE_UNIQUE",
-        columnNames = {"user_id", "course_id"}
+        columnNames = {"user_id", "course_name"}
     )
 })
 @Getter
@@ -39,7 +39,7 @@ public class CourseLike {
     private User user;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "course_id", nullable = false)
+    @JoinColumn(name = "course_name", nullable = false)
     private Course course;
 
     @CreatedDate
