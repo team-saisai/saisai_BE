@@ -8,6 +8,7 @@ import org.springframework.http.HttpStatus;
 @RequiredArgsConstructor
 public enum ExceptionCode {
 
+    DATABASE_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "DB_ERROR_01", "데이터베이스 연결에 실패했습니다.")
     ;
 
     private final HttpStatus httpStatus;
