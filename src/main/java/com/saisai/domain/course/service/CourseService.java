@@ -63,6 +63,29 @@ public class CourseService {
         return new PageImpl<>(courseItemResList, PageRequest.of(currentPage, actualPageSize), totalCount);
     }
 
+    // 코스 상세 조회 비즈니스 로직
+    public CourseInfoRes getCourseInfo(String courseName) {
+        if (courseName.trim().isEmpty()) {
+            throw new CustomException(COURSE_NAME_REQUIRED);
+        }
+
+        ExternalResponse<Body<CourseItem>> apiResponse = callCourseApiWithExceptionHandling(
+            () -> courseApi.callCourseApiByCourseName(courseName), "상세");
+
+        List<CourseItem> items = ExternalResponseUtil.extractItems(apiResponse);
+        if (items == null || items.isEmpty()) {
+            log.warn("코스명 '{}'에 대한 데이터가 없습니다.", courseName);
+            throw new CustomException(COURSE_NOT_FOUND);
+        }
+        CourseItem courseItem = items.get(0);
+
+        Long completeUserCount = rideRepository.countByCourseNameAndStatus(courseName);
+
+        Challenge challenge = challengeRepository.findByCourseNameAndStatus(courseName,
+            ChallengeStatus.ONGOING);
+
+        return CourseInfoRes.from(courseItem, completeUserCount, challenge);
+    }
 
     private ExternalResponse<Body<CourseItem>> callCourseApiWithExceptionHandling(
         Supplier<ExternalResponse<Body<CourseItem>>> apiCall, String errorMessagePrefix) throws CustomException
