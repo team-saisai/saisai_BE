@@ -22,6 +22,9 @@ public enum ExceptionCode {
     // format
     INVALID_INTEGER_FORMAT(HttpStatus.BAD_REQUEST, "FMT_ER_01", "Integer 형식 변환에 실패했습니다."),
     INVALID_DOUBLE_FORMAT(HttpStatus.BAD_REQUEST, "FMT_ER_02", "Double 형식 변환에 실패했습니다."),
+
+    // etc
+    INVALID_PAGE_NUMBER(HttpStatus.BAD_REQUEST, "ETC_ER_01", "요청하신 페이지 번호가 유효 범위를 초과했습니다."),
     ;
 
     private final HttpStatus httpStatus;
