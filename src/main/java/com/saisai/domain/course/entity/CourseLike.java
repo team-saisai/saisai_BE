@@ -38,17 +38,16 @@ public class CourseLike {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "course_name", nullable = false)
-    private Course course;
+    @Column(name = "course_name", unique = true, nullable = false)
+    private String courseName;
 
     @CreatedDate
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
     @Builder
-    public CourseLike(Course course, User user) {
-        this.course = course;
+    public CourseLike(String courseName, User user) {
+        this.courseName = courseName;
         this.user = user;
     }
 }

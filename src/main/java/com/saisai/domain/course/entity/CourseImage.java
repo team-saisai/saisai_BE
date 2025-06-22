@@ -3,12 +3,9 @@ package com.saisai.domain.course.entity;
 import com.saisai.domain.common.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -26,16 +23,15 @@ public class CourseImage extends BaseEntity {
     @Column(name = "id", nullable = false)
     private Long id;
 
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "course_name", nullable = false)
-    private Course course;
+    @Column(name = "course_name", unique = true, nullable = false)
+    private String courseName;
 
     @Column(name = "url", nullable = false)
     protected String url;
 
     @Builder
-    public CourseImage (Course course, String url) {
-        this.course = course;
+    public CourseImage (String courseName, String url) {
+        this.courseName = courseName;
         this.url = url;
     }
 }
