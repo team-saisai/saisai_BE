@@ -8,6 +8,10 @@ import org.springframework.http.HttpStatus;
 @RequiredArgsConstructor
 public enum SuccessCode {
 
+    // Course
+    COURSE_LIST_GET_SUCCESS(HttpStatus.OK, "COURSE_01", "코스 전체 목록 조회에 성공했습니다."),
+    COURSE_INFO_GET_SUCCESS(HttpStatus.OK, "COURSE_02", "코스 단일 상세 조회에 성공했습니다."),
+
     ;
 
     private final HttpStatus httpStatus;

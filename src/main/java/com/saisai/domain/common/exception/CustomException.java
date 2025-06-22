@@ -14,4 +14,10 @@ public class CustomException extends RuntimeException {
         this.httpStatus = exceptionCode.getHttpStatus();
         this.code = exceptionCode.getCode();
     }
+
+    public CustomException(ExceptionCode exceptionCode, Throwable cause) {
+        super(exceptionCode.getMessage(), cause);
+        this.httpStatus = exceptionCode.getHttpStatus();
+        this.code = exceptionCode.getCode();
+    }
 }

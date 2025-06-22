@@ -61,6 +61,10 @@ dependencies {
     // aws
     implementation platform('software.amazon.awssdk:bom:2.20.114')
     implementation 'software.amazon.awssdk:s3'
+
+    // restClient
+    implementation 'org.apache.httpcomponents.client5:httpclient5'
+    implementation 'org.apache.httpcomponents.core5:httpcore5'
 }
 
 tasks.named('test') {
