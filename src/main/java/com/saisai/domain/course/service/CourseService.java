@@ -16,6 +16,7 @@ import com.saisai.domain.course.api.CourseApi;
 import com.saisai.domain.course.api.CourseItem;
 import com.saisai.domain.course.dto.response.CourseInfoRes;
 import com.saisai.domain.course.dto.response.CourseListItemRes;
+import com.saisai.domain.course.dto.response.CourseSummaryInfo;
 import com.saisai.domain.course.entity.CourseImage;
 import com.saisai.domain.course.repository.CourseImageRepository;
 import com.saisai.domain.course.repository.CourseRepository;
@@ -85,6 +86,31 @@ public class CourseService {
             ChallengeStatus.ONGOING);
 
         return CourseInfoRes.from(courseItem, completeUserCount, challenge);
+    }
+
+    public CourseSummaryInfo getCourseSummaryInfoByCourseName(String courseName) {
+        if (courseName.trim().isEmpty()) {
+            throw new CustomException(COURSE_NAME_REQUIRED);
+        }
+
+        ExternalResponse<Body<CourseItem>> apiResponse = callCourseApiWithExceptionHandling(
+            () -> courseApi.callCourseApiByCourseName(courseName), "상세"
+        );
+
+        List<CourseItem> items = ExternalResponseUtil.extractItems(apiResponse);
+        if (items == null || items.isEmpty()) {
+            log.warn("코스명 '{}'에 대한 데이터가 없습니다.", courseName);
+            throw new CustomException(COURSE_NOT_FOUND);
+        }
+        CourseItem courseItem = items.get(0);
+
+        String imageUrl = null;
+        CourseImage courseImage = courseImageRepository.findCourseImageByCourseName(courseName);
+        if (courseImage != null) {
+            imageUrl = courseImage.getUrl();
+        }
+
+        return CourseSummaryInfo.from(courseItem, imageUrl);
     }
 
     private ExternalResponse<Body<CourseItem>> callCourseApiWithExceptionHandling(

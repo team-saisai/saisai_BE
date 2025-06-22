@@ -1,7 +1,6 @@
 package com.saisai.domain.challenge.entity;
 
 import com.saisai.domain.common.BaseEntity;
-import com.saisai.domain.course.entity.Course;
 import com.saisai.domain.reward.entity.Reward;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -37,9 +36,8 @@ public class Challenge extends BaseEntity {
     @Column(name = "id", nullable = false)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "course_name", nullable = false)
-    private Course course;
+    @Column(name = "course_name", unique = true, nullable = false)
+    private String courseName;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "reward_id", nullable = false)
@@ -57,9 +55,9 @@ public class Challenge extends BaseEntity {
     private LocalDateTime endedAt;
 
     @Builder
-    public Challenge(Course course, Reward reward, ChallengeStatus status, LocalDateTime endedAt,
+    public Challenge(String courseName, Reward reward, ChallengeStatus status, LocalDateTime endedAt,
         LocalDateTime startedAt) {
-        this.course = course;
+        this.courseName = courseName;
         this.reward = reward;
         this.status = status;
         this.endedAt = endedAt;

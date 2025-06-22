@@ -1,7 +1,6 @@
 package com.saisai.domain.ride.entity;
 
 import com.saisai.domain.common.BaseEntity;
-import com.saisai.domain.course.entity.Course;
 import com.saisai.domain.user.entity.User;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -34,9 +33,8 @@ public class Ride extends BaseEntity {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "course_name", nullable = false)
-    private Course course;
+    @Column(name = "course_name", unique = true, nullable = false)
+    private String courseName;
 
     @Column(name = "status", nullable = false, length = 15)
     @Enumerated(EnumType.STRING)
