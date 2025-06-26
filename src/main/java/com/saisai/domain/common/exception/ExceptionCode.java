@@ -13,6 +13,12 @@ public enum ExceptionCode {
     COURSE_NAME_REQUIRED(HttpStatus.BAD_REQUEST, "CR_ER_01", "코스명이 공백으로만 이루어져 있거나 비어있습니다."),
     COURSE_NOT_FOUND(HttpStatus.NOT_FOUND, "CR_ER_03", "코스를 찾을 수 없습니다."),
 
+    // gpx
+    GPX_EMPTY(HttpStatus.NOT_FOUND, "GPX_ER_01", "GPX 파일이 비어있습니다."),
+    GPX_DOWNLOAD_FAILED(HttpStatus.SERVICE_UNAVAILABLE, "GPX_ER_02", "GPX 파일 다운로드에 실패했습니다."),
+    GPX_PARSING_FAILED(HttpStatus.BAD_REQUEST, "GPX_ER_03", "GPX XML 파싱에 실패했습니다."),
+    GPX_UNKNOWN_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "GPX_04_ER", "GPX 파일 처리 중 예상치 못한 오류가 발생했습니다."),
+
     // api
     API_CLIENT_ERROR(HttpStatus.BAD_REQUEST, "API_ER_01", "API 요청에 문제가 발생했습니다. (클라이언트 오류)"),
     API_SERVER_ERROR(HttpStatus.SERVICE_UNAVAILABLE, "API_ER_02", "외부 API 서버에 문제가 발생했습니다. (서버 오류)"),
