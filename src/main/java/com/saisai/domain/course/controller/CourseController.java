@@ -33,13 +33,11 @@ public class CourseController {
             "페이지 번호 파라미터만 활성화 상태")
     @GetMapping
     public ResponseEntity<ApiResponse<Page<CourseListItemRes>>> getAllCourses(
-        @Parameter(description = "페이지 번호") @RequestParam(defaultValue = "1") int page
-        //@Parameter(description = "난이도") @RequestParam(required = false) Integer level,
-        //@Parameter(description = "거리") @RequestParam(required = false) Double distance,
-        //@Parameter(description = "시군 (지역)") @RequestParam(required = false) String sigun
+        @Parameter(description = "페이지 번호") @RequestParam(defaultValue = "1") int page,
+        @Parameter(description = "챌린지 상태 (챌린지 중 = ONGOING). 미입력시 모든 코스 조회") @RequestParam(required = false) String status
     ) {
         return ResponseEntity.status(HttpStatus.OK)
-            .body(ApiResponse.success(COURSE_LIST_GET_SUCCESS, courseService.getCourses(page)));
+            .body(ApiResponse.success(COURSE_LIST_GET_SUCCESS, courseService.getCourses(page, status)));
     }
 
     @Operation(summary = "코스 상세 조회",
