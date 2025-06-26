@@ -21,6 +21,9 @@ import com.saisai.domain.course.dto.response.CourseSummaryInfo;
 import com.saisai.domain.course.entity.CourseImage;
 import com.saisai.domain.course.repository.CourseImageRepository;
 import com.saisai.domain.course.repository.CourseRepository;
+import com.saisai.domain.gpx.dto.GpxPoint;
+import com.saisai.domain.gpx.service.GpxParserService;
+import com.saisai.domain.ride.entity.RideStatus;
 import com.saisai.domain.ride.repository.RideRepository;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -49,6 +52,7 @@ public class CourseService {
     private final ChallengeRepository challengeRepository;
     private final CourseImageRepository courseImageRepository;
     private final CourseApi courseApi;
+    private final GpxParserService gpxParserService;
 
     // 코스 목록 조회 비즈니스 로직
     public Page<CourseListItemRes> getCourses(int page, String status) {
@@ -101,12 +105,18 @@ public class CourseService {
         }
         CourseItem courseItem = items.get(0);
 
-        Long completeUserCount = rideRepository.countByCourseNameAndStatus(courseName);
+        CourseImage courseImage = courseImageRepository.findCourseImageByCourseName(courseName);
+        String imageUrl = null;
+        if (courseImage != null) {
+            imageUrl = courseImage.getUrl();
+        }
 
-        Challenge challenge = challengeRepository.findByCourseNameAndStatus(courseName,
-            ChallengeStatus.ONGOING);
+        Long inprogressUserCont = rideRepository.countByCourseNameAndStatus(courseName, RideStatus.IN_PROGRESS);
+        Long completeUserCount = rideRepository.countByCourseNameAndStatus(courseName, RideStatus.COMPLETED);
 
-        return CourseInfoRes.from(courseItem, completeUserCount, challenge);
+        List<GpxPoint> gpxPoints = gpxParserService.parseGpxpath(courseItem.gpxpath());
+
+        return CourseInfoRes.from(courseItem, imageUrl, inprogressUserCont, completeUserCount, gpxPoints);
     }
 
     // 코스명 기반의 요약 정보 반환 로직
@@ -150,7 +160,7 @@ public class CourseService {
         boolean hasMoreData = true;
 
         while (hasMoreData) {
-            ExternalResponse<Body<CourseItem>> result = courseApi.callCourseApi(currentPage);
+            ExternalResponse<Body<CourseItem>> result = courseApi.callCourseApi(currentPage, GET_COURSE_DEFAULT_NUM_OF_ROWS);
 
             List<CourseItem> currentItems = Optional.ofNullable(result)
                 .map(ExternalResponse::response)
