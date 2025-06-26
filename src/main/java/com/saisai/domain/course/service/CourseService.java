@@ -112,6 +112,36 @@ public class CourseService {
 
         return CourseSummaryInfo.from(courseItem, imageUrl);
     }
+    // 모든 코스를 리스트로
+    private List<CourseItem> fetchAllCourseItems() throws CustomException{
+        List<CourseItem> allCourseItems = new ArrayList<>();
+        int currentPage = 1;
+        boolean hasMoreData = true;
+
+        while (hasMoreData) {
+            ExternalResponse<Body<CourseItem>> result = courseApi.callCourseApi(currentPage);
+
+            List<CourseItem> currentItems = Optional.ofNullable(result)
+                .map(ExternalResponse::response)
+                .map(ExternalResponse.Response::body)
+                .map(Body::items)
+                .map(Items::item)
+                .orElseGet(ArrayList::new);
+
+            if (!currentItems.isEmpty()) {
+                allCourseItems.addAll(currentItems);
+
+                if (currentItems.size() < GET_COURSE_DEFAULT_NUM_OF_ROWS) {
+                    hasMoreData = false;
+                } else {
+                    currentPage++;
+                }
+            } else {
+                hasMoreData = false;
+            }
+        }
+        return allCourseItems;
+    }
 
     private ExternalResponse<Body<CourseItem>> callCourseApiWithExceptionHandling(
         Supplier<ExternalResponse<Body<CourseItem>>> apiCall, String errorMessagePrefix) throws CustomException
