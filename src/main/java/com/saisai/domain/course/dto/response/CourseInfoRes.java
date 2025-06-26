@@ -1,57 +1,35 @@
 package com.saisai.domain.course.dto.response;
 
-import com.saisai.domain.challenge.entity.Challenge;
 import com.saisai.domain.course.api.CourseItem;
-import java.time.LocalDateTime;
+import com.saisai.domain.gpx.dto.GpxPoint;
+import java.util.List;
 
 public record CourseInfoRes(
     String courseId,
     String courseName,
-    String contents,
+    String summary,
     Integer level,
     Double distance,
     Double estimatedTime,
     String sigun,
-    String tourInfo,
-    String travelerInfo,
-    String gpxpath,
+    String imageUrl,
+    Integer inProgressUserCount,
     Integer completeUserCount,
-    RewardInfo rewardInfo
+    List<GpxPoint> gpxPoints
 ) {
-    public static CourseInfoRes from(CourseItem courseItem, Long completeUserCount, Challenge challenge) {
+    public static CourseInfoRes from(CourseItem courseItem, String imageUrl, Long inprogressUserCount, Long completeUserCount, List<GpxPoint> gpxPoints) {
         return new CourseInfoRes(
             courseItem.courseId(),
             courseItem.courseName(),
-            courseItem.contents(),
+            courseItem.summary(),
             courseItem.level(),
             courseItem.distance(),
             courseItem.estimatedTime(),
             courseItem.sigun(),
-            courseItem.tourInfo(),
-            courseItem.travelerinfo(),
-            courseItem.gpxpath(),
+            imageUrl,
+            inprogressUserCount != null ? inprogressUserCount.intValue() : 0,
             completeUserCount != null ? completeUserCount.intValue() : 0,
-            RewardInfo.from(challenge)
+            gpxPoints
         );
-    }
-
-    private record RewardInfo(
-        String rewardName,
-        String rewardImageUrl,
-        LocalDateTime startedAt,
-        LocalDateTime endedAt
-    ) {
-        private static RewardInfo from(Challenge challenge) {
-            if (challenge == null) {
-                return null;
-            }
-
-            return new RewardInfo(
-                challenge.getReward().getName(),
-                challenge.getReward().getImage(),
-                challenge.getStartedAt(),
-                challenge.getEndedAt()
-            );
-        }
     }
 }
