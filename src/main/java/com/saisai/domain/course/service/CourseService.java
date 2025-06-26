@@ -9,6 +9,7 @@ import com.saisai.domain.challenge.entity.ChallengeStatus;
 import com.saisai.domain.challenge.repository.ChallengeRepository;
 import com.saisai.domain.common.api.dto.Body;
 import com.saisai.domain.common.api.dto.ExternalResponse;
+import com.saisai.domain.common.api.dto.Items;
 import com.saisai.domain.common.exception.CustomException;
 import com.saisai.domain.common.exception.ExceptionCode;
 import com.saisai.domain.common.utils.ExternalResponseUtil;
@@ -24,12 +25,14 @@ import com.saisai.domain.ride.repository.RideRepository;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Supplier;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -39,6 +42,8 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 public class CourseService {
 
+    private static final int GET_COURSE_DEFAULT_NUM_OF_ROWS = 100;
+    private static final int CLIENT_DEFAULT_PAGE_SIZE = 10;
     private final CourseRepository courseRepository;
     private final RideRepository rideRepository;
     private final ChallengeRepository challengeRepository;
@@ -46,22 +51,38 @@ public class CourseService {
     private final CourseApi courseApi;
 
     // 코스 목록 조회 비즈니스 로직
-    public Page<CourseListItemRes> getCourses(int page) {
-        ExternalResponse<Body<CourseItem>> apiResponse = callCourseApiWithExceptionHandling(
-            () -> courseApi.callCourseApi(page),"목록");
+    public Page<CourseListItemRes> getCourses(int page, String status) {
 
-        List<CourseItem> items = ExternalResponseUtil.extractItems(apiResponse);
+        List<CourseItem> resultCourseItems;
 
-        Long totalCount = ExternalResponseUtil.extractTotalCount(apiResponse);
-        int currentPage = ExternalResponseUtil.extractPageNo(apiResponse, page).intValue();
-        int pageSizeFromApi = ExternalResponseUtil.extractNumOfRows(apiResponse).intValue();
-        int actualPageSize = getValidatedPageSize(pageSizeFromApi);
+        long totalCount;
+        int pageNum;
+        int pageSize;
 
-        validatePageRequest(totalCount, currentPage, actualPageSize);
+        if (status.equals(ChallengeStatus.ONGOING.toString())) {
+            Pageable clientPageable = PageRequest.of(page - 1, CLIENT_DEFAULT_PAGE_SIZE);
+            List<CourseItem> allCourseItems = fetchAllCourseItems();
+            resultCourseItems = filterOnGoingChallengeCourseList(allCourseItems);
 
-        List<CourseListItemRes> courseItemResList = convertCourseItems(items);
+            totalCount = resultCourseItems.size();
+            pageNum = clientPageable.getPageNumber();
+            pageSize = clientPageable.getPageSize();
 
-        return new PageImpl<>(courseItemResList, PageRequest.of(currentPage, actualPageSize), totalCount);
+        } else {
+            ExternalResponse<Body<CourseItem>> apiResponse = callCourseApiWithExceptionHandling(
+                () -> courseApi.callCourseApi(page),"목록");
+            resultCourseItems = ExternalResponseUtil.extractItems(apiResponse);
+
+            totalCount = ExternalResponseUtil.extractTotalCount(apiResponse);
+            pageNum = ExternalResponseUtil.extractPageNo(apiResponse, page).intValue();
+            pageSize = ExternalResponseUtil.extractNumOfRows(apiResponse).intValue();
+        }
+
+        validatePageRequest(totalCount, pageNum, pageSize);
+
+        List<CourseListItemRes> courseItemResList = convertCourseItems(resultCourseItems);
+
+        return new PageImpl<>(courseItemResList, PageRequest.of(pageNum, CLIENT_DEFAULT_PAGE_SIZE), totalCount);
     }
 
     // 코스 상세 조회 비즈니스 로직
@@ -88,6 +109,7 @@ public class CourseService {
         return CourseInfoRes.from(courseItem, completeUserCount, challenge);
     }
 
+    // 코스명 기반의 요약 정보 반환 로직
     public CourseSummaryInfo getCourseSummaryInfoByCourseName(String courseName) {
         if (courseName.trim().isEmpty()) {
             throw new CustomException(COURSE_NAME_REQUIRED);
@@ -111,6 +133,45 @@ public class CourseService {
         }
 
         return CourseSummaryInfo.from(courseItem, imageUrl);
+    }
+
+    // 챌린지 진행 중인 코스 필터링
+    private List<CourseItem> filterOnGoingChallengeCourseList(List<CourseItem> allCourseItemList) {
+        List<String> ongoingChallengeCourseNameList = challengeRepository.findChallengeByStatus(ChallengeStatus.ONGOING);
+
+        return allCourseItemList.stream()
+            .filter(challengeCourse -> ongoingChallengeCourseNameList.contains(challengeCourse.courseName()))
+            .toList();
+    }
+    // 모든 코스를 리스트로
+    private List<CourseItem> fetchAllCourseItems() throws CustomException{
+        List<CourseItem> allCourseItems = new ArrayList<>();
+        int currentPage = 1;
+        boolean hasMoreData = true;
+
+        while (hasMoreData) {
+            ExternalResponse<Body<CourseItem>> result = courseApi.callCourseApi(currentPage);
+
+            List<CourseItem> currentItems = Optional.ofNullable(result)
+                .map(ExternalResponse::response)
+                .map(ExternalResponse.Response::body)
+                .map(Body::items)
+                .map(Items::item)
+                .orElseGet(ArrayList::new);
+
+            if (!currentItems.isEmpty()) {
+                allCourseItems.addAll(currentItems);
+
+                if (currentItems.size() < GET_COURSE_DEFAULT_NUM_OF_ROWS) {
+                    hasMoreData = false;
+                } else {
+                    currentPage++;
+                }
+            } else {
+                hasMoreData = false;
+            }
+        }
+        return allCourseItems;
     }
 
     private ExternalResponse<Body<CourseItem>> callCourseApiWithExceptionHandling(
@@ -173,14 +234,5 @@ public class CourseService {
                 throw new CustomException(ExceptionCode.INVALID_PAGE_NUMBER);
             }
         }
-    }
-
-    private int getValidatedPageSize(int pageSize) {
-        if (pageSize < 1) {
-            log.warn("외부 API에서 유효하지 않은 페이지 크기({})를 반환했습니다. 기본값 10으로 대체합니다.",
-                pageSize);
-            return 10;
-        }
-        return pageSize;
     }
 }

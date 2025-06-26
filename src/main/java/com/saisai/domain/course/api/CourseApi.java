@@ -56,6 +56,18 @@ public class CourseApi {
         ), "페이지: " + page);
     }
 
+    public ExternalResponse<Body<CourseItem>> callCourseApi(int page, int numOfRows) throws CustomException {
+        return executeApiCall(() -> courseApiInterface.callCourseApi(
+            DEFAULT_MOBILE_OS,
+            DEFAULT_MOBILE_APP,
+            API_SECERET_KEY,
+            DEFAULT_BRD_DIV,
+            page,
+            numOfRows,
+            DEFAULT_RESPONSE_TYPE
+        ), "페이지: " + page);
+    }
+
     public ExternalResponse<Body<CourseItem>> callCourseApiByCourseName(String courseName) throws CustomException {
         String encodedCourseName = URLEncoder.encode(courseName, StandardCharsets.UTF_8);
 
