@@ -63,7 +63,7 @@ public class CourseService {
         int pageNum;
         int pageSize;
 
-        if (status.equals(ChallengeStatus.ONGOING.toString())) {
+        if (ChallengeStatus.ONGOING.toString().equals(status)) {
             Pageable clientPageable = PageRequest.of(page - 1, CLIENT_DEFAULT_PAGE_SIZE);
             List<CourseItem> allCourseItems = fetchAllCourseItems();
             resultCourseItems = filterOnGoingChallengeCourseList(allCourseItems);
