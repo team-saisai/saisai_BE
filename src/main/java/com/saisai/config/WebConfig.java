@@ -3,6 +3,7 @@ package com.saisai.config;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.apache.hc.client5.http.classic.HttpClient;
 import org.apache.hc.client5.http.config.RequestConfig;
@@ -28,6 +29,14 @@ public class WebConfig {
             SerializationFeature.WRITE_DATES_AS_TIMESTAMPS); // YYYY-MM-DDTHH:mm:ss 으로 표현
 
         return objectMapper;
+    }
+
+    @Bean
+    public XmlMapper xmlMapper() {
+        XmlMapper xmlMapper = new XmlMapper();
+        xmlMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES,false);
+
+        return xmlMapper;
     }
 
     @Bean
