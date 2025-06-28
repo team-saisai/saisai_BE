@@ -37,4 +37,14 @@ public class AuthController {
             .body(ApiResponse.success(REGISTER_SUCCESS, authService.register(registerReq)));
     }
 
+    @PostMapping("/login")
+    @Operation(summary = "로그인",
+        description = "이메일, 비밀번호 입력 필요")
+    public ResponseEntity<ApiResponse<TokenRes>> login(
+        @Valid @RequestBody LoginReq loginReq
+    ) {
+        return ResponseEntity.status(HttpStatus.OK)
+            .body(ApiResponse.success(LOGIN_SUCCESS, authService.login(loginReq)));
+    }
+
 }
