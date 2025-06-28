@@ -18,6 +18,7 @@ public enum ExceptionCode {
     INVALID_REFRESH_TOKEN(HttpStatus.UNAUTHORIZED, "AUTH_ER_07", "유효하지 않은 Refresh 토큰입니다."),
 
     // user
+    USER_NOT_FOUND(HttpStatus.NOT_FOUND, "USER_ER_01", "사용자를 찾을 수 없습니다."),
     EMAIL_DUPLICATE(HttpStatus.BAD_REQUEST, "USER_ER_02", "이메일이 중복됩니다."),
 
     // course

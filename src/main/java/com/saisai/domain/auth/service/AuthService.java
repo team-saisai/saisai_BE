@@ -47,6 +47,17 @@ public class AuthService {
         return issueAndSaveTokens(savedUser);
     }
 
+    public TokenRes login(LoginReq loginReq) {
+        User user = userRepository.findByEmail(loginReq.email())
+            .orElseThrow(() -> new CustomException(USER_NOT_FOUND));
+
+        if (!passwordEncoder.matches(loginReq.password(), user.getPassword())) {
+            throw new CustomException(AUTH_FAILED);
+        }
+
+        return issueAndSaveTokens(user);
+    }
+
     // 액세스 토큰, 리프레시 토큰 발급하고 리프레시 토큰을 저장하는 메서드
     private TokenRes issueAndSaveTokens(User user) {
         String newAccessToken = jwtProvider.generateAccessToken(user);
