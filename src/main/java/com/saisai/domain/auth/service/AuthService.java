@@ -58,6 +58,29 @@ public class AuthService {
         return issueAndSaveTokens(user);
     }
 
+    public TokenRes reissue(String refreshTokenHeader) {
+        String refreshToken = jwtProvider.substringToken(refreshTokenHeader);
+
+        if(!jwtProvider.validToken(refreshToken)) {
+            throw new CustomException(INVALID_REFRESH_TOKEN);
+        }
+
+        Long userId = jwtProvider.getUserId(refreshToken);
+
+        String storedRefreshToken = refreshTokenRedisService.getRefreshToken(userId);
+
+        if (storedRefreshToken == null || !storedRefreshToken.equals(refreshToken)) {
+            throw new CustomException(INVALID_REFRESH_TOKEN);
+        }
+
+        User user = userRepository.findById(userId)
+            .orElseThrow(() -> new CustomException(USER_NOT_FOUND));
+
+        refreshTokenRedisService.deleteRefreshToken(userId);
+
+        return issueAndSaveTokens(user);
+    }
+
     // 액세스 토큰, 리프레시 토큰 발급하고 리프레시 토큰을 저장하는 메서드
     private TokenRes issueAndSaveTokens(User user) {
         String newAccessToken = jwtProvider.generateAccessToken(user);
