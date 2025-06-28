@@ -47,4 +47,16 @@ public class AuthController {
             .body(ApiResponse.success(LOGIN_SUCCESS, authService.login(loginReq)));
     }
 
+    @PostMapping("/reissue")
+    @Operation(summary = "토큰 재발급",
+        description = "Authorize 버튼 Refresh 토큰 필요 => Bearer 제외 후 토큰만 입력 필요 \n\n" +
+            "Authorization(헤더 파라미터) Refresh 토큰 필요 => bearer ~~ 입력 필요\n\n" +
+            "PostMan에서는 Header 혹은 Authorization(bearer Token) 둘 중 한 군데에서만 입력해도 됨"
+    )
+    public ResponseEntity<ApiResponse<TokenRes>> reissueToken(
+        @RequestHeader("Authorization") String refreshTokenHeader
+    ) {
+        return ResponseEntity.status(HttpStatus.OK)
+            .body(ApiResponse.success(REISSUE_SUCCESS, authService.reissue(refreshTokenHeader)));
+    }
 }
