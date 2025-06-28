@@ -33,7 +33,7 @@ public class User extends BaseEntity {
     private String password;
 
     @Column(name = "name", nullable = false, length = 10)
-    private String name;
+    private String nickname;
 
     @Column(name = "role", nullable = false, length = 10)
     @Enumerated(EnumType.STRING)
@@ -42,18 +42,14 @@ public class User extends BaseEntity {
     @Column(name = "is_deleted", nullable = false)
     private boolean isDeleted = false;
 
-    @Column(name = "image", length = 255)
-    private String image;
-
     @Column(name = "deleted_at")
     private LocalDateTime deletedAt;
 
     @Builder
-    public User(String email, String password, String name, UserRole role,  String image) {
+    public User(String email, String password, String nickname, UserRole role) {
         this.email = email;
         this.password = password;
-        this.name = name;
+        this.nickname = nickname;
         this.role = role;
-        this.image = image;
     }
 }

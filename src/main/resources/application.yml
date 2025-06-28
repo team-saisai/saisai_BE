@@ -21,6 +21,20 @@ spring:
         dialect: org.hibernate.dialect.MySQL8Dialect
         default_batch_fetch_size: 100
 
+  data:
+    redis:
+      host: localhost
+      timeout: 6000ms
+      port: 6379
+      lettuce:
+        pool:
+          max-active: 8
+          max-idle: 8
+          min-idle: 2
+          max-wait: 5000ms
+      database: 0
+
+
 server:
   error:
     include-message: always

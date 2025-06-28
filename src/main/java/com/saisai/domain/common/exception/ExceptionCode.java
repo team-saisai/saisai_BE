@@ -8,6 +8,19 @@ import org.springframework.http.HttpStatus;
 @RequiredArgsConstructor
 public enum ExceptionCode {
 
+    // auth
+    INVALID_USER_ROLE(HttpStatus.BAD_REQUEST, "AUTH_ER_01", "유효하지 않은 UserRole입니다."),
+    AUTH_FAILED(HttpStatus.BAD_REQUEST, "AUTH_ER_02", "이메일 또는 비밀번호가 일치하지 않습니다."),
+    JWT_TOKEN_REQUIRED(HttpStatus.BAD_REQUEST, "AUTH_ER_03", "JWT 토큰이 필요합니다."),
+    INVALID_JWT_SIGNATURE(HttpStatus.UNAUTHORIZED, "AUTH_ER_04", "유효하지 않는 JWT 서명입니다."),
+    EXPIRED_JWT_TOKEN(HttpStatus.UNAUTHORIZED, "AUTH_ER_05", "만료된 JWT 토큰입니다."),
+    UNSUPPORTED_JWT_TOKEN(HttpStatus.BAD_REQUEST, "AUTH_ER_06", "지원되지 않는 JWT 토큰입니다."),
+    INVALID_REFRESH_TOKEN(HttpStatus.UNAUTHORIZED, "AUTH_ER_07", "유효하지 않은 Refresh 토큰입니다."),
+
+    // user
+    USER_NOT_FOUND(HttpStatus.NOT_FOUND, "USER_ER_01", "사용자를 찾을 수 없습니다."),
+    EMAIL_DUPLICATE(HttpStatus.BAD_REQUEST, "USER_ER_02", "이메일이 중복됩니다."),
+
     // course
     COURSE_API_CALL_FAIL(HttpStatus.INTERNAL_SERVER_ERROR, "CR_ER_05", "코스 API 호출에 실패했습니다."),
     COURSE_NAME_REQUIRED(HttpStatus.BAD_REQUEST, "CR_ER_01", "코스명이 공백으로만 이루어져 있거나 비어있습니다."),
@@ -34,6 +47,7 @@ public enum ExceptionCode {
 
     // etc
     INVALID_PAGE_NUMBER(HttpStatus.BAD_REQUEST, "ETC_ER_01", "요청하신 페이지 번호가 유효 범위를 초과했습니다."),
+    INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "ETC_ER_02", "서버가 응답할 수 없습니다.");
     ;
 
     private final HttpStatus httpStatus;
