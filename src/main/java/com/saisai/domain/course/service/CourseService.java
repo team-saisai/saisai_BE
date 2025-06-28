@@ -20,7 +20,6 @@ import com.saisai.domain.course.dto.response.CourseListItemRes;
 import com.saisai.domain.course.dto.response.CourseSummaryInfo;
 import com.saisai.domain.course.entity.CourseImage;
 import com.saisai.domain.course.repository.CourseImageRepository;
-import com.saisai.domain.course.repository.CourseRepository;
 import com.saisai.domain.gpx.dto.GpxPoint;
 import com.saisai.domain.gpx.service.GpxParserService;
 import com.saisai.domain.ride.entity.RideStatus;
@@ -47,7 +46,7 @@ public class CourseService {
 
     private static final int GET_COURSE_DEFAULT_NUM_OF_ROWS = 100;
     private static final int CLIENT_DEFAULT_PAGE_SIZE = 10;
-    private final CourseRepository courseRepository;
+    //private final CourseApiRepository courseApiRepository;
     private final RideRepository rideRepository;
     private final ChallengeRepository challengeRepository;
     private final CourseImageRepository courseImageRepository;
@@ -143,6 +142,18 @@ public class CourseService {
         }
 
         return CourseSummaryInfo.from(courseItem, imageUrl);
+    }
+
+    // 코스아이템 가져오는 메서드
+    public Optional<CourseItem> findCourseByName(String courseName) {
+        ExternalResponse<Body<CourseItem>> apiResponse = callCourseApiWithExceptionHandling(
+            () -> courseApi.callCourseApiByCourseName(courseName), "단건"
+        );
+
+        List<CourseItem> items = ExternalResponseUtil.extractItems(apiResponse);
+        return Optional.ofNullable(items)
+            .filter(courseItemList -> !courseItemList.isEmpty())
+            .map(courseItemList -> courseItemList.get(0));
     }
 
     // 챌린지 진행 중인 코스 필터링
