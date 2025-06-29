@@ -25,6 +25,7 @@ public enum SuccessCode {
 
     // Badge
     BADGE_CREATE_SUCCESS(HttpStatus.CREATED, "BADGE_01", "뱃지 생성에 성공했습니다."),
+    MY_BADGE_LIST_GET_SUCCESS(HttpStatus.OK, "BADGE_02", "로그인 한 사용자의 뱃지 리스트 조회에 성공했습니다."),
 
     ;
 
