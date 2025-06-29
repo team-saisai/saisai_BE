@@ -22,6 +22,10 @@ public enum SuccessCode {
 
     // Ride
     RECENT_RIDE_COURSE_GET_SUCCESS(HttpStatus.OK, "RIDE_01", "최근 주행한 코스 조회에 성공했습니다."),
+
+    // Badge
+    BADGE_CREATE_SUCCESS(HttpStatus.CREATED, "BADGE_01", "뱃지 생성에 성공했습니다."),
+
     ;
 
     private final HttpStatus httpStatus;
