@@ -8,6 +8,7 @@ import com.saisai.domain.common.response.ApiResponse;
 import com.saisai.domain.ride.dto.response.RecentRideInfoRes;
 import com.saisai.domain.ride.service.MyRideService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+@Tag(name = "라이딩(개인) API")
 @RestController
 @RequestMapping("/api/my/rides")
 @RequiredArgsConstructor

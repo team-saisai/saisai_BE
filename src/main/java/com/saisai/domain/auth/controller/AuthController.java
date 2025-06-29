@@ -10,6 +10,7 @@ import com.saisai.domain.auth.dto.response.TokenRes;
 import com.saisai.domain.auth.service.AuthService;
 import com.saisai.domain.common.response.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -20,6 +21,7 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+@Tag(name = "로그인/회원가입 API")
 @RestController
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
