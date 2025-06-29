@@ -1,13 +1,17 @@
 package com.saisai.domain.badge.service;
 
 import static com.saisai.domain.common.exception.ExceptionCode.BADGE_NAME_DUPLICATE;
+import static com.saisai.domain.common.exception.ExceptionCode.BADGE_NOT_FOUND;
+import static com.saisai.domain.common.exception.ExceptionCode.USER_BADGE_NOT_FOUND;
 import static com.saisai.domain.common.exception.ExceptionCode.USER_NOT_FOUND;
 
 import com.saisai.config.jwt.AuthUserDetails;
 import com.saisai.domain.badge.dto.request.BadgeRegisterReq;
+import com.saisai.domain.badge.dto.response.BadgeDetailRes;
 import com.saisai.domain.badge.dto.response.BadgeRegisterRes;
 import com.saisai.domain.badge.dto.response.BadgeSummaryRes;
 import com.saisai.domain.badge.entity.Badge;
+import com.saisai.domain.badge.entity.UserBadge;
 import com.saisai.domain.badge.repository.BadgeRepository;
 import com.saisai.domain.badge.repository.UserBadgeRepository;
 import com.saisai.domain.common.exception.CustomException;
@@ -56,10 +60,23 @@ public class BadgeService {
 
         return badges.stream()
             .map(badge -> new BadgeSummaryRes(
-                badge.badgeId(),
+                badge.userBadgeId(),
                 badge.badgeName(),
                 imageUtil.getImageUrl(badge.badgeImageUrl())
             ))
             .toList();
+    }
+
+    public BadgeDetailRes getBadgeInfo(AuthUserDetails authUserDetails, Long userBadgeId) {
+        User user = userRepository.findById(authUserDetails.userId())
+            .orElseThrow(() -> new CustomException(USER_NOT_FOUND));
+
+        UserBadge userBadge = userBadgeRepository.findByUserAndId(user, userBadgeId)
+            .orElseThrow(() -> new CustomException(USER_BADGE_NOT_FOUND));
+
+        Badge badge = badgeRepository.findById(userBadge.getBadge().getId())
+            .orElseThrow(() -> new CustomException(BADGE_NOT_FOUND));
+
+        return BadgeDetailRes.from(badge, userBadge, imageUtil.getImageUrl(badge.getImage()));
     }
 }

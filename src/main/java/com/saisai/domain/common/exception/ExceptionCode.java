@@ -31,6 +31,10 @@ public enum ExceptionCode {
 
     // badge
     BADGE_NAME_DUPLICATE(HttpStatus.BAD_REQUEST, "BG_ER_01", "뱃지명이 중복됩니다."),
+    BADGE_NOT_FOUND(HttpStatus.NOT_FOUND, "BG_ER_02", "뱃지를 찾을 수 없습니다."),
+
+    // user badge
+    USER_BADGE_NOT_FOUND(HttpStatus.NOT_FOUND, "UB_ER_01", "USER BADGE 정보를 찾을 수 없습니다."),
 
     // gpx
     GPX_EMPTY(HttpStatus.NOT_FOUND, "GPX_ER_01", "GPX 파일이 비어있습니다."),

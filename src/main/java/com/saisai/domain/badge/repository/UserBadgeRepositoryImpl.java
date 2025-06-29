@@ -20,7 +20,7 @@ public class UserBadgeRepositoryImpl implements UserBadgeRepositoryCustom{
     public List<BadgeSummaryRes> findBadgeByUserId(Long userId) {
         return jpaQueryFactory
             .select(new QBadgeSummaryRes(
-                        badge.id,
+                        userBadge.id,
                         badge.name,
                         badge.image))
             .from(userBadge)
