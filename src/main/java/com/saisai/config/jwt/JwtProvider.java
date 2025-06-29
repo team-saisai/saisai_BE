@@ -111,7 +111,6 @@ public class JwtProvider {
     // 토큰 유효성 검사하는 메서드
     public boolean validToken(String token) {
         try{
-            log.info("valid 도착");
             Jwts.parserBuilder()
                 .setSigningKey(key)
                 .build()
