@@ -53,7 +53,7 @@ public enum ExceptionCode {
 
     // etc
     INVALID_PAGE_NUMBER(HttpStatus.BAD_REQUEST, "ETC_ER_01", "요청하신 페이지 번호가 유효 범위를 초과했습니다."),
-    INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "ETC_ER_02", "서버가 응답할 수 없습니다.");
+    INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "ETC_ER_02", "서버가 응답할 수 없습니다."),
     SERVER_IMAGE_FAIL(HttpStatus.INTERNAL_SERVER_ERROR, "ETC_ER_03", "이미지 서버에 문제가 생겼습니다."),
     ;
 
