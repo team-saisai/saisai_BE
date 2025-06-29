@@ -29,7 +29,7 @@ import lombok.NoArgsConstructor;
 public class UserBadge extends BaseEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     private Long id;
 
