@@ -4,7 +4,7 @@ import static com.saisai.domain.common.response.SuccessCode.MY_BADGE_DETAIL_GET_
 import static com.saisai.domain.common.response.SuccessCode.MY_BADGE_LIST_GET_SUCCESS;
 
 import com.saisai.config.jwt.AuthUserDetails;
-import com.saisai.domain.badge.dto.response.BadgeDetatilRes;
+import com.saisai.domain.badge.dto.response.BadgeDetailRes;
 import com.saisai.domain.badge.dto.response.BadgeSummaryRes;
 import com.saisai.domain.badge.service.BadgeService;
 import com.saisai.domain.common.annotation.Auth;
@@ -41,7 +41,7 @@ public class UserBadgeController {
     @GetMapping("/me/{userBadgeId}")
     @Operation(summary = "소유한 뱃지 상세 정보 조회",
         description = "뱃지명, 설명, 획득일, 뱃지 이미지 반환")
-    public ResponseEntity<ApiResponse<BadgeDetatilRes>> getBadgeInfo(
+    public ResponseEntity<ApiResponse<BadgeDetailRes>> getBadgeInfo(
         @Auth AuthUserDetails authUserDetails,
         @PathVariable Long userBadgeId
     ) {
