@@ -16,6 +16,8 @@ public enum ExceptionCode {
     EXPIRED_JWT_TOKEN(HttpStatus.UNAUTHORIZED, "AUTH_ER_05", "만료된 JWT 토큰입니다."),
     UNSUPPORTED_JWT_TOKEN(HttpStatus.BAD_REQUEST, "AUTH_ER_06", "지원되지 않는 JWT 토큰입니다."),
     INVALID_REFRESH_TOKEN(HttpStatus.UNAUTHORIZED, "AUTH_ER_07", "유효하지 않은 Refresh 토큰입니다."),
+    USER_NOT_AUTHENTICATED(HttpStatus.UNAUTHORIZED, "AUTH_ER_09", "인증되지 않았습니다."),
+
 
     // user
     USER_NOT_FOUND(HttpStatus.NOT_FOUND, "USER_ER_01", "사용자를 찾을 수 없습니다."),
