@@ -1,5 +1,7 @@
 package com.saisai.config.jwt;
 
+import static com.saisai.domain.common.exception.ExceptionCode.ADMIN_REQUIRED;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.saisai.domain.common.exception.ExceptionResponse;
 import jakarta.servlet.http.HttpServletRequest;
@@ -24,10 +26,12 @@ public class JwtAccessDeniedHandler implements AccessDeniedHandler {
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
         response.setCharacterEncoding(StandardCharsets.UTF_8.name());
 
-        ExceptionResponse body = new ExceptionResponse("ACCESS_DENIED", "관리자 권한이 필요한 요청입니다. 접근 권한이 없습니다.");
+        ExceptionResponse body = new ExceptionResponse(ADMIN_REQUIRED.getCode(),
+            ADMIN_REQUIRED.getMessage());
         String json = objectMapper.writeValueAsString(body);
 
         response.getWriter().write(json);
+        response.getWriter().flush();
     }
 }
 
