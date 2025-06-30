@@ -4,6 +4,7 @@ import static com.saisai.domain.common.exception.ExceptionCode.EXPIRED_JWT_TOKEN
 import static com.saisai.domain.common.exception.ExceptionCode.INTERNAL_SERVER_ERROR;
 import static com.saisai.domain.common.exception.ExceptionCode.INVALID_JWT_SIGNATURE;
 import static com.saisai.domain.common.exception.ExceptionCode.JWT_TOKEN_REQUIRED;
+import static com.saisai.domain.common.exception.ExceptionCode.MALFORMED_JWT_TOKEN;
 import static com.saisai.domain.common.exception.ExceptionCode.UNSUPPORTED_JWT_TOKEN;
 
 import com.saisai.domain.common.exception.CustomException;
@@ -16,6 +17,7 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.UnsupportedJwtException;
+import io.jsonwebtoken.io.DecodingException;
 import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
 import java.security.Key;
@@ -117,7 +119,7 @@ public class JwtProvider {
                 .parseClaimsJws(token);
 
             return true;
-        } catch (SecurityException | MalformedJwtException e) {
+        } catch (SecurityException e) {
             log.error("Invalid JWT signature, 유효하지 않는 JWT 서명 입니다.", e);
             throw new JwtAuthenticationException(INVALID_JWT_SIGNATURE);
         } catch (ExpiredJwtException e) {
@@ -126,7 +128,10 @@ public class JwtProvider {
         } catch (UnsupportedJwtException e) {
             log.error("Unsupported JWT token, 지원되지 않는 JWT 토큰 입니다.", e);
             throw new JwtAuthenticationException(UNSUPPORTED_JWT_TOKEN);
-        } catch (Exception e) {
+        } catch (DecodingException | MalformedJwtException e) {
+            log.error("Malformed or Decoding error in JWT token, 형식이 올바르지 않는 JWT 토큰 입니다.", e);
+            throw new JwtAuthenticationException(MALFORMED_JWT_TOKEN);
+        }catch (Exception e) {
             log.error("Internal server error", e);
             throw new JwtAuthenticationException(INTERNAL_SERVER_ERROR);
         }
