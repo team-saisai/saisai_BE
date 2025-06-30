@@ -10,6 +10,7 @@ import com.saisai.domain.auth.dto.response.TokenRes;
 import com.saisai.domain.auth.service.AuthService;
 import com.saisai.domain.common.response.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirements;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -30,8 +31,9 @@ public class AuthController {
     private final AuthService authService;
 
     @PostMapping("/register")
+    @SecurityRequirements(value = {})
     @Operation(summary = "회원가입",
-        description = "이메일, 닉네임, 비밀번호, 유저롤(USER/ADMIN 입력 필요")
+        description = "이메일, 닉네임, 비밀번호, 유저롤(USER/ADMIN) 입력 필요")
     public ResponseEntity<ApiResponse<TokenRes>> register(
         @Valid @RequestBody RegisterReq registerReq
     ) {
@@ -40,6 +42,7 @@ public class AuthController {
     }
 
     @PostMapping("/login")
+    @SecurityRequirements(value = {})
     @Operation(summary = "로그인",
         description = "이메일, 비밀번호 입력 필요")
     public ResponseEntity<ApiResponse<TokenRes>> login(
@@ -50,10 +53,9 @@ public class AuthController {
     }
 
     @PostMapping("/reissue")
+    @SecurityRequirements(value = {})
     @Operation(summary = "토큰 재발급",
-        description = "Authorize 버튼 Refresh 토큰 필요 => Bearer 제외 후 토큰만 입력 필요 \n\n" +
-            "Authorization(헤더 파라미터) Refresh 토큰 필요 => bearer ~~ 입력 필요\n\n" +
-            "PostMan에서는 Header 혹은 Authorization(bearer Token) 둘 중 한 군데에서만 입력해도 됨"
+        description = "Authorization(헤더 파라미터) Refresh 토큰 필요, 토큰 앞에 'Bearer ' 입력 필수"
     )
     public ResponseEntity<ApiResponse<TokenRes>> reissueToken(
         @RequestHeader("Authorization") String refreshTokenHeader
