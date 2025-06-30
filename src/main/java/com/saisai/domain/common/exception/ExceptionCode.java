@@ -11,14 +11,16 @@ public enum ExceptionCode {
     // auth
     INVALID_USER_ROLE(HttpStatus.BAD_REQUEST, "AUTH_ER_01", "유효하지 않은 UserRole입니다."),
     AUTH_FAILED(HttpStatus.BAD_REQUEST, "AUTH_ER_02", "이메일 또는 비밀번호가 일치하지 않습니다."),
-    JWT_TOKEN_REQUIRED(HttpStatus.BAD_REQUEST, "AUTH_ER_03", "JWT 토큰이 필요합니다."),
-    INVALID_JWT_SIGNATURE(HttpStatus.UNAUTHORIZED, "AUTH_ER_04", "유효하지 않는 JWT 서명입니다."),
-    EXPIRED_JWT_TOKEN(HttpStatus.UNAUTHORIZED, "AUTH_ER_05", "만료된 JWT 토큰입니다."),
-    UNSUPPORTED_JWT_TOKEN(HttpStatus.BAD_REQUEST, "AUTH_ER_06", "지원되지 않는 JWT 토큰입니다."),
-    INVALID_REFRESH_TOKEN(HttpStatus.UNAUTHORIZED, "AUTH_ER_07", "유효하지 않은 Refresh 토큰입니다."),
-    ADMIN_REQUIRED(HttpStatus.FORBIDDEN, "AUTH_ER_08", "관리자 권한이 필요한 요청입니다. 접근 권한이 없습니다."),
-    USER_NOT_AUTHENTICATED(HttpStatus.UNAUTHORIZED, "AUTH_ER_09", "인증되지 않았습니다."),
+    ADMIN_REQUIRED(HttpStatus.FORBIDDEN, "AUTH_ER_03", "관리자 권한이 필요한 요청입니다. 접근 권한이 없습니다."),
+    USER_NOT_AUTHENTICATED(HttpStatus.UNAUTHORIZED, "AUTH_ER_04", "인증되지 않았습니다."),
 
+    // jwt
+    JWT_TOKEN_REQUIRED(HttpStatus.BAD_REQUEST, "JWT_ER_01", "JWT 토큰이 필요합니다."),
+    INVALID_JWT_SIGNATURE(HttpStatus.UNAUTHORIZED, "JWT_ER_02", "유효하지 않는 JWT 서명입니다."),
+    EXPIRED_JWT_TOKEN(HttpStatus.UNAUTHORIZED, "JWT_ER_03", "만료된 JWT 토큰입니다."),
+    UNSUPPORTED_JWT_TOKEN(HttpStatus.BAD_REQUEST, "JWT_ER_04", "지원되지 않는 JWT 토큰입니다."),
+    INVALID_REFRESH_TOKEN(HttpStatus.UNAUTHORIZED, "JWT_ER_05", "유효하지 않은 Refresh 토큰입니다."),
+    MALFORMED_JWT_TOKEN(HttpStatus.BAD_REQUEST, "JWT_ER_06", "올바르지 않는 형식의 JWT 토큰입니다."),
 
     // user
     USER_NOT_FOUND(HttpStatus.NOT_FOUND, "USER_ER_01", "사용자를 찾을 수 없습니다."),
