@@ -9,7 +9,7 @@ import java.util.Optional;
 public record RecentRideInfoRes(
     String courseName,
     String sigun,
-    String courseIamgeUrl,
+    String courseImageUrl,
     Double distance,
     Double progressRate,
     LocalDate recentRideAt
@@ -27,6 +27,17 @@ public record RecentRideInfoRes(
             courseItem.distance(),
             ride.getProgressRate(),
             ride.getModifiedAt().toLocalDate()
+        );
+    }
+
+    public static RecentRideInfoRes empty() {
+        return new RecentRideInfoRes(
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
         );
     }
 }

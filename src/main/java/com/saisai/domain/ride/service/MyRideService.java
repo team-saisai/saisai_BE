@@ -33,14 +33,14 @@ public class MyRideService {
         Ride recentRide = rideRepository.findTop1ByUserIdOrderByModifiedAtDesc(user.getId());
 
         if (recentRide == null) {
-            return null;
+            return RecentRideInfoRes.empty();
         }
 
-        CourseItem couresItem = courseService.findCourseByName(recentRide.getCourseName())
+        CourseItem courseItem = courseService.findCourseByName(recentRide.getCourseName())
             .orElseThrow(() -> new CustomException(COURSE_NOT_FOUND));
 
         CourseImage courseImage = courseImageRepository.findCourseImageByCourseName(recentRide.getCourseName());
 
-        return RecentRideInfoRes.from(recentRide, couresItem, courseImage);
+        return RecentRideInfoRes.from(recentRide, courseItem, courseImage);
     }
 }
