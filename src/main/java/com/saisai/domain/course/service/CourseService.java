@@ -69,40 +69,22 @@ public class CourseService {
     }
 
     // 코스 상세 조회 비즈니스 로직
-    public CourseInfoRes getCourseInfo(String courseName) {
-        if (courseName.trim().isEmpty()) {
-            throw new CustomException(COURSE_NAME_REQUIRED);
-        }
+    public CourseDetailsRes getCourseInfo(Long courseId) {
 
-        ExternalResponse<Body<CourseItem>> apiResponse = callCourseApiWithExceptionHandling(
-            () -> courseApi.callCourseApiByCourseName(courseName), "상세");
+        Course course = courseRepository.findById(courseId)
+            .orElseThrow(() -> new CustomException(COURSE_NOT_FOUND));
 
-        List<CourseItem> items = ExternalResponseUtil.extractItems(apiResponse);
-        if (items == null || items.isEmpty()) {
-            log.warn("코스명 '{}'에 대한 데이터가 없습니다.", courseName);
-            throw new CustomException(COURSE_NOT_FOUND);
-        }
-        CourseItem courseItem = items.get(0);
+        Long courseChallengerCount = rideRepository.countByCourseIdAndStatus(courseId, RideStatus.IN_PROGRESS);
+        Long courseFinisherCount = rideRepository.countByCourseIdAndStatus(courseId, RideStatus.COMPLETED);
 
-        CourseImage courseImage = courseImageRepository.findCourseImageByCourseName(courseName);
-        String imageUrl = null;
-        if (courseImage != null) {
-            imageUrl = courseImage.getUrl();
-        }
+        List<GpxPoint> gpxPoints = gpxParser.parseGpxpath(course.getGpxPath());
 
-        Long inprogressUserCont = rideRepository.countByCourseNameAndStatus(courseName, RideStatus.IN_PROGRESS);
-        Long completeUserCount = rideRepository.countByCourseNameAndStatus(courseName, RideStatus.COMPLETED);
-
-        List<GpxPoint> gpxPoints = gpxParserService.parseGpxpath(courseItem.gpxpath());
-
-        return CourseInfoRes.from(courseItem, imageUrl, inprogressUserCont, completeUserCount, gpxPoints);
+        return CourseDetailsRes.from(course, imageUtil.getImageUrl(course.getImage()), courseChallengerCount,  courseFinisherCount, gpxPoints);
     }
 
     // 코스아이템 가져오는 메서드
     public Optional<CourseItem> findCourseByName(String courseName) {
-        ExternalResponse<Body<CourseItem>> apiResponse = callCourseApiWithExceptionHandling(
-            () -> courseApi.callCourseApiByCourseName(courseName), "단건"
-        );
+        ExternalResponse<Body<CourseItem>> apiResponse = null;
 
         List<CourseItem> items = ExternalResponseUtil.extractItems(apiResponse);
         return Optional.ofNullable(items)
