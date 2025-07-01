@@ -2,6 +2,7 @@ package com.saisai.domain.gpx.util;
 
 import static com.saisai.domain.common.exception.ExceptionCode.GPX_DOWNLOAD_FAILED;
 import static com.saisai.domain.common.exception.ExceptionCode.GPX_EMPTY;
+import static com.saisai.domain.common.exception.ExceptionCode.GPX_NO_FIRST_POINT;
 import static com.saisai.domain.common.exception.ExceptionCode.GPX_PARSING_FAILED;
 import static com.saisai.domain.common.exception.ExceptionCode.GPX_UNKNOWN_ERROR;
 
@@ -97,4 +98,15 @@ public class GpxParser {
             .flatMap(segment -> segment.trackPoints().stream());
     }
 
+    // gpx 포인트 존재 여부 검사 메서드
+    private void validGpx(Gpx gpx) {
+        if (gpx.tracks().isEmpty()) {
+            throw new CustomException(GPX_EMPTY);
+        }
+
+        boolean hasPoints = flattenTrackPoints(gpx).findAny().isPresent();
+        if (!hasPoints) {
+            throw new CustomException(GPX_NO_FIRST_POINT);
+        }
+    }
 }
