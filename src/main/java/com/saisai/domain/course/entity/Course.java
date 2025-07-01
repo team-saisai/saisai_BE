@@ -59,13 +59,21 @@ public class Course extends BaseEntity {
     @Column(name = "image")
     private String image;
 
+    @Column(name = "start_lat")
+    private Double startLat;
+
+    @Column(name = "start_lon")
+    private Double startLon;
+
     @Column(name = "is_deleted")
     private Boolean isDeleted;
 
 
     @Builder
     public Course(String name, String contents, String summary, String level, Double distance,
-        Double estimatedTime, String sigun, String tourInfo, String travelerInfo, String gpxPath, String durunubiCourseId, String image) {
+        Double estimatedTime, String sigun, String tourInfo, String travelerInfo, String gpxPath,
+        String durunubiCourseId, String image, Double startLat, Double startLon
+    ) {
         this.name = name;
         this.contents = contents;
         this.summary = summary;
@@ -78,6 +86,8 @@ public class Course extends BaseEntity {
         this.gpxPath = gpxPath;
         this.durunubiCourseId = durunubiCourseId;
         this.image = image;
+        this.startLat = startLat;
+        this.startLon = startLon;
         this.isDeleted = false;
     }
 }
