@@ -12,9 +12,7 @@ import com.saisai.domain.common.exception.CustomException;
 import com.saisai.domain.gpx.dto.FirstGpxPoint;
 import com.saisai.domain.gpx.dto.GpxPoint;
 import com.saisai.domain.gpx.dto.format.Gpx;
-import com.saisai.domain.gpx.dto.format.Track;
 import com.saisai.domain.gpx.dto.format.TrackPoint;
-import com.saisai.domain.gpx.dto.format.TrackSegment;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
@@ -76,38 +74,26 @@ public class GpxParser {
         return convertGpxToGpxPoints(gpx);
     }
 
+    // gpx -> List<GpxPoint> 변환 메서드
     private List<GpxPoint> convertGpxToGpxPoints(Gpx gpx) {
+        List<TrackPoint> trackPoints = flattenTrackPoints(gpx).toList();
         List<GpxPoint> gpxPoints = new ArrayList<>();
 
-        double preLat = 0.0;
-        double preLon = 0.0;
-        boolean isFirstPoint = true;
+        TrackPoint prev = trackPoints.get(0);
+        gpxPoints.add(GpxPoint.from(prev, 0.0));
 
-        for (Track track: gpx.tracks()) {
-            if (track.trackSegments().isEmpty()) continue;
+        for (int i = 1; i < trackPoints.size(); i++) {
+            TrackPoint current = trackPoints.get(i);
+            double segmentDistance = DistanceUtils.calculateDistance(
+                prev.lat(), prev.lon(),
+                current.lat(), current.lon()
+            );
 
-            for (TrackSegment segment: track.trackSegments()) {
-                if (segment.trackPoints().isEmpty()) continue;
+            gpxPoints.add(GpxPoint.from(current, segmentDistance));
 
-                for (TrackPoint trackPoint: segment.trackPoints()) {
-                    double currentLat = trackPoint.lat();
-                    double currentLon = trackPoint.lon();
-                    double ele = trackPoint.ele();
-
-                    double segmentDistance = 0.0;
-                    if (!isFirstPoint) {
-                        segmentDistance = DistanceUtils.calculateDistance(preLat, preLon, currentLat, currentLon);
-                    } else {
-                        isFirstPoint = false;
-                    }
-
-                    gpxPoints.add(new GpxPoint(currentLat, currentLon, ele, segmentDistance));
-
-                    preLat = currentLat;
-                    preLon = currentLon;
-                }
-            }
+            prev = current;
         }
+
         return gpxPoints;
     }
 
