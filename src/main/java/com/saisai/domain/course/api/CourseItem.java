@@ -16,7 +16,8 @@ public record CourseItem(
     @JsonProperty("crsTourInfo") String tourInfo,
     @JsonProperty("travelerinfo") String travelerinfo,
     @JsonProperty("sigun") String sigun,
-    @JsonProperty("gpxpath") String gpxpath
+    @JsonProperty("gpxpath") String gpxpath,
+    @JsonProperty("crsIdx") String durunubiCourseId
 ) {
     public Integer level() {
         return ParsingUtils.safeParseInteger(this.levelStr);
