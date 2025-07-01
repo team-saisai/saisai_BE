@@ -1,10 +1,7 @@
 package com.saisai.domain.course.service;
 
-import static com.saisai.domain.common.exception.ExceptionCode.COURSE_NAME_REQUIRED;
 import static com.saisai.domain.common.exception.ExceptionCode.COURSE_NOT_FOUND;
 
-import com.saisai.domain.challenge.entity.ChallengeStatus;
-import com.saisai.domain.challenge.repository.ChallengeRepository;
 import com.saisai.domain.common.api.dto.Body;
 import com.saisai.domain.common.api.dto.ExternalResponse;
 import com.saisai.domain.common.exception.CustomException;
@@ -24,7 +21,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -106,32 +102,6 @@ public class CourseService {
         return CourseInfoRes.from(courseItem, imageUrl, inprogressUserCont, completeUserCount, gpxPoints);
     }
 
-    // 코스명 기반의 요약 정보 반환 로직
-    public CourseSummaryInfo getCourseSummaryInfoByCourseName(String courseName) {
-        if (courseName.trim().isEmpty()) {
-            throw new CustomException(COURSE_NAME_REQUIRED);
-        }
-
-        ExternalResponse<Body<CourseItem>> apiResponse = callCourseApiWithExceptionHandling(
-            () -> courseApi.callCourseApiByCourseName(courseName), "상세"
-        );
-
-        List<CourseItem> items = ExternalResponseUtil.extractItems(apiResponse);
-        if (items == null || items.isEmpty()) {
-            log.warn("코스명 '{}'에 대한 데이터가 없습니다.", courseName);
-            throw new CustomException(COURSE_NOT_FOUND);
-        }
-        CourseItem courseItem = items.get(0);
-
-        String imageUrl = null;
-        CourseImage courseImage = courseImageRepository.findCourseImageByCourseName(courseName);
-        if (courseImage != null) {
-            imageUrl = courseImage.getUrl();
-        }
-
-        return CourseSummaryInfo.from(courseItem, imageUrl);
-    }
-
     // 코스아이템 가져오는 메서드
     public Optional<CourseItem> findCourseByName(String courseName) {
         ExternalResponse<Body<CourseItem>> apiResponse = callCourseApiWithExceptionHandling(
@@ -142,14 +112,5 @@ public class CourseService {
         return Optional.ofNullable(items)
             .filter(courseItemList -> !courseItemList.isEmpty())
             .map(courseItemList -> courseItemList.get(0));
-    }
-
-    // 챌린지 진행 중인 코스 필터링
-    private List<CourseItem> filterOnGoingChallengeCourseList(List<CourseItem> allCourseItemList) {
-        List<String> ongoingChallengeCourseNameList = challengeRepository.findChallengeByStatus(ChallengeStatus.ONGOING);
-
-        return allCourseItemList.stream()
-            .filter(challengeCourse -> ongoingChallengeCourseNameList.contains(challengeCourse.courseName()))
-            .toList();
     }
 }
