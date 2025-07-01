@@ -12,6 +12,7 @@ import org.springframework.data.jpa.repository.Query;
 
 public interface RideRepository extends JpaRepository<Ride, Long>, RideRepositoryCustom {
 
+    // 최근 라이드한 코스 조회 메서드
     Ride findTop1ByUserIdOrderByModifiedAtDesc(Long id);
 
     // courseId와 일치하는 도전자, 완주자 수 조회 메서드
