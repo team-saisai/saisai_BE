@@ -1,34 +1,25 @@
 package com.saisai.domain.course.service;
 
-import static com.saisai.domain.common.exception.ExceptionCode.COURSE_API_CALL_FAIL;
 import static com.saisai.domain.common.exception.ExceptionCode.COURSE_NAME_REQUIRED;
 import static com.saisai.domain.common.exception.ExceptionCode.COURSE_NOT_FOUND;
 
-import com.saisai.domain.challenge.entity.Challenge;
 import com.saisai.domain.challenge.entity.ChallengeStatus;
 import com.saisai.domain.challenge.repository.ChallengeRepository;
 import com.saisai.domain.common.api.dto.Body;
 import com.saisai.domain.common.api.dto.ExternalResponse;
-import com.saisai.domain.common.api.dto.Items;
 import com.saisai.domain.common.exception.CustomException;
-import com.saisai.domain.common.exception.ExceptionCode;
 import com.saisai.domain.common.utils.ExternalResponseUtil;
 import com.saisai.domain.course.api.CourseApi;
 import com.saisai.domain.course.api.CourseItem;
 import com.saisai.domain.course.dto.response.CourseInfoRes;
 import com.saisai.domain.course.dto.response.CourseListItemRes;
 import com.saisai.domain.course.dto.response.CourseSummaryInfo;
-import com.saisai.domain.course.entity.CourseImage;
-import com.saisai.domain.course.repository.CourseImageRepository;
 import com.saisai.domain.gpx.dto.GpxPoint;
 import com.saisai.domain.gpx.service.GpxParserService;
 import com.saisai.domain.ride.entity.RideStatus;
 import com.saisai.domain.ride.repository.RideRepository;
-import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
-import java.util.function.Supplier;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -44,12 +35,9 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 public class CourseService {
 
-    private static final int GET_COURSE_DEFAULT_NUM_OF_ROWS = 100;
     private static final int CLIENT_DEFAULT_PAGE_SIZE = 10;
-    //private final CourseApiRepository courseApiRepository;
     private final RideRepository rideRepository;
     private final ChallengeRepository challengeRepository;
-    private final CourseImageRepository courseImageRepository;
     private final CourseApi courseApi;
     private final GpxParserService gpxParserService;
 
@@ -163,97 +151,5 @@ public class CourseService {
         return allCourseItemList.stream()
             .filter(challengeCourse -> ongoingChallengeCourseNameList.contains(challengeCourse.courseName()))
             .toList();
-    }
-    // 모든 코스를 리스트로
-    private List<CourseItem> fetchAllCourseItems() throws CustomException{
-        List<CourseItem> allCourseItems = new ArrayList<>();
-        int currentPage = 1;
-        boolean hasMoreData = true;
-
-        while (hasMoreData) {
-            ExternalResponse<Body<CourseItem>> result = courseApi.callCourseApi(currentPage, GET_COURSE_DEFAULT_NUM_OF_ROWS);
-
-            List<CourseItem> currentItems = Optional.ofNullable(result)
-                .map(ExternalResponse::response)
-                .map(ExternalResponse.Response::body)
-                .map(Body::items)
-                .map(Items::item)
-                .orElseGet(ArrayList::new);
-
-            if (!currentItems.isEmpty()) {
-                allCourseItems.addAll(currentItems);
-
-                if (currentItems.size() < GET_COURSE_DEFAULT_NUM_OF_ROWS) {
-                    hasMoreData = false;
-                } else {
-                    currentPage++;
-                }
-            } else {
-                hasMoreData = false;
-            }
-        }
-        return allCourseItems;
-    }
-
-    private ExternalResponse<Body<CourseItem>> callCourseApiWithExceptionHandling(
-        Supplier<ExternalResponse<Body<CourseItem>>> apiCall, String errorMessagePrefix) throws CustomException
-    {
-        try {
-            return apiCall.get();
-        } catch (CustomException e) {
-            log.error("코스 {} 조회 중 API 호출 또는 JSON 파싱 중 예외 발생: {}", errorMessagePrefix, e.getMessage());
-            throw e;
-        } catch (Exception e) {
-            log.error("코스 {} 조회 중 예상치 못한 예외 발생: {}", errorMessagePrefix, e.getMessage(), e);
-            throw new CustomException(COURSE_API_CALL_FAIL);
-        }
-    }
-
-    private List<CourseListItemRes> convertCourseItems(List<CourseItem> items) {
-        List<CourseListItemRes> courseItemResList = new ArrayList<>();
-        HashSet<String> courseNameSet = new HashSet<>();
-
-        for (CourseItem item : items) {
-
-            if (item == null || item.courseName() == null || item.courseName().trim().isEmpty()) {
-                log.warn("유효하지 않은 CourseItem이 감지되었습니다 (null 객체 또는 courseName이 null/비어있음). 스킵합니다: {}", item);
-                continue;
-            }
-
-            Challenge challenge = challengeRepository.findByCourseName(item.courseName());
-            CourseImage courseImage = courseImageRepository.findCourseImageByCourseName(item.courseName());
-
-            try {
-                CourseListItemRes convertedItem = CourseListItemRes.from(item, challenge, courseImage);
-                if (convertedItem != null) {
-                    String currentCourseName = convertedItem.courseName();
-                    if (currentCourseName != null && courseNameSet.add(currentCourseName)) {
-                        courseItemResList.add(convertedItem);
-                    } else {
-                        log.warn("중복 또는 null로 인해 코스 아이템 추가 스킵: {}", currentCourseName);
-                    }
-                }
-            } catch (CustomException e) {
-                log.warn("코스 아이템 변환 중 비즈니스 예외 발생 (Course ID: {}): {}. 스택 트레이스: {}",
-                    item.courseName(), e.getMessage(), e.toString(), e);
-            } catch (Exception e) {
-                log.error("코스 아이템 변환 중 예상치 못한 시스템 오류 발생 (Course ID: {}): {}. 스택 트레이스: {}",
-                    item.courseName(), e.getMessage(), e.toString(), e);
-            }
-        }
-
-        return courseItemResList;
-    }
-
-    private void validatePageRequest(Long totalCount, int page, int pageSize) {
-
-        if (totalCount > 0) {
-            int totalPages = (int) Math.ceil((double) totalCount / pageSize);
-
-            if (page > totalPages) {
-                log.warn("요청 페이지 번호가 유효 범위를 초과했습니다. 요청 페이지: {}, 총 페이지: {}", page, totalPages);
-                throw new CustomException(ExceptionCode.INVALID_PAGE_NUMBER);
-            }
-        }
     }
 }
