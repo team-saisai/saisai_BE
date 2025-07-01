@@ -27,7 +27,7 @@ public class ChallengeController {
         description =
             "10개의 인기 챌린지 정보 (코스명, 코스이미지, 난이도, 거리(km), 예상 소요시간(분), 시군, 도전자 수, 챌린지 상태, 챌린지 종료일) 리스트로 반환")
     @GetMapping("/popular")
-    public ResponseEntity<ApiResponse<List<PopularChallengeListItemRes>>> getPopulraChallenges() {
+    public ResponseEntity<ApiResponse<List<PopularChallengeListItemRes>>> getPopularChallenges() {
         return ResponseEntity.status(HttpStatus.OK)
             .body(ApiResponse.success(CHALLENGE_POPULAR_LIST_GET_SUCCESS, challengeService.getPopularChallenges()));
     }
