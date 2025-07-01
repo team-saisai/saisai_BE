@@ -15,6 +15,7 @@ import com.saisai.domain.gpx.dto.format.TrackPoint;
 import com.saisai.domain.gpx.dto.format.TrackSegment;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Stream;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -88,4 +89,12 @@ public class GpxParser {
         }
         return gpxPoints;
     }
+
+    // Track -> segment -> point 구조를 스트림으로 평탄화하는 메서드
+    private Stream<TrackPoint> flattenTrackPoints(Gpx gpx) {
+        return gpx.tracks().stream()
+            .flatMap(track -> track.trackSegments().stream())
+            .flatMap(segment -> segment.trackPoints().stream());
+    }
+
 }
