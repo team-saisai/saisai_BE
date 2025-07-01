@@ -1,6 +1,8 @@
 package com.saisai.domain.course.entity;
 
 import com.saisai.domain.common.BaseEntity;
+import com.saisai.domain.course.api.CourseItem;
+import com.saisai.domain.gpx.dto.FirstGpxPoint;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -33,7 +35,7 @@ public class Course extends BaseEntity {
     private String summary;
 
     @Column(name = "level", nullable = false, length = 1)
-    private String level;
+    private Integer level;
 
     @Column(name = "distance", nullable = false)
     private Double distance; // 단위: Km
@@ -70,7 +72,7 @@ public class Course extends BaseEntity {
 
 
     @Builder
-    public Course(String name, String contents, String summary, String level, Double distance,
+    public Course(String name, String contents, String summary, Integer level, Double distance,
         Double estimatedTime, String sigun, String tourInfo, String travelerInfo, String gpxPath,
         String durunubiCourseId, String image, Double startLat, Double startLon
     ) {
@@ -89,5 +91,23 @@ public class Course extends BaseEntity {
         this.startLat = startLat;
         this.startLon = startLon;
         this.isDeleted = false;
+    }
+
+    public static Course from (CourseItem courseItem, FirstGpxPoint firstGpxPoint) {
+        return Course.builder()
+            .name(courseItem.courseName())
+            .contents(courseItem.contents())
+            .summary(courseItem.summary())
+            .level(courseItem.level())
+            .distance(courseItem.distance())
+            .estimatedTime(courseItem.estimatedTime())
+            .sigun(courseItem.sigun())
+            .tourInfo(courseItem.tourInfo())
+            .travelerInfo(courseItem.travelerinfo())
+            .gpxPath(courseItem.gpxpath())
+            .durunubiCourseId(courseItem.durunubiCourseId())
+            .startLat(firstGpxPoint.lat())
+            .startLon(firstGpxPoint.lon())
+            .build();
     }
 }
