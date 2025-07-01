@@ -1,4 +1,4 @@
-package com.saisai.domain.gpx.service;
+package com.saisai.domain.gpx.util;
 
 import static com.saisai.domain.common.exception.ExceptionCode.GPX_DOWNLOAD_FAILED;
 import static com.saisai.domain.common.exception.ExceptionCode.GPX_EMPTY;
@@ -8,24 +8,23 @@ import static com.saisai.domain.common.exception.ExceptionCode.GPX_UNKNOWN_ERROR
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import com.saisai.domain.common.exception.CustomException;
-import com.saisai.domain.gpx.dto.format.Gpx;
 import com.saisai.domain.gpx.dto.GpxPoint;
+import com.saisai.domain.gpx.dto.format.Gpx;
 import com.saisai.domain.gpx.dto.format.Track;
 import com.saisai.domain.gpx.dto.format.TrackPoint;
 import com.saisai.domain.gpx.dto.format.TrackSegment;
-import com.saisai.domain.gpx.util.DistanceUtils;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientException;
 
 @Slf4j
-@Service
+@Component
 @RequiredArgsConstructor
-public class GpxParserService {
+public class GpxParser {
 
     private final RestClient restClient;
     private final XmlMapper xmlMapper;
