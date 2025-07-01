@@ -67,29 +67,13 @@ public class GpxParser {
         return new FirstGpxPoint(firstTrackPoint.lat(), firstTrackPoint.lon());
     }
 
+    // gpx 전체 파싱 메서드
     public List<GpxPoint> parseGpxpath(String gpxpathUrl) throws CustomException {
-        try {
-            String gpxContent = restClient.get()
-                .uri(gpxpathUrl)
-                .retrieve()
-                .body(String.class);
+        Gpx gpx = getGpxFromUrl(gpxpathUrl);
 
-            Gpx gpx = xmlMapper.readValue(gpxContent, Gpx.class);
-            if (gpx.tracks().isEmpty()) {
-                throw new CustomException(GPX_EMPTY);
-            }
-            return convertGpxToGpxPoints(gpx);
+        validGpx(gpx);
 
-        } catch (RestClientException e) {
-            log.error(e.getMessage());
-            throw new CustomException(GPX_DOWNLOAD_FAILED);
-        } catch (JsonProcessingException e) {
-            log.error(e.getMessage());
-            throw new CustomException(GPX_PARSING_FAILED);
-        } catch (Exception e) {
-            log.error(e.getMessage());
-            throw new CustomException(GPX_UNKNOWN_ERROR);
-        }
+        return convertGpxToGpxPoints(gpx);
     }
 
     private List<GpxPoint> convertGpxToGpxPoints(Gpx gpx) {
