@@ -1,4 +1,4 @@
-package com.saisai.domain.challenge.dto.response;
+package com.saisai.domain.challenge.dto.projection;
 
 import com.querydsl.core.annotations.QueryProjection;
 import com.saisai.domain.challenge.entity.ChallengeStatus;
@@ -6,7 +6,7 @@ import java.time.LocalDateTime;
 
 public record ChallengeInfoProjection(
     Long challengeId,
-    String courseName,
+    Long courseId,
     ChallengeStatus challengeStatus,
     LocalDateTime endedAt,
     Long participantCount
@@ -15,13 +15,13 @@ public record ChallengeInfoProjection(
     @QueryProjection
     public ChallengeInfoProjection(
         Long challengeId,
-        String courseName,
+        Long courseId,
         ChallengeStatus challengeStatus,
         LocalDateTime endedAt,
         Long participantCount
     ) {
         this.challengeId = challengeId;
-        this.courseName = courseName;
+        this.courseId = courseId;
         this.challengeStatus = challengeStatus;
         this.endedAt = endedAt;
         this.participantCount = participantCount;
