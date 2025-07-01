@@ -10,10 +10,15 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.saisai.domain.common.api.dto.Body;
 import com.saisai.domain.common.api.dto.ExternalResponse;
+import com.saisai.domain.common.api.dto.Items;
 import com.saisai.domain.common.exception.CustomException;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-import java.util.function.Supplier;
+import com.saisai.domain.course.entity.Course;
+import com.saisai.domain.course.repository.CourseRepository;
+import com.saisai.domain.gpx.dto.FirstGpxPoint;
+import com.saisai.domain.gpx.util.GpxParser;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -37,12 +42,40 @@ public class CourseApi {
     private static final String DEFAULT_MOBILE_APP = "saisai";
     private static final String DEFAULT_BRD_DIV = "DNBW";
     private static final String DEFAULT_RESPONSE_TYPE = "json";
-    private static final int DEFAULT_NUM_OF_ROWS_COURSE_LIST = 10; // 목록 조회용
-    private static final int DEFAULT_NUM_OF_ROWS_COURSE_INFO = 1;  // 단건 조회용
-    private static final int DEFAULT_PAGE_NO_COURSE_INFO = 1;      // 단건 조회용
+    private static final int GET_COURSE_DEFAULT_NUM_OF_ROWS = 100;// 단건 조회용
 
     private final ObjectMapper objectMapper;
     private final CourseApiInterface courseApiInterface;
+    private final CourseRepository courseRepository;
+    private final GpxParser gpxParser;
+    // 두루누비 API 데이터 DB에 저장하는 메서드
+    private void syncAllCoursesToDb() throws CustomException {
+        int page = 1;
+        boolean hasMoreData = true;
+
+        while (hasMoreData) {
+            ExternalResponse<Body<CourseItem>> result = callCourseApi(page);
+
+            List<CourseItem> currentItems = Optional.ofNullable(result)
+                .map(ExternalResponse::response)
+                .map(ExternalResponse.Response::body)
+                .map(Body::items)
+                .map(Items::item)
+                .orElseGet(ArrayList::new);
+
+            for (CourseItem item : currentItems) {
+                FirstGpxPoint firstGpxPoint = gpxParser.parseFirstGpxpath(item.gpxpath());
+                Course course = Course.from(item, firstGpxPoint);
+                courseRepository.save(course);
+            }
+
+            if (currentItems.size() < GET_COURSE_DEFAULT_NUM_OF_ROWS) {
+                hasMoreData = false;
+            } else {
+                page++;
+            }
+        }
+    }
 
     // 두루누비(코스)API 호출 메서드
     private ExternalResponse<Body<CourseItem>> callCourseApi(int page) throws CustomException {
