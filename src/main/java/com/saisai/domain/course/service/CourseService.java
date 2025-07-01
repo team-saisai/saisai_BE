@@ -6,16 +6,20 @@ import com.saisai.domain.common.api.dto.Body;
 import com.saisai.domain.common.api.dto.ExternalResponse;
 import com.saisai.domain.common.exception.CustomException;
 import com.saisai.domain.common.utils.ExternalResponseUtil;
-import com.saisai.domain.course.api.CourseApi;
+import com.saisai.domain.common.utils.ImageUtil;
 import com.saisai.domain.course.api.CourseItem;
-import com.saisai.domain.course.dto.response.CourseInfoRes;
-import com.saisai.domain.course.dto.response.CourseListItemRes;
-import com.saisai.domain.course.dto.response.CourseSummaryInfo;
+import com.saisai.domain.course.dto.projection.CoursePageProjection;
+import com.saisai.domain.course.dto.response.CourseDetailsRes;
+import com.saisai.domain.course.dto.response.CoursePageRes;
+import com.saisai.domain.course.entity.Course;
+import com.saisai.domain.course.repository.CourseRepository;
 import com.saisai.domain.gpx.dto.GpxPoint;
-import com.saisai.domain.gpx.service.GpxParserService;
+import com.saisai.domain.gpx.util.GpxParser;
+import com.saisai.domain.ride.dto.response.RideCountRes;
 import com.saisai.domain.ride.entity.RideStatus;
 import com.saisai.domain.ride.repository.RideRepository;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -31,45 +35,37 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 public class CourseService {
 
-    private static final int CLIENT_DEFAULT_PAGE_SIZE = 10;
     private final RideRepository rideRepository;
-    private final ChallengeRepository challengeRepository;
-    private final CourseApi courseApi;
-    private final GpxParserService gpxParserService;
+    private final CourseRepository courseRepository;
+    private final GpxParser gpxParser;
+    private final ImageUtil imageUtil;
 
-    // 코스 목록 조회 비즈니스 로직
-    public Page<CourseListItemRes> getCourses(int page, String status) {
+    // 코스 목록 조회 메서드
+    public Page<CoursePageRes> getCourses(Pageable pageable, String challengeStatus) {
+        Page<CoursePageProjection> coursePage = courseRepository.findCoursesByChallengeStatus(challengeStatus, pageable);
 
-        List<CourseItem> resultCourseItems;
+        List<Long> courseIds = coursePage.getContent().stream()
+            .map(CoursePageProjection::courseId)
+            .toList();
 
-        long totalCount;
-        int pageNum;
-        int pageSize;
+        Map<Long, RideCountRes> rideCountResMap = rideRepository.countRidedMapByCourseIds(courseIds);
 
-        if (ChallengeStatus.ONGOING.toString().equals(status)) {
-            Pageable clientPageable = PageRequest.of(page - 1, CLIENT_DEFAULT_PAGE_SIZE);
-            List<CourseItem> allCourseItems = fetchAllCourseItems();
-            resultCourseItems = filterOnGoingChallengeCourseList(allCourseItems);
+        List<CoursePageRes> result = coursePage.getContent().stream()
+            .map(projection -> {
+                RideCountRes rideCountRes = rideCountResMap.getOrDefault(
+                    projection.courseId(),
+                    RideCountRes.empty(projection.courseId())
+                );
+                return CoursePageRes.from(
+                    projection,
+                    rideCountRes,
+                    imageUtil.getImageUrl(projection.imageUrl())
+                );
 
-            totalCount = resultCourseItems.size();
-            pageNum = clientPageable.getPageNumber();
-            pageSize = clientPageable.getPageSize();
+            })
+            .toList();
 
-        } else {
-            ExternalResponse<Body<CourseItem>> apiResponse = callCourseApiWithExceptionHandling(
-                () -> courseApi.callCourseApi(page),"목록");
-            resultCourseItems = ExternalResponseUtil.extractItems(apiResponse);
-
-            totalCount = ExternalResponseUtil.extractTotalCount(apiResponse);
-            pageNum = ExternalResponseUtil.extractPageNo(apiResponse, page).intValue();
-            pageSize = ExternalResponseUtil.extractNumOfRows(apiResponse).intValue();
-        }
-
-        validatePageRequest(totalCount, pageNum, pageSize);
-
-        List<CourseListItemRes> courseItemResList = convertCourseItems(resultCourseItems);
-
-        return new PageImpl<>(courseItemResList, PageRequest.of(pageNum, CLIENT_DEFAULT_PAGE_SIZE), totalCount);
+        return new PageImpl<>(result, pageable, coursePage.getTotalElements());
     }
 
     // 코스 상세 조회 비즈니스 로직
