@@ -22,6 +22,7 @@ import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
@@ -48,6 +49,13 @@ public class CourseApi {
     private final CourseApiInterface courseApiInterface;
     private final CourseRepository courseRepository;
     private final GpxParser gpxParser;
+
+    // 정보 동기화를 위해 주기적으로 두루누비api 호출하는 스케줄러 메서드
+    @Scheduled(cron = "0 0 0 1 * ?") // 매월 1일 작동
+    private void scheduledCallCourseApi() {
+        syncAllCoursesToDb();
+    }
+
     // 두루누비 API 데이터 DB에 저장하는 메서드
     private void syncAllCoursesToDb() throws CustomException {
         int page = 1;
