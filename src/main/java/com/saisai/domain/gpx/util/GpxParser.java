@@ -31,6 +31,27 @@ public class GpxParser {
     private final RestClient restClient;
     private final XmlMapper xmlMapper;
 
+    // gpx 파일에서 파싱해서 gpx 데이터 반환 메서드
+    private Gpx getGpxFromUrl (String gpxpathUrl) {
+        try {
+            String gpxContent = restClient.get()
+                .uri(gpxpathUrl)
+                .retrieve()
+                .body(String.class);
+
+            return xmlMapper.readValue(gpxContent, Gpx.class);
+
+        } catch (RestClientException e) {
+            log.error(e.getMessage());
+            throw new CustomException(GPX_DOWNLOAD_FAILED);
+        } catch (JsonProcessingException e) {
+            log.error(e.getMessage());
+            throw new CustomException(GPX_PARSING_FAILED);
+        } catch (Exception e) {
+            log.error(e.getMessage());
+            throw new CustomException(GPX_UNKNOWN_ERROR);
+        }
+    }
     public List<GpxPoint> parseGpxpath(String gpxpathUrl) throws CustomException {
         try {
             String gpxContent = restClient.get()
