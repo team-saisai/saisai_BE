@@ -3,6 +3,8 @@ package com.saisai.domain.course.entity;
 import com.saisai.domain.common.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
@@ -17,11 +19,12 @@ import lombok.NoArgsConstructor;
 public class Course extends BaseEntity {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id", nullable = false)
+    private Long id;
+
     @Column(name = "name", nullable = false, length = 20)
     private String name;
-
-    @Column(name = "id", nullable = false)
-    private String id;
 
     @Column(name = "contents", nullable = false, length = 255)
     private String contents;
@@ -50,12 +53,20 @@ public class Course extends BaseEntity {
     @Column(name = "gpx_path", nullable = false, length = 255) // GPX 파일 경로 (URL)
     private String gpxPath;
 
+    @Column(name = "durunubi_course_id") // 두루누비API 제공 코스 고유번호 (구분하기 위해 추가)
+    private String durunubiCourseId;
+
+    @Column(name = "image")
+    private String image;
+
+    @Column(name = "is_deleted")
+    private Boolean isDeleted;
+
 
     @Builder
-    public Course(String name, String id, String contents, String summary, String level, Double distance,
-        Double estimatedTime, String sigun, String tourInfo, String travelerInfo, String gpxPath) {
+    public Course(String name, String contents, String summary, String level, Double distance,
+        Double estimatedTime, String sigun, String tourInfo, String travelerInfo, String gpxPath, String durunubiCourseId, String image) {
         this.name = name;
-        this.id = id;
         this.contents = contents;
         this.summary = summary;
         this.level = level;
@@ -65,5 +76,8 @@ public class Course extends BaseEntity {
         this.tourInfo = tourInfo;
         this.travelerInfo = travelerInfo;
         this.gpxPath = gpxPath;
+        this.durunubiCourseId = durunubiCourseId;
+        this.image = image;
+        this.isDeleted = false;
     }
 }
