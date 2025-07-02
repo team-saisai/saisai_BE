@@ -1,12 +1,11 @@
 package com.saisai.domain.ride.dto.response;
 
-import com.saisai.domain.course.api.CourseItem;
-import com.saisai.domain.course.entity.CourseImage;
+import com.saisai.domain.course.entity.Course;
 import com.saisai.domain.ride.entity.Ride;
 import java.time.LocalDate;
-import java.util.Optional;
 
 public record RecentRideInfoRes(
+    Long courseId,
     String courseName,
     String sigun,
     String courseImageUrl,
@@ -15,16 +14,14 @@ public record RecentRideInfoRes(
     LocalDate recentRideAt
 ) {
 
-    public static RecentRideInfoRes from(Ride ride, CourseItem courseItem, CourseImage courseImage) {
-        String courseImageUrl = Optional.ofNullable(courseImage)
-            .map(CourseImage::getUrl)
-            .orElse(null);
+    public static RecentRideInfoRes from(Ride ride, Course course, String courseImageUrl) {
 
         return new RecentRideInfoRes(
-            courseItem.courseName(),
-            courseItem.sigun(),
+            course.getId(),
+            course.getName(),
+            course.getSigun(),
             courseImageUrl,
-            courseItem.distance(),
+            course.getDistance(),
             ride.getProgressRate(),
             ride.getModifiedAt().toLocalDate()
         );
@@ -32,6 +29,7 @@ public record RecentRideInfoRes(
 
     public static RecentRideInfoRes empty() {
         return new RecentRideInfoRes(
+            null,
             null,
             null,
             null,
