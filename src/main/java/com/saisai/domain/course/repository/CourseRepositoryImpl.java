@@ -7,7 +7,9 @@ import com.querydsl.core.BooleanBuilder;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.saisai.domain.challenge.entity.ChallengeStatus;
+import com.saisai.domain.course.dto.projection.CourseCardProjection;
 import com.saisai.domain.course.dto.projection.CoursePageProjection;
+import com.saisai.domain.course.dto.projection.QCourseCardProjection;
 import com.saisai.domain.course.dto.projection.QCoursePageProjection;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -59,6 +61,24 @@ public class CourseRepositoryImpl implements CourseRepositoryCustom {
             .where(searchConditions);
 
         return PageableExecutionUtils.getPage(content, pageable, total::fetchOne);
+    }
+
+    // 코스 Id List 기반으로 CourseCard 조회 메서드
+    @Override
+    public List<CourseCardProjection> findCourseCardByIds(List<Long> courseIds) {
+        return queryFactory
+            .select(new QCourseCardProjection(
+                course.id,
+                course.name,
+                course.level,
+                course.distance,
+                course.estimatedTime,
+                course.sigun,
+                course.image
+            ))
+            .from(course)
+            .where(course.id.in(courseIds))
+            .fetch();
     }
 
     // where절 기본 정의 메서드
