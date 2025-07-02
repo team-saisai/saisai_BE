@@ -3,7 +3,7 @@ package com.saisai.domain.course.service;
 import static com.saisai.domain.common.exception.ExceptionCode.COURSE_NOT_FOUND;
 
 import com.saisai.domain.common.exception.CustomException;
-import com.saisai.domain.common.utils.ImageUtil;
+import com.saisai.domain.common.utils.s3.ImageUtil;
 import com.saisai.domain.course.dto.projection.CoursePageProjection;
 import com.saisai.domain.course.dto.response.CourseDetailsRes;
 import com.saisai.domain.course.dto.response.CoursePageRes;

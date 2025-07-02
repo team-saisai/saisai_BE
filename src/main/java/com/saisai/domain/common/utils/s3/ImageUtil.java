@@ -1,4 +1,4 @@
-package com.saisai.domain.common.utils;
+package com.saisai.domain.common.utils.s3;
 
 import static com.saisai.domain.common.exception.ExceptionCode.SERVER_IMAGE_FAIL;
 
