@@ -29,7 +29,7 @@ public interface RideRepository extends JpaRepository<Ride, Long>, RideRepositor
     List<RideCountRes> countRidesByCourseId(@Param("courseIds") List<Long> courseIds);
 
     // countRidesByCourseId을 맵으로 변환하는 메서드
-    default Map<Long, RideCountRes> countRidedMapByCourseIds(List<Long> courseIds) {
+    default Map<Long, RideCountRes> countRidesMapByCourseIds(List<Long> courseIds) {
         return countRidesByCourseId(courseIds).stream()
             .collect(Collectors.toMap(
                 RideCountRes::courseId,

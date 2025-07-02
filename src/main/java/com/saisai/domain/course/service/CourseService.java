@@ -48,7 +48,7 @@ public class CourseService {
             .map(CoursePageProjection::courseId)
             .toList();
 
-        Map<Long, RideCountRes> rideCountResMap = rideRepository.countRidedMapByCourseIds(courseIds);
+        Map<Long, RideCountRes> rideCountResMap = rideRepository.countRidesMapByCourseIds(courseIds);
 
         List<CoursePageRes> result = coursePage.getContent().stream()
             .map(projection -> {
