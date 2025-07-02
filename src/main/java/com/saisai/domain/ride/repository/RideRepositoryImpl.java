@@ -13,6 +13,7 @@ public class RideRepositoryImpl implements RideRepositoryCustom {
 
     private final JPAQueryFactory jpaQueryFactory;
 
+    // courseId 기준, Ride 상태 기반 사용자 수 반환 메서드
     @Override
     public Long countByCourseIdAndStatus(Long courseId, RideStatus status) {
         return jpaQueryFactory
