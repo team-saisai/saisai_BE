@@ -2,7 +2,7 @@ package com.saisai.domain.course.dto.response;
 
 import com.saisai.domain.course.entity.Course;
 
-public record CourseSummaryRes(
+public record CourseCardRes(
     String courseName,
     Integer level,
     Double distance,
@@ -12,8 +12,8 @@ public record CourseSummaryRes(
     Long courseChallengerCount
 ) {
 
-    public static CourseSummaryRes from(Course course, String imageUrl, Long courseChallengerCount) {
-        return new CourseSummaryRes(
+    public static CourseCardRes from(Course course, String imageUrl, Long courseChallengerCount) {
+        return new CourseCardRes(
             course.getName(),
             course.getLevel(),
             course.getDistance(),
