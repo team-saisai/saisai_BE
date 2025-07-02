@@ -99,6 +99,11 @@ public class GpxParser {
 
     // Track -> segment -> point 구조를 스트림으로 평탄화하는 메서드
     private Stream<TrackPoint> flattenTrackPoints(Gpx gpx) {
+
+        if (gpx == null || gpx.tracks() == null || gpx.tracks().isEmpty()) {
+            throw new CustomException(GPX_EMPTY);
+        }
+
         return gpx.tracks().stream()
             .flatMap(track -> track.trackSegments().stream())
             .flatMap(segment -> segment.trackPoints().stream());
@@ -106,7 +111,7 @@ public class GpxParser {
 
     // gpx 포인트 존재 여부 검사 메서드
     private void validGpx(Gpx gpx) {
-        if (gpx.tracks().isEmpty()) {
+        if (gpx.tracks() == null || gpx.tracks().isEmpty()) {
             throw new CustomException(GPX_EMPTY);
         }
 
