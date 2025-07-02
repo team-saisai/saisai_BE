@@ -2,12 +2,8 @@ package com.saisai.domain.course.service;
 
 import static com.saisai.domain.common.exception.ExceptionCode.COURSE_NOT_FOUND;
 
-import com.saisai.domain.common.api.dto.Body;
-import com.saisai.domain.common.api.dto.ExternalResponse;
 import com.saisai.domain.common.exception.CustomException;
-import com.saisai.domain.common.utils.ExternalResponseUtil;
 import com.saisai.domain.common.utils.ImageUtil;
-import com.saisai.domain.course.api.CourseItem;
 import com.saisai.domain.course.dto.projection.CoursePageProjection;
 import com.saisai.domain.course.dto.response.CourseDetailsRes;
 import com.saisai.domain.course.dto.response.CoursePageRes;
@@ -20,7 +16,6 @@ import com.saisai.domain.ride.entity.RideStatus;
 import com.saisai.domain.ride.repository.RideRepository;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -80,15 +75,5 @@ public class CourseService {
         List<GpxPoint> gpxPoints = gpxParser.parseGpxpath(course.getGpxPath());
 
         return CourseDetailsRes.from(course, imageUtil.getImageUrl(course.getImage()), courseChallengerCount,  courseFinisherCount, gpxPoints);
-    }
-
-    // 코스아이템 가져오는 메서드
-    public Optional<CourseItem> findCourseByName(String courseName) {
-        ExternalResponse<Body<CourseItem>> apiResponse = null;
-
-        List<CourseItem> items = ExternalResponseUtil.extractItems(apiResponse);
-        return Optional.ofNullable(items)
-            .filter(courseItemList -> !courseItemList.isEmpty())
-            .map(courseItemList -> courseItemList.get(0));
     }
 }
