@@ -12,7 +12,6 @@ import com.saisai.domain.course.repository.CourseRepository;
 import com.saisai.domain.gpx.dto.GpxPoint;
 import com.saisai.domain.gpx.util.GpxParser;
 import com.saisai.domain.ride.dto.response.RideCountRes;
-import com.saisai.domain.ride.entity.RideStatus;
 import com.saisai.domain.ride.repository.RideRepository;
 import java.util.List;
 import java.util.Map;
@@ -69,11 +68,10 @@ public class CourseService {
         Course course = courseRepository.findById(courseId)
             .orElseThrow(() -> new CustomException(COURSE_NOT_FOUND));
 
-        Long courseChallengerCount = rideRepository.countByCourseIdAndStatus(courseId, RideStatus.IN_PROGRESS);
-        Long courseFinisherCount = rideRepository.countByCourseIdAndStatus(courseId, RideStatus.COMPLETED);
+        RideCountRes rideCountRes = rideRepository.countRideByCourseId(courseId);
 
         List<GpxPoint> gpxPoints = gpxParser.parseGpxpath(course.getGpxPath());
 
-        return CourseDetailsRes.from(course, imageUtil.getImageUrl(course.getImage()), courseChallengerCount,  courseFinisherCount, gpxPoints);
+        return CourseDetailsRes.from(course, imageUtil.getImageUrl(course.getImage()), rideCountRes, gpxPoints);
     }
 }
