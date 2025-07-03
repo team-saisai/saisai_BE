@@ -1,4 +1,4 @@
-package com.saisai.domain.common.utils.s3;
+package com.saisai.domain.common.aws.s3;
 
 import static com.saisai.domain.common.exception.ExceptionCode.S3_FILE_NOT_FOUND;
 import static com.saisai.domain.common.exception.ExceptionCode.S3_SERVER_DOWNLOAD_FAIL;
