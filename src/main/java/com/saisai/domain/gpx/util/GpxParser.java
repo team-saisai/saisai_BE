@@ -30,31 +30,34 @@ public class GpxParser {
     private final RestClient restClient;
     private final XmlMapper xmlMapper;
 
-    // gpx 파일에서 파싱해서 gpx 데이터 반환 메서드
-    private Gpx getGpxFromUrl (String gpxpathUrl) {
+    // 두루누비 API에서 제공하는 gpx 파일 다운로드
+    public String downloadGpxContent (String gpxUrl) {
         try {
-            String gpxContent = restClient.get()
-                .uri(gpxpathUrl)
+            return restClient.get()
+                .uri(gpxUrl)
                 .retrieve()
                 .body(String.class);
-
-            return xmlMapper.readValue(gpxContent, Gpx.class);
-
         } catch (RestClientException e) {
             log.error(e.getMessage());
             throw new CustomException(GPX_DOWNLOAD_FAILED);
-        } catch (JsonProcessingException e) {
-            log.error(e.getMessage());
-            throw new CustomException(GPX_PARSING_FAILED);
         } catch (Exception e) {
             log.error(e.getMessage());
             throw new CustomException(GPX_UNKNOWN_ERROR);
         }
     }
 
+    // gpx 전체 파싱 메서드
+    public List<GpxPoint> parseGpxContent(String gpxContent) throws CustomException {
+        Gpx gpx = getGpxFromContent(gpxContent);
+
+        validGpx(gpx);
+
+        return convertGpxToGpxPoints(gpx);
+    }
+
     // 첫번째 gpx 좌표만 파싱 메서드
-    public FirstGpxPoint parseFirstGpxpath(String gpxpathUrl) throws CustomException {
-        Gpx gpx = getGpxFromUrl(gpxpathUrl);
+    public FirstGpxPoint parseFirstGpxpath(String gpxContent) throws CustomException {
+        Gpx gpx = getGpxFromContent(gpxContent);
 
         validGpx(gpx);
 
@@ -65,13 +68,18 @@ public class GpxParser {
         return new FirstGpxPoint(firstTrackPoint.lat(), firstTrackPoint.lon());
     }
 
-    // gpx 전체 파싱 메서드
-    public List<GpxPoint> parseGpxpath(String gpxpathUrl) throws CustomException {
-        Gpx gpx = getGpxFromUrl(gpxpathUrl);
+    // gpx 파일 내용 (gpxContent) 파싱 -> gpx 클래스로 반환 메서드
+    private Gpx getGpxFromContent (String gpxContent) {
 
-        validGpx(gpx);
-
-        return convertGpxToGpxPoints(gpx);
+        try {
+            return xmlMapper.readValue(gpxContent, Gpx.class);
+        } catch (JsonProcessingException e) {
+            log.error(e.getMessage());
+            throw new CustomException(GPX_PARSING_FAILED);
+        } catch (Exception e) {
+            log.error(e.getMessage());
+            throw new CustomException(GPX_UNKNOWN_ERROR);
+        }
     }
 
     // gpx -> List<GpxPoint> 변환 메서드
