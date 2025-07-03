@@ -1,6 +1,7 @@
 package com.saisai.domain.challenge.entity;
 
 import com.saisai.domain.common.BaseEntity;
+import com.saisai.domain.course.entity.Course;
 import com.saisai.domain.reward.entity.Reward;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -24,7 +25,7 @@ import lombok.NoArgsConstructor;
 @Table(name = "challenge", uniqueConstraints = {
     @UniqueConstraint(
         name = "COURSE_REWARD_UNIQUE",
-        columnNames = {"course_name","reward_id"}
+        columnNames = {"course_id","reward_id"}
     )
 })
 @Getter
@@ -36,8 +37,9 @@ public class Challenge extends BaseEntity {
     @Column(name = "id", nullable = false)
     private Long id;
 
-    @Column(name = "course_name", unique = true, nullable = false)
-    private String courseName;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "course_id")
+    private Course course;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "reward_id", nullable = false)
@@ -55,9 +57,9 @@ public class Challenge extends BaseEntity {
     private LocalDateTime endedAt;
 
     @Builder
-    public Challenge(String courseName, Reward reward, ChallengeStatus status, LocalDateTime endedAt,
+    public Challenge(Course course, Reward reward, ChallengeStatus status, LocalDateTime endedAt,
         LocalDateTime startedAt) {
-        this.courseName = courseName;
+        this.course = course;
         this.reward = reward;
         this.status = status;
         this.endedAt = endedAt;

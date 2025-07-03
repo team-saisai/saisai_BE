@@ -22,7 +22,7 @@ import org.springframework.data.annotation.CreatedDate;
 @Table(name = "course_likes", uniqueConstraints = {
     @UniqueConstraint(
         name = "USER_COURSE_UNIQUE",
-        columnNames = {"user_id", "course_name"}
+        columnNames = {"user_id", "course_id"}
     )
 })
 @Getter
@@ -38,16 +38,17 @@ public class CourseLike {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @Column(name = "course_name", unique = true, nullable = false)
-    private String courseName;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "course_id", nullable = false)
+    private Course course;    // DDL으로 ON DELETE CASCADE 적용?
 
     @CreatedDate
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
     @Builder
-    public CourseLike(String courseName, User user) {
-        this.courseName = courseName;
+    public CourseLike(Course course, User user) {
+        this.course = course;
         this.user = user;
     }
 }

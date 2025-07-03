@@ -5,10 +5,9 @@ import static com.saisai.domain.common.exception.ExceptionCode.USER_NOT_FOUND;
 
 import com.saisai.config.jwt.AuthUserDetails;
 import com.saisai.domain.common.exception.CustomException;
-import com.saisai.domain.course.api.CourseItem;
-import com.saisai.domain.course.entity.CourseImage;
-import com.saisai.domain.course.repository.CourseImageRepository;
-import com.saisai.domain.course.service.CourseService;
+import com.saisai.domain.common.utils.s3.ImageUtil;
+import com.saisai.domain.course.entity.Course;
+import com.saisai.domain.course.repository.CourseRepository;
 import com.saisai.domain.ride.dto.response.RecentRideInfoRes;
 import com.saisai.domain.ride.entity.Ride;
 import com.saisai.domain.ride.repository.RideRepository;
@@ -22,9 +21,9 @@ import org.springframework.stereotype.Service;
 public class MyRideService {
 
     private final RideRepository rideRepository;
-    private final CourseService courseService;
+    private final CourseRepository courseRepository;
     private final UserRepository userRepository;
-    private final CourseImageRepository courseImageRepository;
+    private final ImageUtil imageUtil;
 
     public RecentRideInfoRes getRecentRideInfo(AuthUserDetails authUserDetails) {
         User user = userRepository.findById(authUserDetails.userId())
@@ -36,11 +35,11 @@ public class MyRideService {
             return RecentRideInfoRes.empty();
         }
 
-        CourseItem courseItem = courseService.findCourseByName(recentRide.getCourseName())
+        Course course = courseRepository.findById(recentRide.getCourse().getId())
             .orElseThrow(() -> new CustomException(COURSE_NOT_FOUND));
 
-        CourseImage courseImage = courseImageRepository.findCourseImageByCourseName(recentRide.getCourseName());
+        String courseImageUrl = imageUtil.getImageUrl(course.getImage());
 
-        return RecentRideInfoRes.from(recentRide, courseItem, courseImage);
+        return RecentRideInfoRes.from(recentRide, course, courseImageUrl);
     }
 }

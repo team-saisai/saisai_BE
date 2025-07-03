@@ -42,7 +42,8 @@ public enum ExceptionCode {
     GPX_EMPTY(HttpStatus.NOT_FOUND, "GPX_ER_01", "GPX 파일이 비어있습니다."),
     GPX_DOWNLOAD_FAILED(HttpStatus.SERVICE_UNAVAILABLE, "GPX_ER_02", "GPX 파일 다운로드에 실패했습니다."),
     GPX_PARSING_FAILED(HttpStatus.BAD_REQUEST, "GPX_ER_03", "GPX XML 파싱에 실패했습니다."),
-    GPX_UNKNOWN_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "GPX_04_ER", "GPX 파일 처리 중 예상치 못한 오류가 발생했습니다."),
+    GPX_UNKNOWN_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "GPX_ER_04", "GPX 파일 처리 중 예상치 못한 오류가 발생했습니다."),
+    GPX_NO_FIRST_POINT(HttpStatus.NOT_FOUND, "GPX_ER_05", "첫 번쩨 GPX 좌표가 없습니다."),
 
     // api
     API_CLIENT_ERROR(HttpStatus.BAD_REQUEST, "API_ER_01", "API 요청에 문제가 발생했습니다. (클라이언트 오류)"),

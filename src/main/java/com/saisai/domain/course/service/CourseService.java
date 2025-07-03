@@ -1,39 +1,24 @@
 package com.saisai.domain.course.service;
 
-import static com.saisai.domain.common.exception.ExceptionCode.COURSE_API_CALL_FAIL;
-import static com.saisai.domain.common.exception.ExceptionCode.COURSE_NAME_REQUIRED;
 import static com.saisai.domain.common.exception.ExceptionCode.COURSE_NOT_FOUND;
 
-import com.saisai.domain.challenge.entity.Challenge;
-import com.saisai.domain.challenge.entity.ChallengeStatus;
-import com.saisai.domain.challenge.repository.ChallengeRepository;
-import com.saisai.domain.common.api.dto.Body;
-import com.saisai.domain.common.api.dto.ExternalResponse;
-import com.saisai.domain.common.api.dto.Items;
 import com.saisai.domain.common.exception.CustomException;
-import com.saisai.domain.common.exception.ExceptionCode;
-import com.saisai.domain.common.utils.ExternalResponseUtil;
-import com.saisai.domain.course.api.CourseApi;
-import com.saisai.domain.course.api.CourseItem;
-import com.saisai.domain.course.dto.response.CourseInfoRes;
-import com.saisai.domain.course.dto.response.CourseListItemRes;
-import com.saisai.domain.course.dto.response.CourseSummaryInfo;
-import com.saisai.domain.course.entity.CourseImage;
-import com.saisai.domain.course.repository.CourseImageRepository;
+import com.saisai.domain.common.utils.s3.ImageUtil;
+import com.saisai.domain.course.dto.projection.CoursePageProjection;
+import com.saisai.domain.course.dto.response.CourseDetailsRes;
+import com.saisai.domain.course.dto.response.CoursePageRes;
+import com.saisai.domain.course.entity.Course;
+import com.saisai.domain.course.repository.CourseRepository;
 import com.saisai.domain.gpx.dto.GpxPoint;
-import com.saisai.domain.gpx.service.GpxParserService;
-import com.saisai.domain.ride.entity.RideStatus;
+import com.saisai.domain.gpx.util.GpxParser;
+import com.saisai.domain.ride.dto.response.RideCountRes;
 import com.saisai.domain.ride.repository.RideRepository;
-import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Optional;
-import java.util.function.Supplier;
+import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -44,216 +29,49 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 public class CourseService {
 
-    private static final int GET_COURSE_DEFAULT_NUM_OF_ROWS = 100;
-    private static final int CLIENT_DEFAULT_PAGE_SIZE = 10;
-    //private final CourseApiRepository courseApiRepository;
     private final RideRepository rideRepository;
-    private final ChallengeRepository challengeRepository;
-    private final CourseImageRepository courseImageRepository;
-    private final CourseApi courseApi;
-    private final GpxParserService gpxParserService;
+    private final CourseRepository courseRepository;
+    private final GpxParser gpxParser;
+    private final ImageUtil imageUtil;
 
-    // 코스 목록 조회 비즈니스 로직
-    public Page<CourseListItemRes> getCourses(int page, String status) {
+    // 코스 목록 조회 메서드
+    public Page<CoursePageRes> getCourses(Pageable pageable, String challengeStatus) {
+        Page<CoursePageProjection> coursePage = courseRepository.findCoursesByChallengeStatus(challengeStatus, pageable);
 
-        List<CourseItem> resultCourseItems;
+        List<Long> courseIds = coursePage.getContent().stream()
+            .map(CoursePageProjection::courseId)
+            .toList();
 
-        long totalCount;
-        int pageNum;
-        int pageSize;
+        Map<Long, RideCountRes> rideCountResMap = rideRepository.countRidesMapByCourseIds(courseIds);
 
-        if (ChallengeStatus.ONGOING.toString().equals(status)) {
-            Pageable clientPageable = PageRequest.of(page - 1, CLIENT_DEFAULT_PAGE_SIZE);
-            List<CourseItem> allCourseItems = fetchAllCourseItems();
-            resultCourseItems = filterOnGoingChallengeCourseList(allCourseItems);
+        List<CoursePageRes> result = coursePage.getContent().stream()
+            .map(projection -> {
+                RideCountRes rideCountRes = rideCountResMap.getOrDefault(
+                    projection.courseId(),
+                    RideCountRes.empty(projection.courseId())
+                );
+                return CoursePageRes.from(
+                    projection,
+                    rideCountRes,
+                    imageUtil.getImageUrl(projection.imageUrl())
+                );
 
-            totalCount = resultCourseItems.size();
-            pageNum = clientPageable.getPageNumber();
-            pageSize = clientPageable.getPageSize();
+            })
+            .toList();
 
-        } else {
-            ExternalResponse<Body<CourseItem>> apiResponse = callCourseApiWithExceptionHandling(
-                () -> courseApi.callCourseApi(page),"목록");
-            resultCourseItems = ExternalResponseUtil.extractItems(apiResponse);
-
-            totalCount = ExternalResponseUtil.extractTotalCount(apiResponse);
-            pageNum = ExternalResponseUtil.extractPageNo(apiResponse, page).intValue();
-            pageSize = ExternalResponseUtil.extractNumOfRows(apiResponse).intValue();
-        }
-
-        validatePageRequest(totalCount, pageNum, pageSize);
-
-        List<CourseListItemRes> courseItemResList = convertCourseItems(resultCourseItems);
-
-        return new PageImpl<>(courseItemResList, PageRequest.of(pageNum, CLIENT_DEFAULT_PAGE_SIZE), totalCount);
+        return new PageImpl<>(result, pageable, coursePage.getTotalElements());
     }
 
     // 코스 상세 조회 비즈니스 로직
-    public CourseInfoRes getCourseInfo(String courseName) {
-        if (courseName.trim().isEmpty()) {
-            throw new CustomException(COURSE_NAME_REQUIRED);
-        }
+    public CourseDetailsRes getCourseInfo(Long courseId) {
 
-        ExternalResponse<Body<CourseItem>> apiResponse = callCourseApiWithExceptionHandling(
-            () -> courseApi.callCourseApiByCourseName(courseName), "상세");
+        Course course = courseRepository.findById(courseId)
+            .orElseThrow(() -> new CustomException(COURSE_NOT_FOUND));
 
-        List<CourseItem> items = ExternalResponseUtil.extractItems(apiResponse);
-        if (items == null || items.isEmpty()) {
-            log.warn("코스명 '{}'에 대한 데이터가 없습니다.", courseName);
-            throw new CustomException(COURSE_NOT_FOUND);
-        }
-        CourseItem courseItem = items.get(0);
+        RideCountRes rideCountRes = rideRepository.countRideByCourseId(courseId);
 
-        CourseImage courseImage = courseImageRepository.findCourseImageByCourseName(courseName);
-        String imageUrl = null;
-        if (courseImage != null) {
-            imageUrl = courseImage.getUrl();
-        }
+        List<GpxPoint> gpxPoints = gpxParser.parseGpxpath(course.getGpxPath());
 
-        Long inprogressUserCont = rideRepository.countByCourseNameAndStatus(courseName, RideStatus.IN_PROGRESS);
-        Long completeUserCount = rideRepository.countByCourseNameAndStatus(courseName, RideStatus.COMPLETED);
-
-        List<GpxPoint> gpxPoints = gpxParserService.parseGpxpath(courseItem.gpxpath());
-
-        return CourseInfoRes.from(courseItem, imageUrl, inprogressUserCont, completeUserCount, gpxPoints);
-    }
-
-    // 코스명 기반의 요약 정보 반환 로직
-    public CourseSummaryInfo getCourseSummaryInfoByCourseName(String courseName) {
-        if (courseName.trim().isEmpty()) {
-            throw new CustomException(COURSE_NAME_REQUIRED);
-        }
-
-        ExternalResponse<Body<CourseItem>> apiResponse = callCourseApiWithExceptionHandling(
-            () -> courseApi.callCourseApiByCourseName(courseName), "상세"
-        );
-
-        List<CourseItem> items = ExternalResponseUtil.extractItems(apiResponse);
-        if (items == null || items.isEmpty()) {
-            log.warn("코스명 '{}'에 대한 데이터가 없습니다.", courseName);
-            throw new CustomException(COURSE_NOT_FOUND);
-        }
-        CourseItem courseItem = items.get(0);
-
-        String imageUrl = null;
-        CourseImage courseImage = courseImageRepository.findCourseImageByCourseName(courseName);
-        if (courseImage != null) {
-            imageUrl = courseImage.getUrl();
-        }
-
-        return CourseSummaryInfo.from(courseItem, imageUrl);
-    }
-
-    // 코스아이템 가져오는 메서드
-    public Optional<CourseItem> findCourseByName(String courseName) {
-        ExternalResponse<Body<CourseItem>> apiResponse = callCourseApiWithExceptionHandling(
-            () -> courseApi.callCourseApiByCourseName(courseName), "단건"
-        );
-
-        List<CourseItem> items = ExternalResponseUtil.extractItems(apiResponse);
-        return Optional.ofNullable(items)
-            .filter(courseItemList -> !courseItemList.isEmpty())
-            .map(courseItemList -> courseItemList.get(0));
-    }
-
-    // 챌린지 진행 중인 코스 필터링
-    private List<CourseItem> filterOnGoingChallengeCourseList(List<CourseItem> allCourseItemList) {
-        List<String> ongoingChallengeCourseNameList = challengeRepository.findChallengeByStatus(ChallengeStatus.ONGOING);
-
-        return allCourseItemList.stream()
-            .filter(challengeCourse -> ongoingChallengeCourseNameList.contains(challengeCourse.courseName()))
-            .toList();
-    }
-    // 모든 코스를 리스트로
-    private List<CourseItem> fetchAllCourseItems() throws CustomException{
-        List<CourseItem> allCourseItems = new ArrayList<>();
-        int currentPage = 1;
-        boolean hasMoreData = true;
-
-        while (hasMoreData) {
-            ExternalResponse<Body<CourseItem>> result = courseApi.callCourseApi(currentPage, GET_COURSE_DEFAULT_NUM_OF_ROWS);
-
-            List<CourseItem> currentItems = Optional.ofNullable(result)
-                .map(ExternalResponse::response)
-                .map(ExternalResponse.Response::body)
-                .map(Body::items)
-                .map(Items::item)
-                .orElseGet(ArrayList::new);
-
-            if (!currentItems.isEmpty()) {
-                allCourseItems.addAll(currentItems);
-
-                if (currentItems.size() < GET_COURSE_DEFAULT_NUM_OF_ROWS) {
-                    hasMoreData = false;
-                } else {
-                    currentPage++;
-                }
-            } else {
-                hasMoreData = false;
-            }
-        }
-        return allCourseItems;
-    }
-
-    private ExternalResponse<Body<CourseItem>> callCourseApiWithExceptionHandling(
-        Supplier<ExternalResponse<Body<CourseItem>>> apiCall, String errorMessagePrefix) throws CustomException
-    {
-        try {
-            return apiCall.get();
-        } catch (CustomException e) {
-            log.error("코스 {} 조회 중 API 호출 또는 JSON 파싱 중 예외 발생: {}", errorMessagePrefix, e.getMessage());
-            throw e;
-        } catch (Exception e) {
-            log.error("코스 {} 조회 중 예상치 못한 예외 발생: {}", errorMessagePrefix, e.getMessage(), e);
-            throw new CustomException(COURSE_API_CALL_FAIL);
-        }
-    }
-
-    private List<CourseListItemRes> convertCourseItems(List<CourseItem> items) {
-        List<CourseListItemRes> courseItemResList = new ArrayList<>();
-        HashSet<String> courseNameSet = new HashSet<>();
-
-        for (CourseItem item : items) {
-
-            if (item == null || item.courseName() == null || item.courseName().trim().isEmpty()) {
-                log.warn("유효하지 않은 CourseItem이 감지되었습니다 (null 객체 또는 courseName이 null/비어있음). 스킵합니다: {}", item);
-                continue;
-            }
-
-            Challenge challenge = challengeRepository.findByCourseName(item.courseName());
-            CourseImage courseImage = courseImageRepository.findCourseImageByCourseName(item.courseName());
-
-            try {
-                CourseListItemRes convertedItem = CourseListItemRes.from(item, challenge, courseImage);
-                if (convertedItem != null) {
-                    String currentCourseName = convertedItem.courseName();
-                    if (currentCourseName != null && courseNameSet.add(currentCourseName)) {
-                        courseItemResList.add(convertedItem);
-                    } else {
-                        log.warn("중복 또는 null로 인해 코스 아이템 추가 스킵: {}", currentCourseName);
-                    }
-                }
-            } catch (CustomException e) {
-                log.warn("코스 아이템 변환 중 비즈니스 예외 발생 (Course ID: {}): {}. 스택 트레이스: {}",
-                    item.courseName(), e.getMessage(), e.toString(), e);
-            } catch (Exception e) {
-                log.error("코스 아이템 변환 중 예상치 못한 시스템 오류 발생 (Course ID: {}): {}. 스택 트레이스: {}",
-                    item.courseName(), e.getMessage(), e.toString(), e);
-            }
-        }
-
-        return courseItemResList;
-    }
-
-    private void validatePageRequest(Long totalCount, int page, int pageSize) {
-
-        if (totalCount > 0) {
-            int totalPages = (int) Math.ceil((double) totalCount / pageSize);
-
-            if (page > totalPages) {
-                log.warn("요청 페이지 번호가 유효 범위를 초과했습니다. 요청 페이지: {}, 총 페이지: {}", page, totalPages);
-                throw new CustomException(ExceptionCode.INVALID_PAGE_NUMBER);
-            }
-        }
+        return CourseDetailsRes.from(course, imageUtil.getImageUrl(course.getImage()), rideCountRes, gpxPoints);
     }
 }

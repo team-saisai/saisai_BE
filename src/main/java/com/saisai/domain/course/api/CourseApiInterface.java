@@ -17,16 +17,4 @@ public interface CourseApiInterface {
         @RequestParam("numOfRows") int numOfRows,
         @RequestParam("_type") String type
     );
-
-    @GetExchange("/courseList")
-    String callCourseApiByCourseName(
-        @RequestParam("MobileOS") String mobileOS,
-        @RequestParam("MobileApp") String mobileApp,
-        @RequestParam("serviceKey") String serviceKey,
-        @RequestParam("brdDiv") String brdDiv,
-        @RequestParam("pageNo") int pageNo,
-        @RequestParam("numOfRows") int numOfRows,
-        @RequestParam("crsKorNm") String crsKorNm,
-        @RequestParam("_type") String type
-    );
 }
