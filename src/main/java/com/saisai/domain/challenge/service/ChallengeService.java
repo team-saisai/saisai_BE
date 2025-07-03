@@ -1,10 +1,10 @@
 package com.saisai.domain.challenge.service;
 
-import com.saisai.domain.challenge.dto.projection.PopularChallengeProjection;
-import com.saisai.domain.challenge.dto.response.PopularChallengeRes;
+import com.saisai.domain.challenge.dto.projection.ChallengeCardProjection;
 import com.saisai.domain.challenge.repository.ChallengeRepository;
 import com.saisai.domain.common.aws.s3.ImageUtil;
 import com.saisai.domain.course.dto.projection.CourseCardProjection;
+import com.saisai.domain.course.dto.response.CourseCardRes;
 import com.saisai.domain.course.repository.CourseRepository;
 import java.util.Collections;
 import java.util.List;
@@ -27,9 +27,9 @@ public class ChallengeService {
     private final ImageUtil imageUtil;
 
     // 현재 인기 챌린지 조회 메서드
-    public List<PopularChallengeRes> getPopularChallenges() {
+    public List<CourseCardRes> getPopularChallenges() {
         // 인기 코스Id + 도전자 수 조회
-        List<PopularChallengeProjection> popularChallengeInfos = challengeRepository.findTop10CoursesByOngoingChallengeRides();
+        List<ChallengeCardProjection> popularChallengeInfos = challengeRepository.findTop10CoursesByOngoingChallengeRides();
 
         if (popularChallengeInfos.isEmpty()) {
             return Collections.emptyList();
@@ -37,7 +37,7 @@ public class ChallengeService {
 
         // 인기 코스 ID 매핑
         List<Long> courseIds = popularChallengeInfos.stream()
-            .map(PopularChallengeProjection::courseId)
+            .map(ChallengeCardProjection::courseId)
             .toList();
 
         // 코스 정보 조회
@@ -53,7 +53,7 @@ public class ChallengeService {
                 CourseCardProjection courseInfo = courseCardMap.get(popularChallengesInfo.courseId());
                 String courseImageUrl = imageUtil.getImageUrl(courseInfo.image());
 
-                return PopularChallengeRes.from(popularChallengesInfo, courseInfo, courseImageUrl);
+                return CourseCardRes.from(popularChallengesInfo, courseInfo, courseImageUrl);
             })
             .toList();
     }
