@@ -39,6 +39,9 @@ public class User extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private UserRole role;
 
+    @Column(name = "region", nullable = false, length = 20)
+    private String region;
+
     @Column(name = "is_deleted", nullable = false)
     private boolean isDeleted = false;
 
@@ -46,10 +49,11 @@ public class User extends BaseEntity {
     private LocalDateTime deletedAt;
 
     @Builder
-    public User(String email, String password, String nickname, UserRole role) {
+    public User(String email, String password, String nickname, UserRole role, String region) {
         this.email = email;
         this.password = password;
         this.nickname = nickname;
         this.role = role;
+        this.region = region;
     }
 }
