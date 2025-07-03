@@ -81,7 +81,7 @@ public class Course extends BaseEntity {
         this.isDeleted = false;
     }
 
-    public static Course from (CourseItem courseItem, FirstGpxPoint firstGpxPoint) {
+    public static Course from (CourseItem courseItem, FirstGpxPoint firstGpxPoint, String gpxPath) {
         return Course.builder()
             .name(courseItem.courseName())
             .summary(courseItem.summary())
@@ -89,7 +89,7 @@ public class Course extends BaseEntity {
             .distance(courseItem.distance())
             .estimatedTime(courseItem.estimatedTime())
             .sigun(courseItem.sigun())
-            .gpxPath(courseItem.gpxpath())
+            .gpxPath(gpxPath)
             .durunubiCourseId(courseItem.durunubiCourseId())
             .startLat(firstGpxPoint.lat())
             .startLon(firstGpxPoint.lon())

@@ -3,7 +3,8 @@ package com.saisai.domain.course.service;
 import static com.saisai.domain.common.exception.ExceptionCode.COURSE_NOT_FOUND;
 
 import com.saisai.domain.common.exception.CustomException;
-import com.saisai.domain.common.utils.s3.ImageUtil;
+import com.saisai.domain.common.aws.s3.GpxS3;
+import com.saisai.domain.common.aws.s3.ImageUtil;
 import com.saisai.domain.course.dto.projection.CoursePageProjection;
 import com.saisai.domain.course.dto.response.CourseDetailsRes;
 import com.saisai.domain.course.dto.response.CoursePageRes;
@@ -33,6 +34,7 @@ public class CourseService {
     private final CourseRepository courseRepository;
     private final GpxParser gpxParser;
     private final ImageUtil imageUtil;
+    private final GpxS3 gpxS3;
 
     // 코스 목록 조회 메서드
     public Page<CoursePageRes> getCourses(Pageable pageable, String challengeStatus) {
@@ -70,7 +72,8 @@ public class CourseService {
 
         RideCountRes rideCountRes = rideRepository.countRideByCourseId(courseId);
 
-        List<GpxPoint> gpxPoints = gpxParser.parseGpxpath(course.getGpxPath());
+        String gpxContent = gpxS3.getGpxContent(course.getGpxPath());
+        List<GpxPoint> gpxPoints = gpxParser.parseGpxContent(gpxContent);
 
         return CourseDetailsRes.from(course, imageUtil.getImageUrl(course.getImage()), rideCountRes, gpxPoints);
     }

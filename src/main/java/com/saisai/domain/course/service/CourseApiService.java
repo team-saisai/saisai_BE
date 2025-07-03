@@ -6,6 +6,7 @@ import com.saisai.domain.common.api.dto.Body;
 import com.saisai.domain.common.api.dto.ExternalResponse;
 import com.saisai.domain.common.api.dto.Items;
 import com.saisai.domain.common.exception.CustomException;
+import com.saisai.domain.common.aws.s3.GpxS3;
 import com.saisai.domain.course.api.CourseApi;
 import com.saisai.domain.course.api.CourseItem;
 import com.saisai.domain.course.entity.Course;
@@ -30,6 +31,7 @@ public class CourseApiService {
     private final CourseRepository courseRepository;
     private final CourseApi courseApi;
     private final GpxParser gpxParser;
+    private final GpxS3 gpxS3;
 
     // 두루누비 API 데이터 DB에 저장하는 메서드
     @Transactional
@@ -58,9 +60,16 @@ public class CourseApiService {
                 }
 
                 try {
-                    FirstGpxPoint firstGpxPoint = gpxParser.parseFirstGpxpath(item.gpxpath());
-                    Course course = Course.from(item, firstGpxPoint);
+                    String gpxContent = gpxParser.downloadGpxContent(item.gpxpath());
+
+                    FirstGpxPoint firstGpxPoint = gpxParser.parseFirstGpxpath(gpxContent);
+
+                    String s3GpxPath = gpxS3.upload(gpxContent, item.courseName());
+
+                    Course course = Course.from(item, firstGpxPoint, s3GpxPath);
+
                     courseRepository.save(course);
+
                     log.info("새 코스 저장 완료: ID={}, 이름={}", item.durunubiCourseId(), item.courseName());
                 } catch (Exception e) {
                     log.error("코스 저장 실패: 이름={}, 오류={}", item.courseName(), e.getMessage(), e);

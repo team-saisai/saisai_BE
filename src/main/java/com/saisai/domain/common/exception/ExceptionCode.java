@@ -58,10 +58,14 @@ public enum ExceptionCode {
     INVALID_INTEGER_FORMAT(HttpStatus.BAD_REQUEST, "FMT_ER_01", "Integer 형식 변환에 실패했습니다."),
     INVALID_DOUBLE_FORMAT(HttpStatus.BAD_REQUEST, "FMT_ER_02", "Double 형식 변환에 실패했습니다."),
 
+    // s3
+    S3_SERVER_UPLOAD_FAIL(HttpStatus.INTERNAL_SERVER_ERROR, "S3_ER_01", "S3 서버에 문제가 생겼습니다."),
+    S3_SERVER_DOWNLOAD_FAIL(HttpStatus.INTERNAL_SERVER_ERROR,"S3_ER_02", "S3에서 파일 다운로드에 실패했습니다."),
+    S3_FILE_NOT_FOUND(HttpStatus.NOT_FOUND, "S3_ER_03", "S3에서 파일을 찾을 수 없습니다."),
+
     // etc
     INVALID_PAGE_NUMBER(HttpStatus.BAD_REQUEST, "ETC_ER_01", "요청하신 페이지 번호가 유효 범위를 초과했습니다."),
     INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "ETC_ER_02", "서버가 응답할 수 없습니다."),
-    SERVER_IMAGE_FAIL(HttpStatus.INTERNAL_SERVER_ERROR, "ETC_ER_03", "이미지 서버에 문제가 생겼습니다."),
     ;
 
     private final HttpStatus httpStatus;

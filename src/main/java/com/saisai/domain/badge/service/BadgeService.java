@@ -15,7 +15,7 @@ import com.saisai.domain.badge.entity.UserBadge;
 import com.saisai.domain.badge.repository.BadgeRepository;
 import com.saisai.domain.badge.repository.UserBadgeRepository;
 import com.saisai.domain.common.exception.CustomException;
-import com.saisai.domain.common.utils.s3.ImageUtil;
+import com.saisai.domain.common.aws.s3.ImageUtil;
 import com.saisai.domain.user.entity.User;
 import com.saisai.domain.user.repository.UserRepository;
 import java.util.List;
