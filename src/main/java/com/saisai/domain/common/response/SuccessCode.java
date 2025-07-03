@@ -16,6 +16,7 @@ public enum SuccessCode {
     // Course
     COURSE_LIST_GET_SUCCESS(HttpStatus.OK, "COURSE_01", "코스 전체 목록 조회에 성공했습니다."),
     COURSE_INFO_GET_SUCCESS(HttpStatus.OK, "COURSE_02", "코스 단일 상세 조회에 성공했습니다."),
+    COURSE_API_SYNC_SUCCESS(HttpStatus.OK, "COURSE_03", "두루누비(코스) API 동기화에 성공했습니다."),
 
     // Challenge
     CHALLENGE_POPULAR_LIST_GET_SUCCESS(HttpStatus.OK, "CHALLENGE_04", "인기 챌린지 리스트 조회에 성공했습니다."),

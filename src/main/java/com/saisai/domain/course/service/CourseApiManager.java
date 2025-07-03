@@ -19,4 +19,10 @@ public class CourseApiManager {
         courseApiService.syncAllCoursesToDb();
         log.info("정기 스케줄 - 두루누비 API 데이터 동기화 완료");
     }
+
+    // 수동으로 동기화 하기 위한 메서드
+    public void manualSync() {
+        log.info("수동 호출 - 코스 데이터 동기화");
+        courseApiService.syncAllCoursesToDb();
+    }
 }
