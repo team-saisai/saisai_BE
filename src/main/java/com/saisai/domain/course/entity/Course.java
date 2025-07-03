@@ -25,13 +25,10 @@ public class Course extends BaseEntity {
     @Column(name = "id", nullable = false)
     private Long id;
 
-    @Column(name = "name", nullable = false, length = 20)
+    @Column(name = "name", nullable = false, length = 50)
     private String name;
 
-    @Column(name = "contents", nullable = false, length = 255)
-    private String contents;
-
-    @Column(name = "summary", nullable = false, length = 255)
+    @Column(name = "summary", nullable = false, columnDefinition = "TEXT")
     private String summary;
 
     @Column(name = "level", nullable = false, length = 1)
@@ -45,12 +42,6 @@ public class Course extends BaseEntity {
 
     @Column(name = "sigun", nullable = false, length = 20) // 행정구역 (예: 경남 밀양시)
     private String sigun;
-
-    @Column(name = "tour_info", length = 255) // 관광 정보
-    private String tourInfo;
-
-    @Column(name = "traveler_info", length = 255) // 여행자 정보
-    private String travelerInfo;
 
     @Column(name = "gpx_path", nullable = false, length = 255) // GPX 파일 경로 (URL)
     private String gpxPath;
@@ -72,19 +63,16 @@ public class Course extends BaseEntity {
 
 
     @Builder
-    public Course(String name, String contents, String summary, Integer level, Double distance,
-        Double estimatedTime, String sigun, String tourInfo, String travelerInfo, String gpxPath,
+    public Course(String name, String summary, Integer level, Double distance,
+        Double estimatedTime, String sigun, String gpxPath,
         String durunubiCourseId, String image, Double startLat, Double startLon
     ) {
         this.name = name;
-        this.contents = contents;
         this.summary = summary;
         this.level = level;
         this.distance = distance;
         this.estimatedTime = estimatedTime;
         this.sigun = sigun;
-        this.tourInfo = tourInfo;
-        this.travelerInfo = travelerInfo;
         this.gpxPath = gpxPath;
         this.durunubiCourseId = durunubiCourseId;
         this.image = image;
@@ -96,14 +84,11 @@ public class Course extends BaseEntity {
     public static Course from (CourseItem courseItem, FirstGpxPoint firstGpxPoint) {
         return Course.builder()
             .name(courseItem.courseName())
-            .contents(courseItem.contents())
             .summary(courseItem.summary())
             .level(courseItem.level())
             .distance(courseItem.distance())
             .estimatedTime(courseItem.estimatedTime())
             .sigun(courseItem.sigun())
-            .tourInfo(courseItem.tourInfo())
-            .travelerInfo(courseItem.travelerinfo())
             .gpxPath(courseItem.gpxpath())
             .durunubiCourseId(courseItem.durunubiCourseId())
             .startLat(firstGpxPoint.lat())

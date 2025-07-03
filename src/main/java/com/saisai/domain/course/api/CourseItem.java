@@ -6,18 +6,15 @@ import com.saisai.domain.common.utils.ParsingUtils;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public record CourseItem(
-    @JsonProperty("crsIdx") String courseId,
+    @JsonProperty("crsIdx") String durunubiCourseId,
     @JsonProperty("crsKorNm") String courseName,
     @JsonProperty("crsLevel") String levelStr,
     @JsonProperty("crsDstnc") String distanceStr,
     @JsonProperty("crsTotlRqrmHour") String estimatedTimeStr,
     @JsonProperty("crsContents") String contents,
     @JsonProperty("crsSummary") String summary,
-    @JsonProperty("crsTourInfo") String tourInfo,
-    @JsonProperty("travelerinfo") String travelerinfo,
     @JsonProperty("sigun") String sigun,
-    @JsonProperty("gpxpath") String gpxpath,
-    @JsonProperty("crsIdx") String durunubiCourseId
+    @JsonProperty("gpxpath") String gpxpath
 ) {
     public Integer level() {
         return ParsingUtils.safeParseInteger(this.levelStr);
