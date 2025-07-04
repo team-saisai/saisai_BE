@@ -40,6 +40,7 @@ public class CourseApiService {
         boolean hasMoreData = true;
         int totalProcessed = 0;
         int duplicateCount = 0;
+        int failedCount = 0;
         int newCount = 0;
 
         while (hasMoreData) {
@@ -53,9 +54,11 @@ public class CourseApiService {
                 .orElseGet(ArrayList::new);
 
             for (CourseItem item : currentItems) {
+                totalProcessed++;
 
                 if (TRUE.equals(courseRepository.existsByDurunubiCourseId(item.durunubiCourseId()))) {
                     log.debug("코스 ID {}는 이미 존재합니다. 건너뜁니다.", item.durunubiCourseId());
+                    duplicateCount++;
                     continue;
                 }
 
@@ -70,9 +73,11 @@ public class CourseApiService {
 
                     courseRepository.save(course);
 
+                    newCount++;
                     log.info("새 코스 저장 완료: ID={}, 이름={}", item.durunubiCourseId(), item.courseName());
                 } catch (Exception e) {
                     log.error("코스 저장 실패: 이름={}, 오류={}", item.courseName(), e.getMessage(), e);
+                    failedCount++;
                 }
             }
 
@@ -82,8 +87,8 @@ public class CourseApiService {
                 page++;
             }
         }
-        log.info("동기화 완료 - 전체: {}건, 신규: {}건, 중복: {}건",
-            totalProcessed, newCount, duplicateCount);
+        log.info("동기화 완료 - 전체: {}건, 신규: {}건, 실패: {}건, 중복: {}건",
+            totalProcessed, newCount, failedCount, duplicateCount);
     }
 
 }
