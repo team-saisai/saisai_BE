@@ -31,8 +31,7 @@ public class CourseController {
     private final CourseService courseService;
 
     @Operation(summary = "코스 전체 목록 조회",
-        description = "코스명, 요약, 난이도, 거리(km), 예상 소요시간(분), 시군, 도전자 수, 완주자 수, 챌린지 상태, 챌린지 종료일을 한 페이지 당 10개 씩 반환\n\n" +
-            "페이지 번호 파라미터만 활성화 상태")
+        description = "코스명, 요약, 난이도, 거리(km), 예상 소요시간(분), 시군, 도전자 수, 완주자 수, 챌린지 상태, 챌린지 종료일을 한 페이지 당 10개 씩 반환")
     @GetMapping
     public ResponseEntity<ApiResponse<Page<CoursePageRes>>> getAllCourses(
         @Parameter(description = "페이지 번호") @RequestParam(defaultValue = "1") int page,
