@@ -39,9 +39,10 @@ public class GpxS3 {
             return "course";
         }
 
-        return courseName
+        String sanitized = courseName
             .replaceAll("[^a-zA-Z0-9가-힣\\s]", "")
-            .replaceAll("\\s+", "_")
-            .substring(0, Math.min(courseName.length(), 50));
+            .replaceAll("\\s+", "_");
+
+        return sanitized.substring(0, Math.min(sanitized.length(), 50));
     }
 }
