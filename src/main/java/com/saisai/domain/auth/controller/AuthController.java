@@ -44,7 +44,10 @@ public class AuthController {
     @PostMapping("/login")
     @SecurityRequirements(value = {})
     @Operation(summary = "로그인",
-        description = "이메일, 비밀번호 입력 필요")
+        description = "이메일, 비밀번호 입력 필요, 그대로 복붙해서 사용\n\n"
+        + "테스트용 사용자 계정 \n\n{  \"email\": \"sai@sai.com\",  \"password\": \"123\"\n}\n\n"
+        + "테스트용 관리자 계정 \n\n{  \"email\": \"admin@sai.com\n\",  \"password\": \"123\"\n}"
+    )
     public ResponseEntity<ApiResponse<TokenRes>> login(
         @Valid @RequestBody LoginReq loginReq
     ) {
