@@ -44,7 +44,7 @@ public class CourseController {
     }
 
     @Operation(summary = "코스 상세 조회",
-        description = "코스ID, 코스명, 코스 설명, 난이도, 거리(km), 예상 소요시간(분), 시군(지역), 투어 정보, 여행자 정보, gpx경로(위도, 경도, 고도, 앞뒤 좌표 거리(m), 현재-시작 누적 거리(km)), 완주자 수, 리워드 정보 반환 ")
+        description = "코스ID, 코스명, 코스 설명, 난이도, 거리(km), 예상 소요시간(분), 시군(지역), 투어 정보, 여행자 정보, gpx경로(위도, 경도, 고도, 앞뒤 좌표 거리(m), 현재까지의 누적 거리(km)), 완주자 수, 리워드 정보 반환 ")
     @GetMapping("/{courseId}")
     public ResponseEntity<ApiResponse<CourseDetailsRes>> getCourseInfo(
         @PathVariable Long courseId
