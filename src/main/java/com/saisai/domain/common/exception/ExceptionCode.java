@@ -38,6 +38,9 @@ public enum ExceptionCode {
     // user badge
     USER_BADGE_NOT_FOUND(HttpStatus.NOT_FOUND, "UB_ER_01", "USER BADGE 정보를 찾을 수 없습니다."),
 
+    // ride
+    RIDE_ALREADY_IN_PROGRESS(HttpStatus.CONFLICT, "RD_ER_01", "현재 달리고 있는 코스가 존재합니다."),
+
     // gpx
     GPX_EMPTY(HttpStatus.NOT_FOUND, "GPX_ER_01", "GPX 파일이 비어있습니다."),
     GPX_DOWNLOAD_FAILED(HttpStatus.SERVICE_UNAVAILABLE, "GPX_ER_02", "GPX 파일 다운로드에 실패했습니다."),
