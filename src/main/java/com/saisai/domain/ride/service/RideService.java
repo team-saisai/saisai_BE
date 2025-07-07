@@ -19,6 +19,7 @@ import com.saisai.domain.ride.repository.RideRepository;
 import com.saisai.domain.user.entity.User;
 import com.saisai.domain.user.repository.UserRepository;
 import java.util.List;
+import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -34,6 +35,8 @@ public class RideService {
     private final GpxS3 gpxS3;
     private final GpxParser gpxParser;
 
+    private static final Set<Long> ADMIN_USER_IDS = Set.of(1L, 2L, 53L);
+
     // Ride 시작 데이터 저장
     @Transactional
     public RideStartRes startRide(Long courseId, AuthUserDetails authUserDetails) {
@@ -43,9 +46,8 @@ public class RideService {
         User user = userRepository.findById(authUserDetails.userId())
             .orElseThrow(() -> new CustomException(USER_NOT_FOUND));
 
-        Boolean isRiding = rideRepository.existsByUserAndStatus(user, RideStatus.IN_PROGRESS);
-        if (TRUE.equals(isRiding)) {
-            throw new CustomException(RIDE_ALREADY_IN_PROGRESS);
+        if (!isAdminUser(user.getId())) {
+            validateUserNotRiding(user);
         }
 
         Ride ride = Ride.start(user, course);
@@ -60,5 +62,18 @@ public class RideService {
     private List<GpxPoint> getGpxPoints(Ride ride) {
         String gpxContent = gpxS3.getGpxContent(ride.getCourse().getGpxPath());
         return gpxParser.parseGpxContent(gpxContent);
+    }
+
+    // 관리자 계정인지 검사
+    private boolean isAdminUser(Long userId) {
+        return ADMIN_USER_IDS.contains(userId);
+    }
+
+    // 라이딩 중인 코스가 있는지 검사
+    private void validateUserNotRiding(User user) {
+        Boolean isRiding = rideRepository.existsByUserAndStatus(user, RideStatus.IN_PROGRESS);
+        if (TRUE.equals(isRiding)) {
+            throw new CustomException(RIDE_ALREADY_IN_PROGRESS);
+        }
     }
 }
