@@ -7,14 +7,16 @@ public record GpxPoint(
     Double latitude,
     Double longitude,
     Double elevation,
-    Double segmentDistance
+    Double segmentDistance,
+    Double totalDistance
 ) {
-    public static GpxPoint from(TrackPoint trackPoint, double segmentDistance) {
+    public static GpxPoint from(TrackPoint trackPoint, double segmentDistance, double totalDistance) {
         return new GpxPoint(
             trackPoint.lat(),
             trackPoint.lon(),
             trackPoint.ele(),
-            segmentDistance
+            segmentDistance,
+            totalDistance
         );
     }
 }
