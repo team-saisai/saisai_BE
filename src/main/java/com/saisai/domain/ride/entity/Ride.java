@@ -36,7 +36,7 @@ public class Ride extends BaseEntity {
     private User user;
 
     @ManyToOne
-    @JoinColumn(name = "course_id")
+    @JoinColumn(name = "course_id", nullable = false)
     private Course course;
 
     @Column(name = "status", nullable = false, length = 15)
@@ -45,9 +45,6 @@ public class Ride extends BaseEntity {
 
     @Column(name = "progress_rate", nullable = false)
     private Double progressRate;
-
-    @Column(name = "started_at")
-    private LocalDateTime startedAt;
 
     @Column(name = "completed_at")
     private LocalDateTime completedAt;
