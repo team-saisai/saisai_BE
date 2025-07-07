@@ -2,6 +2,8 @@ package com.saisai.domain.ride.repository;
 
 import com.saisai.domain.ride.dto.response.RideCountRes;
 import com.saisai.domain.ride.entity.Ride;
+import com.saisai.domain.ride.entity.RideStatus;
+import com.saisai.domain.user.entity.User;
 import io.lettuce.core.dynamic.annotation.Param;
 import java.util.List;
 import java.util.Map;
@@ -48,4 +50,6 @@ public interface RideRepository extends JpaRepository<Ride, Long>, RideRepositor
         WHERE r.course.id = :courseId
     """)
     RideCountRes countRideByCourseId(@Param("courseId") Long courseId);
+
+    Boolean existsByUserAndStatus(User user, RideStatus status);
 }
