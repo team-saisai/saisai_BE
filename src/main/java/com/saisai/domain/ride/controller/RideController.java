@@ -2,6 +2,8 @@ package com.saisai.domain.ride.controller;
 
 import static com.saisai.domain.common.response.SuccessCode.RIDE_START_SUCCESS;
 
+import com.saisai.config.jwt.AuthUserDetails;
+import com.saisai.domain.common.annotation.Auth;
 import com.saisai.domain.common.response.ApiResponse;
 import com.saisai.domain.ride.dto.response.RideStartRes;
 import com.saisai.domain.ride.service.RideService;
@@ -25,9 +27,10 @@ public class RideController {
         description = "총 거리(km), gpx 경로(위도, 경도, 고도, 앞뒤 좌표 간의 거리(m), 현재-시작 좌표 간의 거리(km)")
     @GetMapping
     public ResponseEntity<ApiResponse<RideStartRes>> startRide(
-        @PathVariable Long courseId
+        @PathVariable Long courseId,
+        @Auth AuthUserDetails authUserDetails
     ) {
         return ResponseEntity.status(HttpStatus.OK)
-            .body(ApiResponse.success(RIDE_START_SUCCESS, rideService.startRide(courseId)));
+            .body(ApiResponse.success(RIDE_START_SUCCESS, rideService.startRide(courseId, authUserDetails)));
     }
 }
