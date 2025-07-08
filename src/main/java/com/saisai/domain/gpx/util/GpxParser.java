@@ -88,16 +88,21 @@ public class GpxParser {
         List<GpxPoint> gpxPoints = new ArrayList<>();
 
         TrackPoint prev = trackPoints.get(0);
-        gpxPoints.add(GpxPoint.from(prev, 0.0));
+        double segmentDistance = 0.0;
+        double totalDistanceKm = 0.0;
+
+        gpxPoints.add(GpxPoint.from(prev,segmentDistance, totalDistanceKm));
 
         for (int i = 1; i < trackPoints.size(); i++) {
             TrackPoint current = trackPoints.get(i);
-            double segmentDistance = DistanceUtils.calculateDistance(
+            segmentDistance = DistanceUtils.calculateDistance(
                 prev.lat(), prev.lon(),
                 current.lat(), current.lon()
             );
 
-            gpxPoints.add(GpxPoint.from(current, segmentDistance));
+            totalDistanceKm += (segmentDistance / 1000.0);
+
+            gpxPoints.add(GpxPoint.from(current, segmentDistance, totalDistanceKm));
 
             prev = current;
         }

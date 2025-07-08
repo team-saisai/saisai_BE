@@ -16,7 +16,6 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import java.time.LocalDateTime;
 import lombok.AccessLevel;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -36,7 +35,7 @@ public class Ride extends BaseEntity {
     private User user;
 
     @ManyToOne
-    @JoinColumn(name = "course_id")
+    @JoinColumn(name = "course_id", nullable = false)
     private Course course;
 
     @Column(name = "status", nullable = false, length = 15)
@@ -45,9 +44,6 @@ public class Ride extends BaseEntity {
 
     @Column(name = "progress_rate", nullable = false)
     private Double progressRate;
-
-    @Column(name = "started_at")
-    private LocalDateTime startedAt;
 
     @Column(name = "completed_at")
     private LocalDateTime completedAt;
@@ -61,20 +57,14 @@ public class Ride extends BaseEntity {
     @Column(name = "certified_image", length = 255)
     private String certifiedImage;
 
-    @Builder
-
-    public Ride(RideStatus status, User user, Course course, Double progressRate,
-        String certifiedImage,
-        LocalDateTime resumeAt, LocalDateTime pausedAt, LocalDateTime completedAt,
-        LocalDateTime startedAt) {
-        this.status = status;
+    private Ride(User user, Course course) {
+        this.status = RideStatus.IN_PROGRESS;
         this.user = user;
         this.course = course;
-        this.progressRate = progressRate;
-        this.certifiedImage = certifiedImage;
-        this.resumeAt = resumeAt;
-        this.pausedAt = pausedAt;
-        this.completedAt = completedAt;
-        this.startedAt = startedAt;
+        this.progressRate = 0.0;
+    }
+
+    public static Ride start(User user, Course course) {
+        return new Ride(user, course);
     }
 }
