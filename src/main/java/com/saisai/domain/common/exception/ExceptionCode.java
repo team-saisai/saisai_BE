@@ -27,9 +27,10 @@ public enum ExceptionCode {
     EMAIL_DUPLICATE(HttpStatus.BAD_REQUEST, "USER_ER_02", "이메일이 중복됩니다."),
 
     // course
-    COURSE_API_CALL_FAIL(HttpStatus.INTERNAL_SERVER_ERROR, "CR_ER_05", "코스 API 호출에 실패했습니다."),
-    COURSE_NAME_REQUIRED(HttpStatus.BAD_REQUEST, "CR_ER_01", "코스명이 공백으로만 이루어져 있거나 비어있습니다."),
+    COURSE_API_CALL_FAIL(HttpStatus.INTERNAL_SERVER_ERROR, "CR_ER_01", "코스 API 호출에 실패했습니다."),
+    COURSE_NAME_REQUIRED(HttpStatus.BAD_REQUEST, "CR_ER_02", "코스명이 공백으로만 이루어져 있거나 비어있습니다."),
     COURSE_NOT_FOUND(HttpStatus.NOT_FOUND, "CR_ER_03", "코스를 찾을 수 없습니다."),
+    COURSE_DISTANCE_INVALID(HttpStatus.BAD_REQUEST, "CR_ER_04", "코스 거리 정보가 유효하지 않습니다."),
 
     // badge
     BADGE_NAME_DUPLICATE(HttpStatus.BAD_REQUEST, "BG_ER_01", "뱃지명이 중복됩니다."),
@@ -40,6 +41,10 @@ public enum ExceptionCode {
 
     // ride
     RIDE_ALREADY_IN_PROGRESS(HttpStatus.CONFLICT, "RD_ER_01", "현재 달리고 있는 코스가 존재합니다."),
+    RIDE_NOT_FOUND(HttpStatus.NOT_FOUND, "RD_ER_02", "라이드 기록을 찾을 수 없습니다."),
+    RIDE_COURSE_MISMATCH(HttpStatus.BAD_REQUEST, "RD_ER_03", "요청한 코스와 라이딩 정보가 일치하지 않습니다."),
+    RIDE_NOT_IN_PROGRESS(HttpStatus.CONFLICT, "RD_ER_04", "현재 진행 중인 라이딩이 아닙니다."),
+    RIDE_UNAUTHORIZED_ACCESS(HttpStatus.FORBIDDEN, "RD_ER_05", "해당 라이딩에 대한 접근 권한이 없습니다."),
 
     // gpx
     GPX_EMPTY(HttpStatus.NOT_FOUND, "GPX_ER_01", "GPX 파일이 비어있습니다."),
