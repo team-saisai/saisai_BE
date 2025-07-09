@@ -43,7 +43,7 @@ public class RideController {
     }
 
     @Operation(summary = "코스 라이딩 중단",
-        description = "라이딩 시작API로 기록 저장 후 테스트 가능")
+        description = "라이딩 시작API로 기록 저장 후 테스트 가능\n\nRequestBody 모든 필드 null 불가")
     @PatchMapping("/{rideId}/pause")
     public ResponseEntity<ApiResponse<RidePausedRes>> pausedRide(
         @PathVariable Long courseId,
