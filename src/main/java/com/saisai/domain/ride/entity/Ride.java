@@ -1,6 +1,9 @@
 package com.saisai.domain.ride.entity;
 
+import static com.saisai.domain.common.exception.ExceptionCode.RIDE_NOT_IN_PROGRESS;
+
 import com.saisai.domain.common.BaseEntity;
+import com.saisai.domain.common.exception.CustomException;
 import com.saisai.domain.course.entity.Course;
 import com.saisai.domain.user.entity.User;
 import jakarta.persistence.Column;
@@ -66,5 +69,19 @@ public class Ride extends BaseEntity {
 
     public static Ride start(User user, Course course) {
         return new Ride(user, course);
+    }
+
+    public void paused(int progressRate) {
+        if (this.status != RideStatus.IN_PROGRESS) {
+            throw new CustomException(RIDE_NOT_IN_PROGRESS);
+        }
+
+        this.status = RideStatus.PAUSED;
+        this.progressRate = progressRate;
+    }
+
+    public void pausedForAdmin(int progressRate) {
+        this.status = RideStatus.PAUSED;
+        this.progressRate = progressRate;
     }
 }
