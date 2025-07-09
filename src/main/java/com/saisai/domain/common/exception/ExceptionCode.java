@@ -27,8 +27,8 @@ public enum ExceptionCode {
     EMAIL_DUPLICATE(HttpStatus.BAD_REQUEST, "USER_ER_02", "이메일이 중복됩니다."),
 
     // course
-    COURSE_API_CALL_FAIL(HttpStatus.INTERNAL_SERVER_ERROR, "CR_ER_05", "코스 API 호출에 실패했습니다."),
-    COURSE_NAME_REQUIRED(HttpStatus.BAD_REQUEST, "CR_ER_01", "코스명이 공백으로만 이루어져 있거나 비어있습니다."),
+    COURSE_API_CALL_FAIL(HttpStatus.INTERNAL_SERVER_ERROR, "CR_ER_01", "코스 API 호출에 실패했습니다."),
+    COURSE_NAME_REQUIRED(HttpStatus.BAD_REQUEST, "CR_ER_02", "코스명이 공백으로만 이루어져 있거나 비어있습니다."),
     COURSE_NOT_FOUND(HttpStatus.NOT_FOUND, "CR_ER_03", "코스를 찾을 수 없습니다."),
 
     // badge
