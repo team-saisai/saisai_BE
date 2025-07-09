@@ -43,7 +43,7 @@ public class Ride extends BaseEntity {
     private RideStatus status;
 
     @Column(name = "progress_rate", nullable = false)
-    private Double progressRate;
+    private Integer progressRate;
 
     @Column(name = "completed_at")
     private LocalDateTime completedAt;
@@ -61,7 +61,7 @@ public class Ride extends BaseEntity {
         this.status = RideStatus.IN_PROGRESS;
         this.user = user;
         this.course = course;
-        this.progressRate = 0.0;
+        this.progressRate = 0;
     }
 
     public static Ride start(User user, Course course) {

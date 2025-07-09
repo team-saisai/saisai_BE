@@ -10,7 +10,7 @@ public record RecentRideInfoRes(
     String sigun,
     String courseImageUrl,
     Double distance,
-    Double progressRate,
+    Integer progressRate,
     LocalDate recentRideAt
 ) {
 
