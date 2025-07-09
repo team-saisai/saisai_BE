@@ -55,7 +55,7 @@ public class RideService {
 
         List<GpxPoint> gpxPoints = getGpxPoints(saveRide);
 
-        return RideStartRes.from(saveRide.getCourse().getDistance(), gpxPoints);
+        return RideStartRes.from(saveRide, gpxPoints);
     }
 
     // ride course Gpx 포인트 조회
