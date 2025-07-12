@@ -31,6 +31,7 @@ public enum ExceptionCode {
     COURSE_NAME_REQUIRED(HttpStatus.BAD_REQUEST, "CR_ER_02", "코스명이 공백으로만 이루어져 있거나 비어있습니다."),
     COURSE_NOT_FOUND(HttpStatus.NOT_FOUND, "CR_ER_03", "코스를 찾을 수 없습니다."),
     COURSE_DISTANCE_INVALID(HttpStatus.BAD_REQUEST, "CR_ER_04", "코스 거리 정보가 유효하지 않습니다."),
+    COURSE_ALREADY_SAVE(HttpStatus.CONFLICT, "CR_ER_05", "이미 저장된 코스 입니다."),
 
     // badge
     BADGE_NAME_DUPLICATE(HttpStatus.BAD_REQUEST, "BG_ER_01", "뱃지명이 중복됩니다."),
