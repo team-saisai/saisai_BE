@@ -1,5 +1,6 @@
 package com.saisai.domain.course.entity;
 
+import com.saisai.domain.common.BaseEntity;
 import com.saisai.domain.user.entity.User;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -11,15 +12,12 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
-import java.time.LocalDateTime;
 import lombok.AccessLevel;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.springframework.data.annotation.CreatedDate;
 
 @Entity
-@Table(name = "course_likes", uniqueConstraints = {
+@Table(name = "course_saves", uniqueConstraints = {
     @UniqueConstraint(
         name = "USER_COURSE_UNIQUE",
         columnNames = {"user_id", "course_id"}
@@ -27,7 +25,7 @@ import org.springframework.data.annotation.CreatedDate;
 })
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class CourseLike {
+public class CourseSave extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -42,13 +40,15 @@ public class CourseLike {
     @JoinColumn(name = "course_id", nullable = false)
     private Course course;    // DDL으로 ON DELETE CASCADE 적용?
 
-    @CreatedDate
-    @Column(name = "created_at", nullable = false, updatable = false)
-    private LocalDateTime createdAt;
+    public static CourseSave from(User user,  Course course) {
+        return new CourseSave(
+            user,
+            course
+        );
+    }
 
-    @Builder
-    public CourseLike(Course course, User user) {
-        this.course = course;
+    private CourseSave(User user,  Course course) {
         this.user = user;
+        this.course = course;
     }
 }
