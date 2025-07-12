@@ -73,6 +73,13 @@ public enum ExceptionCode {
     S3_SERVER_DOWNLOAD_FAIL(HttpStatus.INTERNAL_SERVER_ERROR,"S3_ER_02", "S3에서 파일 다운로드에 실패했습니다."),
     S3_FILE_NOT_FOUND(HttpStatus.NOT_FOUND, "S3_ER_03", "S3에서 파일을 찾을 수 없습니다."),
 
+    // file
+    INVALID_FILE_NAME(HttpStatus.BAD_REQUEST, "FL_ER_01", "파일명이 유효하지 않습니다."),
+    MISSING_FILE_EXTENSION(HttpStatus.BAD_REQUEST, "FL_ER_02", "파일 확장자가 없거나 파일명이 없습니다."),
+    UNSUPPORTED_FILE_TYPE(HttpStatus.BAD_REQUEST, "FL_ER_03", "허용되지 않은 파일 확장자입니다."),
+    FILE_SIZE_EXCEEDED(HttpStatus.BAD_REQUEST, "FL_ER_04", "파일 크기가 제한을 초과했습니다."),
+    INVALID_FILE(HttpStatus.BAD_REQUEST, "FL_ER_05", "유효하지 않은 파일입니다."),
+
     // etc
     INVALID_PAGE_NUMBER(HttpStatus.BAD_REQUEST, "ETC_ER_01", "요청하신 페이지 번호가 유효 범위를 초과했습니다."),
     INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "ETC_ER_02", "서버가 응답할 수 없습니다."),

@@ -4,7 +4,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -52,17 +51,10 @@ public class GlobalExceptionHandler {
         HttpServletRequest request,
         MethodArgumentNotValidException e
     ) {
-        //글로벌 에러 메시지들
-        String globalErrorMessage = e.getGlobalErrors().stream()
-            .map(DefaultMessageSourceResolvable::getDefaultMessage)
-            .collect(Collectors.joining(", ", "[Global Error : ", "], \t"));
-
-        //필드 에러 메시지들
-        String fieldErrorMessage = e.getFieldErrors().stream()
+        String errorMessage = e.getFieldErrors().stream()
             .map(error -> error.getField() + " : " + error.getDefaultMessage())
-            .collect(Collectors.joining(" ", "[Field Error : ", "]"));
+            .collect(Collectors.joining(", "));
 
-        String errorMessage = globalErrorMessage + fieldErrorMessage;
         log.warn("잘못된 요청이 들어왔습니다. URI:{}, 내용:{}", request.getRequestURI(), errorMessage);
         return ResponseEntity
             .badRequest()
