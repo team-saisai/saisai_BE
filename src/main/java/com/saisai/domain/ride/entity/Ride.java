@@ -5,6 +5,7 @@ import static com.saisai.domain.common.exception.ExceptionCode.RIDE_NOT_IN_PROGR
 import com.saisai.domain.common.BaseEntity;
 import com.saisai.domain.common.exception.CustomException;
 import com.saisai.domain.course.entity.Course;
+import com.saisai.domain.ride.dto.request.RideCompleteReq;
 import com.saisai.domain.user.entity.User;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -37,7 +38,7 @@ public class Ride extends BaseEntity {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "course_id", nullable = false)
     private Course course;
 
@@ -48,14 +49,14 @@ public class Ride extends BaseEntity {
     @Column(name = "progress_rate", nullable = false)
     private Integer progressRate;
 
+    @Column(name = "duration_second", nullable = false)
+    private Long durationSecond;
+
+    @Column(name = "actual_distance", nullable = false)
+    private Double actualDistance;
+
     @Column(name = "completed_at")
     private LocalDateTime completedAt;
-
-    @Column(name = "paused_at")
-    private LocalDateTime pausedAt;
-
-    @Column(name = "resume_at")
-    private LocalDateTime resumeAt;
 
     @Column(name = "certified_image", length = 255)
     private String certifiedImage;
@@ -65,6 +66,8 @@ public class Ride extends BaseEntity {
         this.user = user;
         this.course = course;
         this.progressRate = 0;
+        this.durationSecond = 0L;
+        this.actualDistance = 0D;
     }
 
     public static Ride start(User user, Course course) {
@@ -83,5 +86,14 @@ public class Ride extends BaseEntity {
     public void pausedForAdmin(int progressRate) {
         this.status = RideStatus.PAUSED;
         this.progressRate = progressRate;
+    }
+
+    public void complete(RideCompleteReq rideCompleteReq, String certifiedImage) {
+        this.status = RideStatus.COMPLETED;
+        this.progressRate = 100;
+        this.certifiedImage = certifiedImage;
+        this.durationSecond = rideCompleteReq.duration();
+        this.actualDistance = rideCompleteReq.actualDistance();
+        this.completedAt = LocalDateTime.now();
     }
 }

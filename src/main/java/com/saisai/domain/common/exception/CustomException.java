@@ -20,4 +20,11 @@ public class CustomException extends RuntimeException {
         this.httpStatus = exceptionCode.getHttpStatus();
         this.code = exceptionCode.getCode();
     }
+
+    // 동적 메시지 용
+    public CustomException(ExceptionCode exceptionCode, String customMessage) {
+        super(customMessage);  // 커스텀 메시지 사용
+        this.httpStatus = exceptionCode.getHttpStatus();
+        this.code = exceptionCode.getCode();
+    }
 }
