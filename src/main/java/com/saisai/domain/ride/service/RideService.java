@@ -21,7 +21,6 @@ import com.saisai.domain.gpx.util.GpxParser;
 import com.saisai.domain.ride.dto.request.RideCompleteReq;
 import com.saisai.domain.ride.dto.request.RidePausedReq;
 import com.saisai.domain.ride.dto.response.RidePausedRes;
-import com.saisai.domain.ride.dto.response.RideResumeRes;
 import com.saisai.domain.ride.dto.response.RideStartRes;
 import com.saisai.domain.ride.entity.Ride;
 import com.saisai.domain.ride.entity.RideStatus;
