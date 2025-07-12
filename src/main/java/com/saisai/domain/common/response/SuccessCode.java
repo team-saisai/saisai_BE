@@ -27,6 +27,8 @@ public enum SuccessCode {
     RECENT_RIDE_COURSE_GET_SUCCESS(HttpStatus.OK, "RIDE_01", "최근 주행한 코스 조회에 성공했습니다."),
     RIDE_START_SUCCESS(HttpStatus.OK, "RIDE_02", "코스 라이드 시작에 성공했습니다."),
     RIDE_PAUSED_SUCCESS(HttpStatus.OK, "RIDE_03", "코스 라이드 중단에 성공했습니다."),
+    RIDE_RESUME_SUCCESS(HttpStatus.OK, "RIDE_04", "코스 라아드 재개에 성공했습니다."),
+    RIDE_COMPLETE_SUCCESS(HttpStatus.OK, "RIDE_05", "코스 라이드 완주에 성공했습니다."),
 
     // Badge
     BADGE_CREATE_SUCCESS(HttpStatus.CREATED, "BADGE_01", "뱃지 생성에 성공했습니다."),
