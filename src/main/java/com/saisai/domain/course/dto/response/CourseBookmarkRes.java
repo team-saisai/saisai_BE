@@ -1,11 +1,11 @@
 package com.saisai.domain.course.dto.response;
 
 public record CourseBookmarkRes(
-    Boolean isCourseSaved
+    Boolean isCourseBookmarked
 ) {
-    public static CourseBookmarkRes of() {
+    public static CourseBookmarkRes of(boolean isCourssBookmarked) {
         return new CourseBookmarkRes(
-            true
+            isCourssBookmarked
         );
     }
 }

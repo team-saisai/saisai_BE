@@ -1,6 +1,7 @@
 package com.saisai.domain.course.service;
 
-import static com.saisai.domain.common.exception.ExceptionCode.COURSE_ALREADY_SAVE;
+import static com.saisai.domain.common.exception.ExceptionCode.COURSE_ALREADY_BOOKMARK;
+import static com.saisai.domain.common.exception.ExceptionCode.COURSE_BOOKMARK_NOT_FOUND;
 import static com.saisai.domain.common.exception.ExceptionCode.COURSE_NOT_FOUND;
 import static com.saisai.domain.common.exception.ExceptionCode.USER_NOT_FOUND;
 
@@ -25,7 +26,7 @@ public class CourseBookmarkService {
     private final CourseBookmarkRepository courseBookMarkRepository;
     private final UserRepository userRepository;
 
-    // 코스 저장
+    // 코스 북마크 추가
     @Transactional
     public CourseBookmarkRes bookmarkCourse(Long courseId, AuthUserDetails authUserDetails) {
         Course course = courseRepository.findById(courseId)
@@ -34,19 +35,37 @@ public class CourseBookmarkService {
         User user = userRepository.findById(authUserDetails.userId())
             .orElseThrow(() -> new CustomException(USER_NOT_FOUND));
 
-        if (isCourseAlreadySaved(course, user)) {
-            throw new CustomException(COURSE_ALREADY_SAVE);
+        if (isBookmarkExists(course, user)) {
+            throw new CustomException(COURSE_ALREADY_BOOKMARK);
         }
 
         CourseBookmark courseBookMark = CourseBookmark.from(user, course);
 
         CourseBookmark savedCourseBookmark = courseBookMarkRepository.save(courseBookMark);
 
-        return CourseBookmarkRes.of();
+        return CourseBookmarkRes.of(true);
+    }
+
+    // 코스 북마크 삭제
+    @Transactional
+    public CourseBookmarkRes removeBookmark (Long courseId, AuthUserDetails authUserDetails) {
+        Course course = courseRepository.findById(courseId)
+            .orElseThrow(() -> new CustomException(COURSE_NOT_FOUND));
+
+        User user = userRepository.findById(authUserDetails.userId())
+            .orElseThrow(() -> new CustomException(USER_NOT_FOUND));
+
+        CourseBookmark courseBookmark = courseBookMarkRepository.findByCourseIdAndUserId(course.getId(), user.getId())
+            .orElseThrow(() -> new CustomException(COURSE_BOOKMARK_NOT_FOUND));
+
+        courseBookMarkRepository.delete(courseBookmark);
+
+        return CourseBookmarkRes.of(false);
+
     }
 
     // 코스 저장 이미 존재하는지 확인
-    private boolean isCourseAlreadySaved(Course course, User user) {
+    private boolean isBookmarkExists(Course course, User user) {
         return courseBookMarkRepository.existsByCourseIdAndUserId(course.getId(), user.getId());
     }
 }
