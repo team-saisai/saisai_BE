@@ -1,0 +1,71 @@
+package com.saisai.domain.course.service;
+
+import static com.saisai.domain.common.exception.ExceptionCode.COURSE_ALREADY_BOOKMARK;
+import static com.saisai.domain.common.exception.ExceptionCode.COURSE_BOOKMARK_NOT_FOUND;
+import static com.saisai.domain.common.exception.ExceptionCode.COURSE_NOT_FOUND;
+import static com.saisai.domain.common.exception.ExceptionCode.USER_NOT_FOUND;
+
+import com.saisai.config.jwt.AuthUserDetails;
+import com.saisai.domain.common.exception.CustomException;
+import com.saisai.domain.course.dto.response.CourseBookmarkRes;
+import com.saisai.domain.course.entity.Course;
+import com.saisai.domain.course.entity.CourseBookmark;
+import com.saisai.domain.course.repository.CourseRepository;
+import com.saisai.domain.course.repository.CourseBookmarkRepository;
+import com.saisai.domain.user.entity.User;
+import com.saisai.domain.user.repository.UserRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+@Service
+@RequiredArgsConstructor
+public class CourseBookmarkService {
+
+    private final CourseRepository courseRepository;
+    private final CourseBookmarkRepository courseBookMarkRepository;
+    private final UserRepository userRepository;
+
+    // 코스 북마크 추가
+    @Transactional
+    public CourseBookmarkRes bookmarkCourse(Long courseId, AuthUserDetails authUserDetails) {
+        Course course = courseRepository.findById(courseId)
+            .orElseThrow(() -> new CustomException(COURSE_NOT_FOUND));
+
+        User user = userRepository.findById(authUserDetails.userId())
+            .orElseThrow(() -> new CustomException(USER_NOT_FOUND));
+
+        if (isBookmarkExists(course, user)) {
+            throw new CustomException(COURSE_ALREADY_BOOKMARK);
+        }
+
+        CourseBookmark courseBookMark = CourseBookmark.from(user, course);
+
+        CourseBookmark savedCourseBookmark = courseBookMarkRepository.save(courseBookMark);
+
+        return CourseBookmarkRes.of(true);
+    }
+
+    // 코스 북마크 삭제
+    @Transactional
+    public CourseBookmarkRes removeBookmark (Long courseId, AuthUserDetails authUserDetails) {
+        Course course = courseRepository.findById(courseId)
+            .orElseThrow(() -> new CustomException(COURSE_NOT_FOUND));
+
+        User user = userRepository.findById(authUserDetails.userId())
+            .orElseThrow(() -> new CustomException(USER_NOT_FOUND));
+
+        CourseBookmark courseBookmark = courseBookMarkRepository.findByCourseIdAndUserId(course.getId(), user.getId())
+            .orElseThrow(() -> new CustomException(COURSE_BOOKMARK_NOT_FOUND));
+
+        courseBookMarkRepository.delete(courseBookmark);
+
+        return CourseBookmarkRes.of(false);
+
+    }
+
+    // 코스 저장 이미 존재하는지 확인
+    private boolean isBookmarkExists(Course course, User user) {
+        return courseBookMarkRepository.existsByCourseIdAndUserId(course.getId(), user.getId());
+    }
+}
