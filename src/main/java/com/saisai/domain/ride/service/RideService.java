@@ -5,19 +5,23 @@ import static com.saisai.domain.common.exception.ExceptionCode.COURSE_NOT_FOUND;
 import static com.saisai.domain.common.exception.ExceptionCode.RIDE_ALREADY_IN_PROGRESS;
 import static com.saisai.domain.common.exception.ExceptionCode.RIDE_COURSE_MISMATCH;
 import static com.saisai.domain.common.exception.ExceptionCode.RIDE_NOT_FOUND;
+import static com.saisai.domain.common.exception.ExceptionCode.RIDE_NOT_IN_PROGRESS;
 import static com.saisai.domain.common.exception.ExceptionCode.RIDE_UNAUTHORIZED_ACCESS;
 import static com.saisai.domain.common.exception.ExceptionCode.USER_NOT_FOUND;
 import static java.lang.Boolean.TRUE;
 
 import com.saisai.config.jwt.AuthUserDetails;
 import com.saisai.domain.common.aws.s3.GpxS3;
+import com.saisai.domain.common.aws.s3.ImageUtil;
 import com.saisai.domain.common.exception.CustomException;
 import com.saisai.domain.course.entity.Course;
 import com.saisai.domain.course.repository.CourseRepository;
 import com.saisai.domain.gpx.dto.GpxPoint;
 import com.saisai.domain.gpx.util.GpxParser;
+import com.saisai.domain.ride.dto.request.RideCompleteReq;
 import com.saisai.domain.ride.dto.request.RidePausedReq;
 import com.saisai.domain.ride.dto.response.RidePausedRes;
+import com.saisai.domain.ride.dto.response.RideResumeRes;
 import com.saisai.domain.ride.dto.response.RideStartRes;
 import com.saisai.domain.ride.entity.Ride;
 import com.saisai.domain.ride.entity.RideStatus;
@@ -41,6 +45,7 @@ public class RideService {
     private final CacheRideService cacheRideService;
     private final GpxS3 gpxS3;
     private final GpxParser gpxParser;
+    private final ImageUtil imageUtil;
 
     private static final Set<Long> ADMIN_USER_IDS = Set.of(1L, 2L, 53L, 54L);
 
@@ -62,7 +67,7 @@ public class RideService {
 
         List<GpxPoint> gpxPoints = getGpxPoints(saveRide);
 
-        return RideStartRes.from(saveRide, gpxPoints);
+        return RideStartRes.from(saveRide, course, gpxPoints);
     }
 
     // Ride 중단
@@ -87,6 +92,28 @@ public class RideService {
 
         return RidePausedRes.from(ride, progressRate);
     }
+
+    // Ride 완주
+    @Transactional
+    public void completeRide(Long rideId, RideCompleteReq rideCompleteReq, AuthUserDetails authUserDetails) {
+        Ride ride = rideRepository.findById(rideId)
+            .orElseThrow(() -> new CustomException(RIDE_NOT_FOUND));
+
+        // RideId의 user인지 확인
+        if (!ride.getUser().getId().equals(authUserDetails.userId())) {
+            throw new CustomException(RIDE_UNAUTHORIZED_ACCESS);
+        }
+
+        // 달리고 있는 상태인지 확인
+        if (ride.getStatus() != RideStatus.IN_PROGRESS) {
+            throw new CustomException(RIDE_NOT_IN_PROGRESS);
+        }
+
+        String image = imageUtil.upload(rideCompleteReq.completedImage(), "ride");
+
+        ride.complete(rideCompleteReq, image);
+    }
+
 
     // ride course Gpx 포인트 조회
     private List<GpxPoint> getGpxPoints(Ride ride) {

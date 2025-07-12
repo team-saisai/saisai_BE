@@ -5,6 +5,7 @@ import static com.saisai.domain.common.exception.ExceptionCode.RIDE_NOT_IN_PROGR
 import com.saisai.domain.common.BaseEntity;
 import com.saisai.domain.common.exception.CustomException;
 import com.saisai.domain.course.entity.Course;
+import com.saisai.domain.ride.dto.request.RideCompleteReq;
 import com.saisai.domain.user.entity.User;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -85,5 +86,14 @@ public class Ride extends BaseEntity {
     public void pausedForAdmin(int progressRate) {
         this.status = RideStatus.PAUSED;
         this.progressRate = progressRate;
+    }
+
+    public void complete(RideCompleteReq rideCompleteReq, String certifiedImage) {
+        this.status = RideStatus.COMPLETED;
+        this.progressRate = 100;
+        this.certifiedImage = certifiedImage;
+        this.durationSecond = rideCompleteReq.duration();
+        this.actualDistance = rideCompleteReq.actualDistance();
+        this.completedAt = LocalDateTime.now();
     }
 }
