@@ -17,7 +17,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "course_saves", uniqueConstraints = {
+@Table(name = "course_bookmarks", uniqueConstraints = {
     @UniqueConstraint(
         name = "USER_COURSE_UNIQUE",
         columnNames = {"user_id", "course_id"}
@@ -25,7 +25,7 @@ import lombok.NoArgsConstructor;
 })
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class CourseSave extends BaseEntity {
+public class CourseBookmark extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -40,14 +40,14 @@ public class CourseSave extends BaseEntity {
     @JoinColumn(name = "course_id", nullable = false)
     private Course course;    // DDL으로 ON DELETE CASCADE 적용?
 
-    public static CourseSave from(User user,  Course course) {
-        return new CourseSave(
+    public static CourseBookmark from(User user,  Course course) {
+        return new CourseBookmark(
             user,
             course
         );
     }
 
-    private CourseSave(User user,  Course course) {
+    private CourseBookmark(User user,  Course course) {
         this.user = user;
         this.course = course;
     }
