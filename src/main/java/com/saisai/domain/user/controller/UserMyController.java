@@ -18,14 +18,14 @@ import org.springframework.web.bind.annotation.RestController;
 
 @Tag(name = "유저 API")
 @RestController
-@RequestMapping("/api/users")
+@RequestMapping("/api/my")
 @RequiredArgsConstructor
-public class UserController {
+public class UserMyController {
 
     private final UserService userService;
 
     @Operation(summary = "유저 정보 조회(홈화면)")
-    @GetMapping("/me")
+    @GetMapping
     public ResponseEntity<ApiResponse<UserGreetingRes>> getUserGreetingInfo(
         @Auth AuthUserDetails authUserDetails
     ) {
