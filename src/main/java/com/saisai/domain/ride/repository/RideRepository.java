@@ -7,6 +7,7 @@ import com.saisai.domain.user.entity.User;
 import io.lettuce.core.dynamic.annotation.Param;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -52,4 +53,14 @@ public interface RideRepository extends JpaRepository<Ride, Long>, RideRepositor
     RideCountRes countRideByCourseId(@Param("courseId") Long courseId);
 
     Boolean existsByUserAndStatus(User user, RideStatus status);
+
+    @Query(""" 
+        SELECT COUNT(r.id) > 0 FROM Ride r
+        WHERE r.user.id = :userId
+        AND r.course.id = :courseId
+        AND r.status NOT IN ('COMPLETED')""")
+    boolean existsActiveRideByUserIdAndCourseId(@Param("userId") Long userId,
+        @Param("courseId") Long courseId);
+
+    Optional<Ride> findByUserIdAndCourseIdAndStatus(Long userId, Long courseId, RideStatus rideStatus);
 }

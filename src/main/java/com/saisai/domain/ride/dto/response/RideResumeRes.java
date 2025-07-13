@@ -2,11 +2,11 @@ package com.saisai.domain.ride.dto.response;
 
 import com.saisai.domain.ride.entity.Ride;
 
-public record RidePausedRes(
+public record RideResumeRes(
     Long rideId
 ) {
-    public static RidePausedRes from (Ride ride) {
-        return new RidePausedRes(
+    public static RideResumeRes from (Ride ride) {
+        return new RideResumeRes(
             ride.getId()
         );
     }

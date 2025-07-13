@@ -2,6 +2,7 @@ package com.saisai.domain.ride.controller;
 
 import static com.saisai.domain.common.response.SuccessCode.RIDE_COMPLETE_SUCCESS;
 import static com.saisai.domain.common.response.SuccessCode.RIDE_PAUSED_SUCCESS;
+import static com.saisai.domain.common.response.SuccessCode.RIDE_RESUME_SUCCESS;
 import static com.saisai.domain.common.response.SuccessCode.RIDE_START_SUCCESS;
 
 import com.saisai.config.jwt.AuthUserDetails;
@@ -10,6 +11,7 @@ import com.saisai.domain.common.response.ApiResponse;
 import com.saisai.domain.ride.dto.request.RideCompleteReq;
 import com.saisai.domain.ride.dto.request.RidePausedReq;
 import com.saisai.domain.ride.dto.response.RidePausedRes;
+import com.saisai.domain.ride.dto.response.RideResumeRes;
 import com.saisai.domain.ride.dto.response.RideStartRes;
 import com.saisai.domain.ride.service.RideService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -36,7 +38,7 @@ public class RideController {
     private final RideService rideService;
 
     @Operation(summary = "코스 라이딩 시작",
-        description = "총 거리(km), gpx 경로(위도, 경도, 고도, 앞뒤 좌표 간의 거리(m), 현재까지의 누적거리(km)")
+        description = "총 거리(km), gpx 경로(위도, 경도, 고도, 앞뒤 좌표 간의 거리(m), 현재까지의 누적거리(km)\n\n중단한 기록 있는 경우 해당 API로도 라이딩 재개 처리 가능")
     @PostMapping("/courses/{courseId}/rides")
     public ResponseEntity<ApiResponse<RideStartRes>> startRide(
         @PathVariable Long courseId,
@@ -47,16 +49,26 @@ public class RideController {
     }
 
     @Operation(summary = "코스 라이딩 중단",
-        description = "라이딩 시작API로 기록 저장 후 테스트 가능\n\nRequestBody 모든 필드 null 불가")
+        description = "(중단시점) 소요시간(초 단위), 달린 거리(km) 입력 필수")
     @PatchMapping("/rides/{rideId}/pause")
     public ResponseEntity<ApiResponse<RidePausedRes>> pausedRide(
-        @PathVariable Long courseId,
         @PathVariable Long rideId,
         @Auth AuthUserDetails authUserDetails,
         @Valid @RequestBody RidePausedReq ridePausedReq
     ) {
         return ResponseEntity.status(HttpStatus.OK)
-            .body(ApiResponse.success(RIDE_PAUSED_SUCCESS, rideService.pausedRide(courseId, rideId, authUserDetails, ridePausedReq)));
+            .body(ApiResponse.success(RIDE_PAUSED_SUCCESS, rideService.pausedRide(rideId, authUserDetails, ridePausedReq)));
+    }
+
+    @Operation(summary = "코스 라이딩 재개",
+        description = "사용자 라이딩 상태 변경(IN_PROGRESS)을 위한 API")
+    @PatchMapping("/rides/{rideId}/resume")
+    public ResponseEntity<ApiResponse<RideResumeRes>> resumeRide(
+        @PathVariable Long rideId,
+        @Auth AuthUserDetails authUserDetails
+    ) {
+        return ResponseEntity.status(HttpStatus.OK)
+            .body(ApiResponse.success(RIDE_RESUME_SUCCESS, rideService.resumeRide(rideId, authUserDetails)));
     }
 
     @Operation(summary = "코스 라이딩 완주",

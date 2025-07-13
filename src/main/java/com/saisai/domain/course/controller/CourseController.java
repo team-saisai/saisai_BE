@@ -3,6 +3,8 @@ package com.saisai.domain.course.controller;
 import static com.saisai.domain.common.response.SuccessCode.COURSE_INFO_GET_SUCCESS;
 import static com.saisai.domain.common.response.SuccessCode.COURSE_LIST_GET_SUCCESS;
 
+import com.saisai.config.jwt.AuthUserDetails;
+import com.saisai.domain.common.annotation.Auth;
 import com.saisai.domain.common.response.ApiResponse;
 import com.saisai.domain.course.dto.response.CourseDetailsRes;
 import com.saisai.domain.course.dto.response.CoursePageRes;
@@ -47,9 +49,10 @@ public class CourseController {
         description = "코스ID, 코스명, 코스 설명, 난이도(상(3)/중(2)/하(1)), 거리(km), 예상 소요시간(분), 시군(지역), gpx경로(위도, 경도, 고도, 앞뒤 좌표 거리(m), 현재까지의 누적 거리(km)), 도전자 수, 완주자 수, 라이딩 중단 기록 여부 반환 ")
     @GetMapping("/{courseId}")
     public ResponseEntity<ApiResponse<CourseDetailsRes>> getCourseInfo(
-        @PathVariable Long courseId
+        @PathVariable Long courseId,
+        @Auth AuthUserDetails authUserDetails
     ) {
         return ResponseEntity.status(HttpStatus.OK)
-            .body(ApiResponse.success(COURSE_INFO_GET_SUCCESS, courseService.getCourseInfo(courseId)));
+            .body(ApiResponse.success(COURSE_INFO_GET_SUCCESS, courseService.getCourseInfo(courseId, authUserDetails)));
     }
 }

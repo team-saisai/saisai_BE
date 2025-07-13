@@ -3,7 +3,6 @@ package com.saisai.domain.ride.service;
 import static com.saisai.domain.common.exception.ExceptionCode.COURSE_DISTANCE_INVALID;
 import static com.saisai.domain.common.exception.ExceptionCode.COURSE_NOT_FOUND;
 import static com.saisai.domain.common.exception.ExceptionCode.RIDE_ALREADY_IN_PROGRESS;
-import static com.saisai.domain.common.exception.ExceptionCode.RIDE_COURSE_MISMATCH;
 import static com.saisai.domain.common.exception.ExceptionCode.RIDE_NOT_FOUND;
 import static com.saisai.domain.common.exception.ExceptionCode.RIDE_NOT_IN_PROGRESS;
 import static com.saisai.domain.common.exception.ExceptionCode.RIDE_UNAUTHORIZED_ACCESS;
@@ -21,6 +20,7 @@ import com.saisai.domain.gpx.util.GpxParser;
 import com.saisai.domain.ride.dto.request.RideCompleteReq;
 import com.saisai.domain.ride.dto.request.RidePausedReq;
 import com.saisai.domain.ride.dto.response.RidePausedRes;
+import com.saisai.domain.ride.dto.response.RideResumeRes;
 import com.saisai.domain.ride.dto.response.RideStartRes;
 import com.saisai.domain.ride.entity.Ride;
 import com.saisai.domain.ride.entity.RideStatus;
@@ -28,6 +28,7 @@ import com.saisai.domain.ride.repository.RideRepository;
 import com.saisai.domain.user.entity.User;
 import com.saisai.domain.user.repository.UserRepository;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -35,7 +36,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
-@Transactional(readOnly = true)
 public class RideService {
 
     private final RideRepository rideRepository;
@@ -57,26 +57,39 @@ public class RideService {
         User user = userRepository.findById(authUserDetails.userId())
             .orElseThrow(() -> new CustomException(USER_NOT_FOUND));
 
+        Ride currentRide;
+
         if (!isAdminUser(user.getId())) {
             validateUserNotRiding(user);
+
+            Optional<Ride> pausedRideOptional =
+                rideRepository.findByUserIdAndCourseIdAndStatus(user.getId(), course.getId(), RideStatus.PAUSED);
+
+            if (pausedRideOptional.isPresent()) {
+                currentRide = pausedRideOptional.get();
+                currentRide.resume();
+            } else {
+                currentRide = Ride.start(user, course);
+                rideRepository.save(currentRide);
+            }
+        } else {
+            currentRide = Ride.start(user, course);
+            rideRepository.save(currentRide);
         }
 
-        Ride ride = Ride.start(user, course);
-        Ride saveRide = rideRepository.save(ride);
+        List<GpxPoint> gpxPoints = getGpxPoints(currentRide);
 
-        List<GpxPoint> gpxPoints = getGpxPoints(saveRide);
-
-        return RideStartRes.from(saveRide, course, gpxPoints);
+        return RideStartRes.from(currentRide, course, gpxPoints);
     }
 
     // Ride 중단
     @Transactional
-    public RidePausedRes pausedRide(Long courseId, Long rideId, AuthUserDetails authUserDetails, RidePausedReq ridePausedReq) {
+    public RidePausedRes pausedRide(Long rideId, AuthUserDetails authUserDetails, RidePausedReq ridePausedReq) {
 
         Ride ride = rideRepository.findById(rideId)
             .orElseThrow(() -> new CustomException(RIDE_NOT_FOUND));
 
-        validateRideAccess(ride, courseId, authUserDetails.userId());
+        validateRideAccess(ride, authUserDetails.userId());
 
         int progressRate = calculateProgressRate(ridePausedReq, ride);
 
@@ -87,9 +100,22 @@ public class RideService {
             ride.paused(progressRate);
         }
 
-        cacheRideService.savePausedData(authUserDetails.userId(), rideId, ridePausedReq);
+        //cacheRideService.savePausedData(authUserDetails.userId(), rideId, ridePausedReq);
 
-        return RidePausedRes.from(ride, progressRate);
+        return RidePausedRes.from(ride);
+    }
+
+    // 라이딩 재개
+    @Transactional
+    public RideResumeRes resumeRide(Long rideId, AuthUserDetails authUserDetails) {
+        Ride ride = rideRepository.findById(rideId)
+            .orElseThrow(() -> new CustomException(RIDE_NOT_FOUND));
+
+        validateRideAccess(ride, authUserDetails.userId());
+
+        ride.resume();
+
+        return RideResumeRes.from(ride);
     }
 
     // Ride 완주
@@ -134,15 +160,10 @@ public class RideService {
     }
 
     // 라이딩 접근 권한 검사
-    private void validateRideAccess(Ride ride, Long courseId, Long userId) {
+    private void validateRideAccess(Ride ride, Long userId) {
         // 사용자 권한 검사
         if (!ride.getUser().getId().equals(userId)) {
             throw new CustomException(RIDE_UNAUTHORIZED_ACCESS);
-        }
-
-        // 코스-라이딩 일치성 검사
-        if (!ride.getCourse().getId().equals(courseId)) {
-            throw new CustomException(RIDE_COURSE_MISMATCH);
         }
     }
 

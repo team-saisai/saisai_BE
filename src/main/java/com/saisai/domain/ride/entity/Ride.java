@@ -1,6 +1,7 @@
 package com.saisai.domain.ride.entity;
 
 import static com.saisai.domain.common.exception.ExceptionCode.RIDE_NOT_IN_PROGRESS;
+import static com.saisai.domain.common.exception.ExceptionCode.RIDE_NOT_PAUSED;
 
 import com.saisai.domain.common.BaseEntity;
 import com.saisai.domain.common.exception.CustomException;
@@ -81,6 +82,14 @@ public class Ride extends BaseEntity {
 
         this.status = RideStatus.PAUSED;
         this.progressRate = progressRate;
+    }
+
+    public void resume() {
+        if (this.status != RideStatus.PAUSED) {
+            throw new CustomException(RIDE_NOT_PAUSED);
+        }
+
+        this.status = RideStatus.IN_PROGRESS;
     }
 
     public void pausedForAdmin(int progressRate) {
