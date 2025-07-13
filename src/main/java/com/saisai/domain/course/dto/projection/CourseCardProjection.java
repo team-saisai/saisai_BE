@@ -1,6 +1,7 @@
 package com.saisai.domain.course.dto.projection;
 
 import com.querydsl.core.annotations.QueryProjection;
+import com.saisai.domain.reward.dto.projection.RewardEventProjection;
 
 public record CourseCardProjection(
     Long courseId,
@@ -9,7 +10,8 @@ public record CourseCardProjection(
     Double distance,
     Double estimatedTime,
     String sigun,
-    String image
+    String image,
+    RewardEventProjection rewardEventProjection
 ) {
 
     @QueryProjection

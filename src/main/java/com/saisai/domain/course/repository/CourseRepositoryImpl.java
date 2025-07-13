@@ -2,6 +2,8 @@ package com.saisai.domain.course.repository;
 
 import static com.saisai.domain.challenge.entity.QChallenge.challenge;
 import static com.saisai.domain.course.entity.QCourse.course;
+import static com.saisai.domain.reward.entity.QEventCourse.eventCourse;
+import static com.saisai.domain.reward.entity.QRewardEvent.rewardEvent;
 
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.jpa.impl.JPAQuery;
@@ -11,6 +13,8 @@ import com.saisai.domain.course.dto.projection.CourseCardProjection;
 import com.saisai.domain.course.dto.projection.CoursePageProjection;
 import com.saisai.domain.course.dto.projection.QCourseCardProjection;
 import com.saisai.domain.course.dto.projection.QCoursePageProjection;
+import com.saisai.domain.reward.dto.projection.QRewardEventProjection;
+import com.saisai.domain.reward.entity.EventStatus;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -45,10 +49,18 @@ public class CourseRepositoryImpl implements CourseRepositoryCustom {
                 course.sigun,
                 course.image,
                 challenge.status,
-                challenge.endedAt
-                ))
+                challenge.endedAt,
+                new QRewardEventProjection(
+                    rewardEvent.id,
+                    rewardEvent.status,
+                    rewardEvent.type,
+                    rewardEvent.value
+                )
+            ))
             .from(challenge)
             .join(challenge.course, course)
+            .leftJoin(eventCourse).on(eventCourse.course.eq(course))
+            .leftJoin(rewardEvent).on(eventCourse.rewardEvent.eq(rewardEvent))
             .where(searchConditions)
             .offset(pageable.getOffset())
             .limit(pageable.getPageSize())
@@ -58,6 +70,9 @@ public class CourseRepositoryImpl implements CourseRepositoryCustom {
             .select(course.countDistinct())
             .from(challenge)
             .join(challenge.course, course)
+            .leftJoin(eventCourse).on(eventCourse.course.eq(course))
+            .leftJoin(rewardEvent).on(eventCourse.rewardEvent.eq(rewardEvent)
+                .and(rewardEvent.status.eq(EventStatus.ACTIVE)))
             .where(searchConditions);
 
         return PageableExecutionUtils.getPage(content, pageable, total::fetchOne);
@@ -74,9 +89,18 @@ public class CourseRepositoryImpl implements CourseRepositoryCustom {
                 course.distance,
                 course.estimatedTime,
                 course.sigun,
-                course.image
+                course.image,
+                new QRewardEventProjection(
+                    rewardEvent.id,
+                    rewardEvent.status,
+                    rewardEvent.type,
+                    rewardEvent.value
+                )
             ))
             .from(course)
+            .leftJoin(eventCourse).on(eventCourse.course.eq(course))
+            .leftJoin(rewardEvent).on(eventCourse.rewardEvent.eq(rewardEvent)
+                .and(rewardEvent.status.eq(EventStatus.ACTIVE)))
             .where(course.id.in(courseIds))
             .fetch();
     }
