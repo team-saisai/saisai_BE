@@ -10,7 +10,7 @@ public record PausedRideCacheData(
 ) {
     public static PausedRideCacheData from (RidePausedReq ridePausedReq) {
         return new PausedRideCacheData(
-            ridePausedReq.elapsedTimeSecond(),
+            ridePausedReq.duration(),
             ridePausedReq.totalDistance(),
             LocalDateTime.now()
         );
