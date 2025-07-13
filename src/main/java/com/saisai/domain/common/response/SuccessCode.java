@@ -13,6 +13,9 @@ public enum SuccessCode {
     LOGIN_SUCCESS(HttpStatus.OK, "AUTH_02", "로그인에 성공했습니다."),
     REISSUE_SUCCESS(HttpStatus.OK, "AUTH_03", "토큰 재발급에 성공했습니다."),
 
+    // User
+    USER_GREETING_INFO_GET_SUCCESS(HttpStatus.OK, "USER_01", "사용자 정보 조회에 성공했습니다."),
+
     // Course
     COURSE_LIST_GET_SUCCESS(HttpStatus.OK, "COURSE_01", "코스 전체 목록 조회에 성공했습니다."),
     COURSE_INFO_GET_SUCCESS(HttpStatus.OK, "COURSE_02", "코스 단일 상세 조회에 성공했습니다."),
