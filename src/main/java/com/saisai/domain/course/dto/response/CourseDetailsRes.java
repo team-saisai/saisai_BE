@@ -17,9 +17,10 @@ public record CourseDetailsRes(
     Long challengerCount,
     Long finisherCount,
     Boolean hasUncompletedRide,
+    List<String> themeNames,
     List<GpxPoint> gpxPoints
 ) {
-    public static CourseDetailsRes from(Course course, String imageUrl, RideCountRes rideCountRes, List<GpxPoint> gpxPoints, boolean hasUncompletedRide) {
+    public static CourseDetailsRes from(Course course, String imageUrl, RideCountRes rideCountRes, List<GpxPoint> gpxPoints, boolean hasUncompletedRide, List<String> themeNames) {
         return new CourseDetailsRes(
             course.getId(),
             course.getName(),
@@ -32,6 +33,7 @@ public record CourseDetailsRes(
             rideCountRes.courseChallengerCount(),
             rideCountRes.courseFinisherCount(),
             hasUncompletedRide,
+            themeNames,
             gpxPoints
         );
     }

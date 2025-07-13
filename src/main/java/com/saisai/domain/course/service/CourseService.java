@@ -101,9 +101,11 @@ public class CourseService {
 
         RideCountRes rideCountRes = rideRepository.countRideByCourseId(courseId);
 
+        List<String> themenames = themeRepository.findThemeNamesByCourseId(courseId);
+
         String gpxContent = gpxS3.getGpxContent(course.getGpxPath());
         List<GpxPoint> gpxPoints = gpxParser.parseGpxContent(gpxContent);
 
-        return CourseDetailsRes.from(course, imageUtil.getImageUrl(course.getImage()), rideCountRes, gpxPoints, hasUnCompletedRide);
+        return CourseDetailsRes.from(course, imageUtil.getImageUrl(course.getImage()), rideCountRes, gpxPoints, hasUnCompletedRide, themenames);
     }
 }

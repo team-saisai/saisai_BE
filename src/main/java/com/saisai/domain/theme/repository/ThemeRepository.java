@@ -11,8 +11,12 @@ import org.springframework.data.repository.query.Param;
 
 public interface ThemeRepository extends JpaRepository<Theme, Long> {
 
-    // 코스에 해당하는 테마 조회
-    @Query("SELECT tc.course.id, t.name FROM ThemeCourse tc JOIN tc.theme t WHERE tc.course.id IN :courseIds")
+    // 코스IDs에 해당하는 테마 조회
+    @Query("SELECT tc.course.id, t.name " +
+        "FROM ThemeCourse tc " +
+        "JOIN tc.theme t " +
+        "WHERE tc.course.id IN :courseIds"
+    )
     List<Object[]> findThemeNamesByCourseIds(@Param("courseIds") List<Long> courseIds);
 
     default Map<Long, List<String>> findThemeNamesMapByCourseIds(List<Long> courseIds) {
@@ -26,4 +30,11 @@ public interface ThemeRepository extends JpaRepository<Theme, Long> {
             ));
     }
 
+    //코스Id에 해당하는 테마 조회
+    @Query("SELECT t.name " +
+        "FROM ThemeCourse tc " +
+        "JOIN tc.theme t " +
+        "WHERE tc.course.id = :courseId"
+    )
+    List<String> findThemeNamesByCourseId(@Param("courseId") Long courseId);
 }
