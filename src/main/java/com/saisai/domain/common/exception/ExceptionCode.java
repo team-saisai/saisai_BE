@@ -48,6 +48,9 @@ public enum ExceptionCode {
     RIDE_NOT_IN_PROGRESS(HttpStatus.CONFLICT, "RD_ER_04", "현재 진행 중인 라이딩이 아닙니다."),
     RIDE_UNAUTHORIZED_ACCESS(HttpStatus.FORBIDDEN, "RD_ER_05", "해당 라이딩에 대한 접근 권한이 없습니다."),
 
+    // reward_event
+    REWARD_EVENT_COURSE_CONFLICT(HttpStatus.CONFLICT, "RE_ER_01", "이미 다른 이벤트료 등록된 코스입니다."),
+
     // gpx
     GPX_EMPTY(HttpStatus.NOT_FOUND, "GPX_ER_01", "GPX 파일이 비어있습니다."),
     GPX_DOWNLOAD_FAILED(HttpStatus.SERVICE_UNAVAILABLE, "GPX_ER_02", "GPX 파일 다운로드에 실패했습니다."),

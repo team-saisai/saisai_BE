@@ -1,7 +1,7 @@
 package com.saisai.domain.reward.entity;
 
 import com.saisai.domain.common.BaseEntity;
-import com.saisai.domain.user.entity.User;
+import com.saisai.domain.course.entity.Course;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -11,16 +11,15 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-import java.time.LocalDateTime;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "user_rewards")
+@Table(name = "event_courses")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class UserReward extends BaseEntity {
+public class EventCourse extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -28,18 +27,20 @@ public class UserReward extends BaseEntity {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
-    private User user;
+    @JoinColumn(name = "reward_event_id", nullable = false)
+    private RewardEvent rewardEvent;
 
-    @Column(name = "acquired_at", nullable = false, updatable = false)
-    private LocalDateTime acquiredAt;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "course_id", nullable = false)
+    private Course course;
 
-    @Column(name = "reward", nullable = false)
-    private Integer reward;
-
-    public UserReward(User user, int reward) {
-        this.acquiredAt = LocalDateTime.now();
-        this.user = user;
-        this.reward = reward;
+    private EventCourse(RewardEvent rewardEvent, Course coures) {
+        this.rewardEvent = rewardEvent;
+        this.course = coures;
     }
+
+    public static EventCourse from (RewardEvent rewardEvent, Course coures) {
+        return new EventCourse(rewardEvent, coures);
+    }
+
 }
