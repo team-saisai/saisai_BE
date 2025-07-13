@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-@Tag(name= "ADMIN 전용 뱃지 API")
+@Tag(name= "ADMIN 전용 API")
 @RequestMapping("/api/admin/badges")
 @RestController
 @RequiredArgsConstructor
