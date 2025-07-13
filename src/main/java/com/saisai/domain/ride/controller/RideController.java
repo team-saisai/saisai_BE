@@ -2,6 +2,7 @@ package com.saisai.domain.ride.controller;
 
 import static com.saisai.domain.common.response.SuccessCode.RIDE_COMPLETE_SUCCESS;
 import static com.saisai.domain.common.response.SuccessCode.RIDE_PAUSED_SUCCESS;
+import static com.saisai.domain.common.response.SuccessCode.RIDE_RESUME_SUCCESS;
 import static com.saisai.domain.common.response.SuccessCode.RIDE_START_SUCCESS;
 
 import com.saisai.config.jwt.AuthUserDetails;
@@ -36,7 +37,7 @@ public class RideController {
     private final RideService rideService;
 
     @Operation(summary = "코스 라이딩 시작",
-        description = "총 거리(km), gpx 경로(위도, 경도, 고도, 앞뒤 좌표 간의 거리(m), 현재까지의 누적거리(km)")
+        description = "총 거리(km), gpx 경로(위도, 경도, 고도, 앞뒤 좌표 간의 거리(m), 현재까지의 누적거리(km)\n\n중단한 기록 있는 경우 해당 API로도 라이딩 재개 처리 가능")
     @PostMapping("/courses/{courseId}/rides")
     public ResponseEntity<ApiResponse<RideStartRes>> startRide(
         @PathVariable Long courseId,
@@ -57,6 +58,18 @@ public class RideController {
     ) {
         return ResponseEntity.status(HttpStatus.OK)
             .body(ApiResponse.success(RIDE_PAUSED_SUCCESS, rideService.pausedRide(courseId, rideId, authUserDetails, ridePausedReq)));
+    }
+
+    @Operation(summary = "코스 라이딩 재개",
+        description = "사용자 라이딩 상태 변경(IN_PROGRESS)을 위한 API")
+    @PatchMapping("/rides/{rideId}/resume")
+    public ResponseEntity<ApiResponse<Void>> resumeRide(
+        @PathVariable Long rideId,
+        @Auth AuthUserDetails authUserDetails
+    ) {
+        rideService.resumeRide(rideId, authUserDetails);
+        return ResponseEntity.status(HttpStatus.OK)
+            .body(ApiResponse.success(RIDE_RESUME_SUCCESS));
     }
 
     @Operation(summary = "코스 라이딩 완주",
