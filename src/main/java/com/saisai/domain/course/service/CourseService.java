@@ -1,10 +1,12 @@
 package com.saisai.domain.course.service;
 
 import static com.saisai.domain.common.exception.ExceptionCode.COURSE_NOT_FOUND;
+import static com.saisai.domain.common.exception.ExceptionCode.USER_NOT_FOUND;
 
-import com.saisai.domain.common.exception.CustomException;
+import com.saisai.config.jwt.AuthUserDetails;
 import com.saisai.domain.common.aws.s3.GpxS3;
 import com.saisai.domain.common.aws.s3.ImageUtil;
+import com.saisai.domain.common.exception.CustomException;
 import com.saisai.domain.course.dto.projection.CoursePageProjection;
 import com.saisai.domain.course.dto.response.CourseDetailsRes;
 import com.saisai.domain.course.dto.response.CoursePageRes;
@@ -14,6 +16,8 @@ import com.saisai.domain.gpx.dto.GpxPoint;
 import com.saisai.domain.gpx.util.GpxParser;
 import com.saisai.domain.ride.dto.response.RideCountRes;
 import com.saisai.domain.ride.repository.RideRepository;
+import com.saisai.domain.user.entity.User;
+import com.saisai.domain.user.repository.UserRepository;
 import java.util.List;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
@@ -35,6 +39,7 @@ public class CourseService {
     private final GpxParser gpxParser;
     private final ImageUtil imageUtil;
     private final GpxS3 gpxS3;
+    private final UserRepository userRepository;
 
     // 코스 목록 조회 메서드
     public Page<CoursePageRes> getCourses(Pageable pageable, String challengeStatus) {
@@ -65,16 +70,21 @@ public class CourseService {
     }
 
     // 코스 상세 조회 비즈니스 로직
-    public CourseDetailsRes getCourseInfo(Long courseId) {
+    public CourseDetailsRes getCourseInfo(Long courseId, AuthUserDetails authUserDetails) {
+
+        User user = userRepository.findById(authUserDetails.userId())
+            .orElseThrow(() -> new CustomException(USER_NOT_FOUND));
 
         Course course = courseRepository.findById(courseId)
             .orElseThrow(() -> new CustomException(COURSE_NOT_FOUND));
+
+        boolean hasUnCompletedRide = rideRepository.existsActiveRideByUserIdAndCourseId(user.getId(), course.getId());
 
         RideCountRes rideCountRes = rideRepository.countRideByCourseId(courseId);
 
         String gpxContent = gpxS3.getGpxContent(course.getGpxPath());
         List<GpxPoint> gpxPoints = gpxParser.parseGpxContent(gpxContent);
 
-        return CourseDetailsRes.from(course, imageUtil.getImageUrl(course.getImage()), rideCountRes, gpxPoints);
+        return CourseDetailsRes.from(course, imageUtil.getImageUrl(course.getImage()), rideCountRes, gpxPoints, hasUnCompletedRide);
     }
 }
