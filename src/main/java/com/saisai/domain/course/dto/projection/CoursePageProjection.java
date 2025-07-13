@@ -2,6 +2,7 @@ package com.saisai.domain.course.dto.projection;
 
 import com.querydsl.core.annotations.QueryProjection;
 import com.saisai.domain.challenge.entity.ChallengeStatus;
+import com.saisai.domain.reward.dto.projection.RewardEventProjection;
 import java.time.LocalDateTime;
 
 public record CoursePageProjection(
@@ -14,7 +15,8 @@ public record CoursePageProjection(
     String sigun,
     String imageUrl,
     ChallengeStatus challengeStatus,
-    LocalDateTime challengeEndedAt
+    LocalDateTime challengeEndedAt,
+    RewardEventProjection rewardEventProjection
 ) {
 
     @QueryProjection
