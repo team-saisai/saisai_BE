@@ -28,6 +28,7 @@ import com.saisai.domain.ride.repository.RideRepository;
 import com.saisai.domain.user.entity.User;
 import com.saisai.domain.user.repository.UserRepository;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -35,7 +36,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
-@Transactional(readOnly = true)
 public class RideService {
 
     private final RideRepository rideRepository;
@@ -57,16 +57,29 @@ public class RideService {
         User user = userRepository.findById(authUserDetails.userId())
             .orElseThrow(() -> new CustomException(USER_NOT_FOUND));
 
+        Ride currentRide;
+
         if (!isAdminUser(user.getId())) {
             validateUserNotRiding(user);
+
+            Optional<Ride> pausedRideOptional =
+                rideRepository.findByUserIdAndCourseIdAndStatus(user.getId(), course.getId(), RideStatus.PAUSED);
+
+            if (pausedRideOptional.isPresent()) {
+                currentRide = pausedRideOptional.get();
+                currentRide.resume();
+            } else {
+                currentRide = Ride.start(user, course);
+                rideRepository.save(currentRide);
+            }
+        } else {
+            currentRide = Ride.start(user, course);
+            rideRepository.save(currentRide);
         }
 
-        Ride ride = Ride.start(user, course);
-        Ride saveRide = rideRepository.save(ride);
+        List<GpxPoint> gpxPoints = getGpxPoints(currentRide);
 
-        List<GpxPoint> gpxPoints = getGpxPoints(saveRide);
-
-        return RideStartRes.from(saveRide, course, gpxPoints);
+        return RideStartRes.from(currentRide, course, gpxPoints);
     }
 
     // Ride 중단
@@ -90,6 +103,20 @@ public class RideService {
         cacheRideService.savePausedData(authUserDetails.userId(), rideId, ridePausedReq);
 
         return RidePausedRes.from(ride, progressRate);
+    }
+
+    // 라이딩 재개
+    @Transactional
+    public void resumeRide(Long rideId, AuthUserDetails authUserDetails) {
+        Ride ride = rideRepository.findById(rideId)
+            .orElseThrow(() -> new CustomException(RIDE_NOT_FOUND));
+
+        if (!ride.getUser().getId().equals(authUserDetails.userId())) {
+            throw new CustomException(RIDE_UNAUTHORIZED_ACCESS);
+        }
+
+        ride.resume();
+
     }
 
     // Ride 완주

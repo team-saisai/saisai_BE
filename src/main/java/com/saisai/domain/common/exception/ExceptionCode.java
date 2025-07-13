@@ -47,6 +47,7 @@ public enum ExceptionCode {
     RIDE_COURSE_MISMATCH(HttpStatus.BAD_REQUEST, "RD_ER_03", "요청한 코스와 라이딩 정보가 일치하지 않습니다."),
     RIDE_NOT_IN_PROGRESS(HttpStatus.CONFLICT, "RD_ER_04", "현재 진행 중인 라이딩이 아닙니다."),
     RIDE_UNAUTHORIZED_ACCESS(HttpStatus.FORBIDDEN, "RD_ER_05", "해당 라이딩에 대한 접근 권한이 없습니다."),
+    RIDE_NOT_PAUSED(HttpStatus.CONFLICT, "RD_ER_06", "중단했던 라이딩이 아닙니다."),
 
     // reward_event
     REWARD_EVENT_COURSE_CONFLICT(HttpStatus.CONFLICT, "RE_ER_01", "이미 다른 이벤트료 등록된 코스입니다."),
