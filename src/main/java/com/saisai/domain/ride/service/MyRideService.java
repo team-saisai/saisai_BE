@@ -32,7 +32,7 @@ public class MyRideService {
         Ride recentRide = rideRepository.findTop1ByUserIdOrderByModifiedAtDesc(user.getId());
 
         if (recentRide == null) {
-            return RecentRideInfoRes.empty();
+            return null;
         }
 
         Course course = courseRepository.findById(recentRide.getCourse().getId())

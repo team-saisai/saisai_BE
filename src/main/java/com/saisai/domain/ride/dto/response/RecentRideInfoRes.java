@@ -26,16 +26,4 @@ public record RecentRideInfoRes(
             ride.getModifiedAt().toLocalDate()
         );
     }
-
-    public static RecentRideInfoRes empty() {
-        return new RecentRideInfoRes(
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null
-        );
-    }
 }

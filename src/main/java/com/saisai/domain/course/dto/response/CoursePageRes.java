@@ -6,6 +6,7 @@ import com.saisai.domain.reward.dto.projection.RewardEventProjection;
 import com.saisai.domain.reward.util.RewardUtils;
 import com.saisai.domain.ride.dto.response.RideCountRes;
 import java.time.LocalDate;
+import java.util.List;
 
 public record CoursePageRes(
     Long courseId,
@@ -21,10 +22,11 @@ public record CoursePageRes(
     ChallengeStatus challengeStatus,
     LocalDate challengeEndedAt,
     Boolean isEventActive,
-    Integer reward
+    Integer reward,
+    List<String> themeNames
 ) {
 
-    public static CoursePageRes from(CoursePageProjection coursePageProjection, RideCountRes rideCountRes, String imageUrl) {
+    public static CoursePageRes from(CoursePageProjection coursePageProjection, RideCountRes rideCountRes, String imageUrl, List<String> themeNames) {
 
         RewardEventProjection rewardEventProjection = coursePageProjection.rewardEventProjection();
         boolean isEventActive = rewardEventProjection != null;
@@ -50,7 +52,8 @@ public record CoursePageRes(
             coursePageProjection.challengeStatus(),
             coursePageProjection.challengeEndedAt().toLocalDate(),
             isEventActive,
-            reward
+            reward,
+            themeNames
         );
     }
 }

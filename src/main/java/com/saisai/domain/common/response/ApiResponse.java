@@ -1,6 +1,5 @@
 package com.saisai.domain.common.response;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Getter;
 
 @Getter
@@ -8,7 +7,6 @@ public class ApiResponse<T> {
 
     private final String code;
     private final String message;
-    @JsonInclude(JsonInclude.Include.NON_NULL)
     private final T data;
 
     private ApiResponse(final String code, final String message, final T data) {
