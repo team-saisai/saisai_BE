@@ -141,7 +141,7 @@ jobs:
             # 헬스 체크
             echo "서버 애플리케이션 정상 실행 확인 중..."
             for i in {1..30}; do
-              response=$(curl -sf http://localhost:${HOST_PORT}/api/api-docs || true)
+              response=$(curl -sf http://localhost:${HOST_PORT}/v3/api-docs || true)
               if [[ "$response" == *"OK"* ]]; then
                 echo "🎉 서버 애플리케이션 정상 실행 확인!"
                 exit 0
