@@ -26,6 +26,8 @@ spring:
 
   data:
     redis:
+      repositories:
+        enabled: false
       host: localhost
       timeout: 6000ms
       port: 6379
