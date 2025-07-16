@@ -160,6 +160,15 @@ jobs:
               fi
             fi
 
+            # MySQL 연결 테스트
+            echo "MySQL 연결 테스트 중..."
+            if ! mysql -h ${DB_HOST} -P ${DB_PORT} -u ${DB_USERNAME} -p${DB_PASSWORD} -e "SELECT 1;" > /dev/null 2>&1; then
+              echo "❌ MySQL 연결 실패 - 서버 상태 확인 필요"
+              exit 1
+            fi
+            
+            echo "✅ MySQL 연결 성공"
+
             echo "새로운 컨테이너 실행 중..."
             sudo docker run -d --name $CONTAINER_NAME -p $HOST_PORT:$CONTAINER_PORT --env-file .env $DOCKER_IMAGE_NAME:$IMAGE_TAG
 
