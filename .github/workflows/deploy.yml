@@ -77,6 +77,14 @@ jobs:
           username: ubuntu
           key: ${{ secrets.PRIVATE_KEY }}
           script: |
+            set -x
+
+            # GitHub Secrets 값 확인
+            echo "DB_HOST: ${{ secrets.DB_HOST }}"
+            echo "DB_PORT: ${{ secrets.DB_PORT }}"
+            echo "DB_USERNAME: ${{ secrets.DB_USERNAME }}"
+            echo "DB_PASSWORD 길이: ${#DB_PASSWORD}"
+            
             DOCKER_IMAGE_NAME=${{ secrets.ECR_REGISTRY }}/${{ secrets.ECR_REPOSITORY }}
             IMAGE_TAG=sai-${{ github.sha }}
             CONTAINER_NAME=saisai-server 
@@ -92,7 +100,7 @@ jobs:
             DB_PORT=${{ secrets.DB_PORT }}
             DB_NAME=${{ secrets.DB_NAME }}
             DB_USERNAME=${{ secrets.DB_USERNAME }}
-            DB_PASSWORD=${{ secrets.DB_PASSWORD }}
+            DB_PASSWORD='${{ secrets.DB_PASSWORD }}'
             
             # Redis Configuration
             REDIS_HOST=${{ secrets.REDIS_HOST }}
@@ -162,7 +170,7 @@ jobs:
 
             # MySQL 연결 테스트
             echo "MySQL 연결 테스트 중..."
-            if ! mysql -h ${DB_HOST} -P ${DB_PORT} -u ${DB_USERNAME} -p${DB_PASSWORD} -e "SELECT 1;" > /dev/null 2>&1; then
+            if ! mysql -h ${DB_HOST} -P ${DB_PORT} -u ${DB_USERNAME} -p"${DB_PASSWORD}" -e "SELECT 1;" > /dev/null 2>&1; then
               echo "❌ MySQL 연결 실패 - 서버 상태 확인 필요"
               exit 1
             fi
