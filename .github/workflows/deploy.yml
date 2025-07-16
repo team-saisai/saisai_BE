@@ -1,0 +1,154 @@
+# 워크 플로우 이름
+name: Deploy to Development
+
+# 어떤 브랜치에서 어떤 행동이 일어날 때 cicd가 일어날 것인지를 설정
+on:
+  pull_request:
+    types: [ closed ]
+    branches: [ dev, main ]
+    paths: # 이 경로가 변경되었을 떄만 트리거 발동
+      - 'src/**'
+      - '.github/**'
+
+permissions:
+  contents: read
+  id-token: write
+  pull-requests: write
+
+jobs:
+  # dev 브랜치로 병합될 때 CD
+  deploy_to_dev:
+    if: github.event_name.pull_request.merged == true
+    runs-on: ubuntu-latest
+    environment: development
+
+    steps:
+      # 체크아웃
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      # JDK 17로 세팅
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          java-version: '17'
+          distribution: 'openjdk'
+
+      # Gradlew 권한 부여
+      - name: Grant execute permission for gradlew
+        run: chmod +x ./gradlew
+
+      # CD에서 개선된 캐싱
+      - name: Setup Gradle with Caching for CD
+        uses: gradle/actions/setup-gradle@v3
+        with:
+          cache-read-only: false  # CD에서는 캐시 쓰기 허용
+          add-job-summary-as-pr-comment: false  # CD에서는 PR 댓글 불필요
+          build-scan-publish: false  # CD에서는 빌드 스캔 불필요
+
+      - name: Build Application
+        run: ./gradlew bootJar -x test # 테스트는 CI에서 했으므로 빌드만
+
+      # AWS 자격 증명 설정
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      # Amazon ECR 로그인
+      - name: Login to Amazon ECR
+        uses: aws-actions/amazon-ecr-login@v2
+
+       # 이미지 빌드 및 ECR push
+      - name: Build and Push to ECR
+        uses: docker/build-push-action@v5
+        with:
+          context: . # Dockerfile이 있는 현재 디렉토리를 빌드 컨텍스트로 사용
+          push: true
+          tags: ${{ secrets.ECR_REGISTRY }}/${{ secrets.ECR_REPOSITORY }}:${{ github.sha }}
+
+      # ec2에 ssh로 접속하여 도커 이미지 실행
+      - name: Deploy to EC2 via SSH
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.HOST_EC2 }}
+          username: ubuntu
+          key: ${{ secrets.PRIVATE_KEY }}
+          script: |
+            DOCKER_IMAGE_NAME=${{ secrets.ECR_REGISTRY }}/${{ secrets.ECR_REPOSITORY }}
+            IMAGE_TAG=${{ github.sha }}
+            CONTAINER_NAME=saisai-server 
+            HOST_PORT=${{ secrets.HOST_PORT }} # EC2에서 열어줄 포트
+            CONTAINER_PORT=${{ secrets.CONTAINER_PORT }} # 컨테이너 내부 애플리케이션 포트
+
+            # 환경변수 파일 생성 (추가)
+            echo "환경변수 파일 생성 중..."
+            cat > .env << EOF
+            
+            # Database Configuration
+            DB_HOST=${{ secrets.DB_HOST }}
+            DB_PORT=${{ secrets.DB_PORT }}
+            DB_NAME=${{ secrets.DB_NAME }}
+            DB_USERNAME=${{ secrets.DB_USERNAME }}
+            DB_PASSWORD=${{ secrets.DB_PASSWORD }}
+            
+            # Redis Configuration
+            REDIS_HOST=${{ secrets.REDIS_HOST }}
+            REDIS_PORT=6379
+            REDIS_PASSWORD=${{ secrets.REDIS_PASSWORD }}
+            
+            # JWT Configuration
+            JWT_SECRET_KEY=${{ secrets.JWT_SECRET_KEY }}
+            
+            # S3 Configuration
+            S3_ACCESS_KEY=${{ secrets.AWS_ACCESS_KEY_ID }}
+            S3_SECRET_KEY=${{ secrets.AWS_SECRET_KEY }}
+            S3_BUCKET_NAME=${{ secrets.S3_BUCKET_NAME }}
+            S3_REGION=${{ secrets.AWS_REGION }}
+            S3_ENDPOINT=${{ secrets.S3_ENDPOINT }}
+            S3_BASEPATH=${{ secrets.S3_BASEPATH }}
+            
+            # External API Configuration
+            DURUNUBI_SECRET_KEY=${{ secrets.DURUNUBI_SECRET_KEY }}
+            EOF
+            
+            # EC2에서 ECR 로그인
+            echo "ECR 로그인 중..."
+            aws ecr get-login-password --region ${{ secrets.AWS_REGION }} | sudo docker login --username AWS --password-stdin ${{ secrets.ECR_REGISTRY }}
+            
+            echo "이전 컨테이너 중지 및 제거 시작..."
+            if [ "$(sudo docker ps -q -f name=$CONTAINER_NAME)" ]; then # 실행 중인 컨테이너 확인
+              sudo docker stop $CONTAINER_NAME
+            fi
+            if [ "$(sudo docker ps -aq -f name=$CONTAINER_NAME)" ]; then # 모든 컨테이너 확인
+              sudo docker rm $CONTAINER_NAME
+            fi
+
+            echo "최신 도커 이미지 다운로드 중..."
+            sudo docker pull $DOCKER_IMAGE_NAME:$IMAGE_TAG
+
+            echo "새로운 컨테이너 실행 중..."
+            # 필요한 경우 --network, -v (볼륨 마운트) 등 추가
+            sudo docker run -d --name $CONTAINER_NAME -p $HOST_PORT:$CONTAINER_PORT --env-file .env $DOCKER_IMAGE_NAME:$IMAGE_TAG
+
+            echo "오래된 도커 이미지 정리 중..."
+            sudo docker image prune -f
+
+            echo "🎉 EC2 개발 환경 배포 완료!"
+            
+            # 헬스 체크
+            echo "서버 애플리케이션 정상 실행 확인 중..."
+            for i in {1..30}; do
+              response=$(curl -sf http://localhost:${HOST_PORT}/api/api-docs || true)
+              if [[ "$response" == *"OK"* ]]; then
+                echo "🎉 서버 애플리케이션 정상 실행 확인!"
+                exit 0
+              else
+                echo "서버 애플리케이션 실행 대기... ($i/30)"
+                sleep 1
+              fi
+            done
+            echo "😡 서버 애플리케이션 실행 실패..."
+            exit 1
