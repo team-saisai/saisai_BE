@@ -1,9 +1,13 @@
 package com.saisai.domain.course.dto.response;
 
-import com.saisai.domain.course.entity.Course;
+import com.saisai.domain.challenge.entity.ChallengeStatus;
+import com.saisai.domain.course.dto.projection.CourseDetailsProjection;
 import com.saisai.domain.gpx.dto.GpxPoint;
 import com.saisai.domain.ride.dto.response.RideCountRes;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 public record CourseDetailsRes(
     Long courseId,
@@ -17,22 +21,33 @@ public record CourseDetailsRes(
     Long challengerCount,
     Long finisherCount,
     Boolean hasUncompletedRide,
+    ChallengeStatus challengeStatus,
+    LocalDate challengeEndedAt,
+    Boolean isEventActive,
     List<String> themeNames,
     List<GpxPoint> gpxPoints
 ) {
-    public static CourseDetailsRes from(Course course, String imageUrl, RideCountRes rideCountRes, List<GpxPoint> gpxPoints, boolean hasUncompletedRide, List<String> themeNames) {
+    public static CourseDetailsRes from(CourseDetailsProjection course, String imageUrl, RideCountRes rideCountRes, List<GpxPoint> gpxPoints, boolean hasUncompletedRide, List<String> themeNames) {
+
+        LocalDate challengeEndedAt = Optional.ofNullable(course.challengeEndedAt())
+            .map(LocalDateTime::toLocalDate)
+            .orElse(null);
+
         return new CourseDetailsRes(
-            course.getId(),
-            course.getName(),
-            course.getSummary(),
-            course.getLevel(),
-            course.getDistance(),
-            course.getEstimatedTime(),
-            course.getSigun(),
+            course.id(),
+            course.name(),
+            course.summary(),
+            course.level(),
+            course.distance(),
+            course.estimatedTime(),
+            course.sigun(),
             imageUrl,
             rideCountRes.courseChallengerCount(),
             rideCountRes.courseFinisherCount(),
             hasUncompletedRide,
+            course.challengeStatus(),
+            challengeEndedAt,
+            course.isEventActive(),
             themeNames,
             gpxPoints
         );
