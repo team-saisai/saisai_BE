@@ -28,7 +28,7 @@ jobs:
         id: check-label
         run: |
           labels=$(gh pr view ${{ steps.pr.outputs.pr_number }} --json labels --jq '.labels[].name')
-          if echo "$labels" | grep -q "auto-merge"; then
+          if echo "$labels" | grep -q "🌀 auto-merge"; then
             echo "has_label=true" >> $GITHUB_OUTPUT
           else
             echo "has_label=false" >> $GITHUB_OUTPUT
