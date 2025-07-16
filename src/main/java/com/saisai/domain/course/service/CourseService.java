@@ -7,10 +7,10 @@ import com.saisai.config.jwt.AuthUserDetails;
 import com.saisai.domain.common.aws.s3.GpxS3;
 import com.saisai.domain.common.aws.s3.ImageUtil;
 import com.saisai.domain.common.exception.CustomException;
+import com.saisai.domain.course.dto.projection.CourseDetailsProjection;
 import com.saisai.domain.course.dto.projection.CoursePageProjection;
 import com.saisai.domain.course.dto.response.CourseDetailsRes;
 import com.saisai.domain.course.dto.response.CoursePageRes;
-import com.saisai.domain.course.entity.Course;
 import com.saisai.domain.course.repository.CourseRepository;
 import com.saisai.domain.gpx.dto.GpxPoint;
 import com.saisai.domain.gpx.util.GpxParser;
@@ -94,18 +94,18 @@ public class CourseService {
         User user = userRepository.findById(authUserDetails.userId())
             .orElseThrow(() -> new CustomException(USER_NOT_FOUND));
 
-        Course course = courseRepository.findById(courseId)
+        CourseDetailsProjection course = courseRepository.findCourseDetailsProjection(courseId)
             .orElseThrow(() -> new CustomException(COURSE_NOT_FOUND));
 
-        boolean hasUnCompletedRide = rideRepository.existsActiveRideByUserIdAndCourseId(user.getId(), course.getId());
+        boolean hasUnCompletedRide = rideRepository.existsActiveRideByUserIdAndCourseId(user.getId(), courseId);
 
         RideCountRes rideCountRes = rideRepository.countRideByCourseId(courseId);
 
         List<String> themenames = themeRepository.findThemeNamesByCourseId(courseId);
 
-        String gpxContent = gpxS3.getGpxContent(course.getGpxPath());
+        String gpxContent = gpxS3.getGpxContent(course.gpxpath());
         List<GpxPoint> gpxPoints = gpxParser.parseGpxContent(gpxContent);
 
-        return CourseDetailsRes.from(course, imageUtil.getImageUrl(course.getImage()), rideCountRes, gpxPoints, hasUnCompletedRide, themenames);
+        return CourseDetailsRes.from(course, imageUtil.getImageUrl(course.imageUrl()), rideCountRes, gpxPoints, hasUnCompletedRide, themenames);
     }
 }
