@@ -67,7 +67,7 @@ jobs:
         with:
           context: . # Dockerfile이 있는 현재 디렉토리를 빌드 컨텍스트로 사용
           push: true
-          tags: ${{ secrets.ECR_REGISTRY }}/${{ secrets.ECR_REPOSITORY }}:${{ github.sha }}
+          tags: ${{ secrets.ECR_REGISTRY }}/${{ secrets.ECR_REPOSITORY }}:sai-${{ github.sha }}
 
       # ec2에 ssh로 접속하여 도커 이미지 실행
       - name: Deploy to EC2 via SSH
@@ -78,12 +78,12 @@ jobs:
           key: ${{ secrets.PRIVATE_KEY }}
           script: |
             DOCKER_IMAGE_NAME=${{ secrets.ECR_REGISTRY }}/${{ secrets.ECR_REPOSITORY }}
-            IMAGE_TAG=${{ github.sha }}
+            IMAGE_TAG=sai-${{ github.sha }}
             CONTAINER_NAME=saisai-server 
             HOST_PORT=${{ secrets.HOST_PORT }} # EC2에서 열어줄 포트
             CONTAINER_PORT=${{ secrets.CONTAINER_PORT }} # 컨테이너 내부 애플리케이션 포트
 
-            # 환경변수 파일 생성 (추가)
+            # 환경변수 파일 생성
             echo "환경변수 파일 생성 중..."
             cat > .env << EOF
             
@@ -125,12 +125,42 @@ jobs:
             if [ "$(sudo docker ps -aq -f name=$CONTAINER_NAME)" ]; then # 모든 컨테이너 확인
               sudo docker rm $CONTAINER_NAME
             fi
+            
+            # 디스크 공간 사전 확보
+            echo "디스크 공간 확보 중..."
+            sudo docker system prune -f
+            sudo docker image prune -f
+            
+            # 디스크 공간 확인
+            AVAILABLE_SPACE=$(df / | tail -1 | awk '{print $4}')
+            echo "사용 가능한 디스크 공간: ${AVAILABLE_SPACE}KB"
+            
+            if [ $AVAILABLE_SPACE -lt 1048576 ]; then # 1GB 미만인 경우
+              echo "⚠️ 디스크 공간 부족 경고: ${AVAILABLE_SPACE}KB 남음"
+              echo "추가 정리 수행 중..."
+              sudo rm -rf /tmp/* || true
+              sudo journalctl --vacuum-time=1d || true
+            fi
 
+            # 이미지 다운로드 
             echo "최신 도커 이미지 다운로드 중..."
-            sudo docker pull $DOCKER_IMAGE_NAME:$IMAGE_TAG
+            if ! sudo docker pull $DOCKER_IMAGE_NAME:$IMAGE_TAG; then
+              echo "😡 이미지 다운로드 실패!"
+              echo "현재 디스크 상태:"
+              df -h
+              echo "Docker 시스템 상태:"
+              sudo docker system df
+              echo "강제 정리 후 재시도..."
+              sudo docker system prune -a -f --volumes
+              
+              # 재시도
+              if ! sudo docker pull $DOCKER_IMAGE_NAME:$IMAGE_TAG; then
+                echo "😡 이미지 다운로드 최종 실패 - 디스크 공간 부족"
+                exit 1
+              fi
+            fi
 
             echo "새로운 컨테이너 실행 중..."
-            # 필요한 경우 --network, -v (볼륨 마운트) 등 추가
             sudo docker run -d --name $CONTAINER_NAME -p $HOST_PORT:$CONTAINER_PORT --env-file .env $DOCKER_IMAGE_NAME:$IMAGE_TAG
 
             echo "오래된 도커 이미지 정리 중..."
