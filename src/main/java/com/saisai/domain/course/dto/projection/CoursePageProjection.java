@@ -8,7 +8,6 @@ import java.time.LocalDateTime;
 public record CoursePageProjection(
     Long courseId,
     String courseName,
-    String summary,
     Integer level,
     Double distance,
     Double estimatedTime,
