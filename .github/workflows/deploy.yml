@@ -3,12 +3,13 @@ name: Deploy to Development
 
 # 어떤 브랜치에서 어떤 행동이 일어날 때 cicd가 일어날 것인지를 설정
 on:
-  pull_request:
-    types: [ closed ]
+  push:
     branches: [ dev, main ]
     paths: # 이 경로가 변경되었을 떄만 트리거 발동
       - 'src/**'
       - '.github/**'
+      - 'Dockerfile'
+      - 'build.gradle'
 
 permissions:
   contents: read
@@ -18,7 +19,6 @@ permissions:
 jobs:
   # dev 브랜치로 병합될 때 CD
   deploy_to_dev:
-    if: github.event.pull_request.merged == true
     runs-on: ubuntu-latest
     environment: development
 
