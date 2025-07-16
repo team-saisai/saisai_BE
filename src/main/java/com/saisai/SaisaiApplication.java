@@ -12,7 +12,6 @@ public class SaisaiApplication {
 
     public static void main(String[] args) {
         SpringApplication.run(SaisaiApplication.class, args);
-        
     }
 
 }
