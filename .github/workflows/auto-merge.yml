@@ -43,11 +43,11 @@ jobs:
             echo "has_label=false" >> $GITHUB_OUTPUT
           fi
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.PAT_GITHUB_ACTIONS }}
 
       # 자동 merge 실행
       - name: Auto merge PR
         if: steps.check-label.outputs.has_label == 'true'
         run: gh pr merge --squash ${{ steps.pr.outputs.pr_number }}
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.PAT_GITHUB_ACTIONS }}
