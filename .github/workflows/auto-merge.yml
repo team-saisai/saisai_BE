@@ -18,6 +18,10 @@ jobs:
       github.event.workflow_run.pull_requests[0] != null
 
     steps:
+      # 코드 체크아웃 추가
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        
       # PR 번호 추출
       - name: Get PR number
         id: pr
