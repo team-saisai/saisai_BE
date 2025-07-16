@@ -77,14 +77,6 @@ jobs:
           username: ubuntu
           key: ${{ secrets.PRIVATE_KEY }}
           script: |
-            set -x
-
-            # GitHub Secrets 값 확인
-            echo "DB_HOST: ${{ secrets.DB_HOST }}"
-            echo "DB_PORT: ${{ secrets.DB_PORT }}"
-            echo "DB_USERNAME: ${{ secrets.DB_USERNAME }}"
-            echo "DB_PASSWORD 길이: ${#DB_PASSWORD}"
-            
             DOCKER_IMAGE_NAME=${{ secrets.ECR_REGISTRY }}/${{ secrets.ECR_REPOSITORY }}
             IMAGE_TAG=sai-${{ github.sha }}
             CONTAINER_NAME=saisai-server 
@@ -100,7 +92,6 @@ jobs:
             DB_PORT=${{ secrets.DB_PORT }}
             DB_NAME=${{ secrets.DB_NAME }}
             DB_USERNAME=${{ secrets.DB_USERNAME }}
-            DB_PASSWORD='${{ secrets.DB_PASSWORD }}'
             
             # Redis Configuration
             REDIS_HOST=${{ secrets.REDIS_HOST }}
@@ -121,6 +112,8 @@ jobs:
             # External API Configuration
             DURUNUBI_SECRET_KEY=${{ secrets.DURUNUBI_SECRET_KEY }}
             EOF
+            
+            echo "DB_PASSWORD='$DB_PASSWORD'" >> .env
             
             # EC2에서 ECR 로그인
             echo "ECR 로그인 중..."
