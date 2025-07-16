@@ -1,6 +1,9 @@
-FROM openjdk:17-jdk-slim
+FROM openjdk:17-jdk-slim AS builder
+WORKDIR /app
+COPY . .
+RUN ./gradlew bootJar
 
-ARG JAR_FILE=build/libs/saisai.jar
-COPY ${JAR_FILE} app.jar
-
-ENTRYPOINT ["java","-jar", "-Duser.timezone=Asia/Seoul", "-Dspring.profiles.active=dev", "/app.jar"]
+FROM amazoncorretto:17-alpine
+WORKDIR /app
+COPY --from=builder /app/build/libs/*.jar app.jar
+ENTRYPOINT ["java", "-Xmx400m", "-jar", "-Duser.timezone=Asia/Seoul", "-Dspring.profiles.active=dev", "/app.jar"]
