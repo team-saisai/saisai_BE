@@ -37,7 +37,6 @@ spring:
           max-wait: 5000ms
       database: 0
 
-
 server:
   error:
     include-message: always
@@ -53,9 +52,6 @@ s3:
   secret-key: ${S3_SECRET_KEY}
   endpoint: ${S3_ENDPOINT}
   base-path: ${S3_BASEPATH}
-file:
-  path: src/main/webapp/images
-  endpoint: http://localhost:8080/images
 
 springdoc:
   swagger-ui:
