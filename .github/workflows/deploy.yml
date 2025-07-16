@@ -192,11 +192,7 @@ jobs:
             sudo docker run -d \
               --name $CONTAINER_NAME \
               --network host \
-              -e DB_HOST="$DB_HOST" \
-              -e DB_PORT="$DB_PORT" \
-              -e DB_NAME="$DB_NAME" \
-              -e DB_USERNAME="$DB_USERNAME" \
-              -e DB_PASSWORD="$DB_PASSWORD" \
+              --env-file .env \
               $DOCKER_IMAGE_NAME:$IMAGE_TAG
   
             echo "오래된 도커 이미지 정리 중..."
