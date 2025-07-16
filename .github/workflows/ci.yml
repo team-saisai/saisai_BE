@@ -9,7 +9,6 @@ on:
       - 'src/**'
       - '.github/**'
 
-
 permissions:
   contents: read # 코드와 파일 읽을 수 있도록 허용(기본값)
   pull-requests: write # PR 댓글을 위해 쓰기 허용
