@@ -6,16 +6,20 @@ import static com.saisai.domain.reward.entity.QEventCourse.eventCourse;
 import static com.saisai.domain.reward.entity.QRewardEvent.rewardEvent;
 
 import com.querydsl.core.BooleanBuilder;
+import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.saisai.domain.challenge.entity.ChallengeStatus;
 import com.saisai.domain.course.dto.projection.CourseCardProjection;
+import com.saisai.domain.course.dto.projection.CourseDetailsProjection;
 import com.saisai.domain.course.dto.projection.CoursePageProjection;
 import com.saisai.domain.course.dto.projection.QCourseCardProjection;
+import com.saisai.domain.course.dto.projection.QCourseDetailsProjection;
 import com.saisai.domain.course.dto.projection.QCoursePageProjection;
 import com.saisai.domain.reward.dto.projection.QRewardEventProjection;
 import com.saisai.domain.reward.entity.EventStatus;
 import java.util.List;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -42,7 +46,6 @@ public class CourseRepositoryImpl implements CourseRepositoryCustom {
             .select(new QCoursePageProjection(
                 course.id,
                 course.name,
-                course.summary,
                 course.level,
                 course.distance,
                 course.estimatedTime,
@@ -71,8 +74,7 @@ public class CourseRepositoryImpl implements CourseRepositoryCustom {
             .from(challenge)
             .join(challenge.course, course)
             .leftJoin(eventCourse).on(eventCourse.course.eq(course))
-            .leftJoin(rewardEvent).on(eventCourse.rewardEvent.eq(rewardEvent)
-                .and(rewardEvent.status.eq(EventStatus.ACTIVE)))
+            .leftJoin(rewardEvent).on(eventCourse.rewardEvent.eq(rewardEvent))
             .where(searchConditions);
 
         return PageableExecutionUtils.getPage(content, pageable, total::fetchOne);
@@ -99,10 +101,40 @@ public class CourseRepositoryImpl implements CourseRepositoryCustom {
             ))
             .from(course)
             .leftJoin(eventCourse).on(eventCourse.course.eq(course))
-            .leftJoin(rewardEvent).on(eventCourse.rewardEvent.eq(rewardEvent)
-                .and(rewardEvent.status.eq(EventStatus.ACTIVE)))
+            .leftJoin(rewardEvent).on(eventCourse.rewardEvent.eq(rewardEvent))
             .where(course.id.in(courseIds))
             .fetch();
+    }
+
+    // 코스 상세 조회
+    @Override
+    public Optional<CourseDetailsProjection> findCourseDetailsProjection(Long courseId) {
+
+        CourseDetailsProjection result = queryFactory
+            .select(new QCourseDetailsProjection(
+                course.id,
+                course.name,
+                course.summary,
+                course.level,
+                course.distance,
+                course.estimatedTime,
+                course.sigun,
+                course.image,
+                course.gpxPath,
+                challenge.status,
+                challenge.endedAt,
+                Expressions.asBoolean(rewardEvent.status.eq(EventStatus.ACTIVE))
+                    .coalesce(false)
+            ))
+            .from(course)
+            .leftJoin(challenge).on(challenge.course.eq(course)
+                .and(challenge.status.eq(ChallengeStatus.ONGOING)))
+            .leftJoin(eventCourse).on(eventCourse.course.eq(course))
+            .leftJoin(eventCourse.rewardEvent, rewardEvent)
+            .where(course.id.eq(courseId))
+            .fetchOne();
+
+        return Optional.ofNullable(result);
     }
 
     // where절 기본 정의 메서드

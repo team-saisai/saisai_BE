@@ -11,7 +11,6 @@ import java.util.List;
 public record CoursePageRes(
     Long courseId,
     String courseName,
-    String summary,
     Integer level,
     Double distance,
     Double estimatedTime,
@@ -41,7 +40,6 @@ public record CoursePageRes(
         return new CoursePageRes(
             coursePageProjection.courseId(),
             coursePageProjection.courseName(),
-            coursePageProjection.summary(),
             coursePageProjection.level(),
             coursePageProjection.distance(),
             coursePageProjection.estimatedTime(),
