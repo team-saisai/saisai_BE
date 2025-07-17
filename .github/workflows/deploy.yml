@@ -71,37 +71,37 @@ jobs:
 
       # env 파일 생성
       - name: Create .env File
-          run: |
-            # 비밀번호 디코딩
-            DB_PASSWORD=$(echo "${{ secrets.DB_PASSWORD }}" | base64 -d)
-            
-            cat > .env << EOF
-            # Database 
-            DB_HOST=${{ secrets.DB_HOST }}
-            DB_PORT=${{ secrets.DB_PORT }}
-            DB_NAME=${{ secrets.DB_NAME }}
-            DB_USERNAME=${{ secrets.DB_USERNAME }}
-            DB_PASSWORD=$DB_PASSWORD
-            
-            # Redis
-            REDIS_HOST=${{ secrets.REDIS_HOST }}
-            REDIS_PORT=6379
-            REDIS_PASSWORD=${{ secrets.REDIS_PASSWORD }}
-            
-            # JWT 
-            JWT_SECRET_KEY=${{ secrets.JWT_SECRET_KEY }}
-            
-            # S3
-            S3_ACCESS_KEY=${{ secrets.AWS_ACCESS_KEY_ID }}
-            S3_SECRET_KEY=${{ secrets.AWS_SECRET_KEY }}
-            S3_BUCKET_NAME=${{ secrets.S3_BUCKET_NAME }}
-            S3_REGION=${{ secrets.AWS_REGION }}
-            S3_ENDPOINT=${{ secrets.S3_ENDPOINT }}
-            S3_BASEPATH=${{ secrets.S3_BASEPATH }}
-            
-            # External API Configuration
-            DURUNUBI_SECRET_KEY=${{ secrets.DURUNUBI_SECRET_KEY }}
-            EOF
+        run: |
+          # 비밀번호 디코딩
+          DB_PASSWORD=$(echo "${{ secrets.DB_PASSWORD }}" | base64 -d)
+          
+          cat > .env << EOF
+          # Database 
+          DB_HOST=${{ secrets.DB_HOST }}
+          DB_PORT=${{ secrets.DB_PORT }}
+          DB_NAME=${{ secrets.DB_NAME }}
+          DB_USERNAME=${{ secrets.DB_USERNAME }}
+          DB_PASSWORD=$DB_PASSWORD
+          
+          # Redis
+          REDIS_HOST=${{ secrets.REDIS_HOST }}
+          REDIS_PORT=6379
+          REDIS_PASSWORD=${{ secrets.REDIS_PASSWORD }}
+          
+          # JWT 
+          JWT_SECRET_KEY=${{ secrets.JWT_SECRET_KEY }}
+          
+          # S3
+          S3_ACCESS_KEY=${{ secrets.AWS_ACCESS_KEY_ID }}
+          S3_SECRET_KEY=${{ secrets.AWS_SECRET_KEY }}
+          S3_BUCKET_NAME=${{ secrets.S3_BUCKET_NAME }}
+          S3_REGION=${{ secrets.AWS_REGION }}
+          S3_ENDPOINT=${{ secrets.S3_ENDPOINT }}
+          S3_BASEPATH=${{ secrets.S3_BASEPATH }}
+          
+          # External API Configuration
+          DURUNUBI_SECRET_KEY=${{ secrets.DURUNUBI_SECRET_KEY }}
+          EOF
 
       # 애플리케이션 배포
       - name: Deploy Application
