@@ -61,6 +61,10 @@ jobs:
       - name: Login to Amazon ECR
         uses: aws-actions/amazon-ecr-login@v2
 
+      # Docker Buildx 설정
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
        # 이미지 빌드 및 ECR push
       - name: Build and Push to ECR
         uses: docker/build-push-action@v5
@@ -68,10 +72,6 @@ jobs:
           context: . # Dockerfile이 있는 현재 디렉토리를 빌드 컨텍스트로 사용
           push: true
           tags: ${{ secrets.ECR_REGISTRY }}/${{ secrets.ECR_REPOSITORY }}:sai-${{ github.sha }}
-
-      # Docker Buildx 설정
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
 
       # env 파일 생성
       - name: Create .env File
