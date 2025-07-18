@@ -34,11 +34,16 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
+      # Gradle 정리
+      - name: Clean Gradle
+        run: |
+          rm -rf ~/.gradle
+
       # Gradlew 권한 부여
       - name: Grant execute permission for gradlew
         run: chmod +x ./gradlew
 
-      # CD에서 개선된 캐싱
+      # 캐싱
       - name: Setup Gradle with Caching for CD
         uses: gradle/actions/setup-gradle@v3
         with:
