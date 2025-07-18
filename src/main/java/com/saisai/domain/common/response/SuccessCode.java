@@ -41,6 +41,9 @@ public enum SuccessCode {
     // reward_event
     REWARD_EVENT_CREATE_SUCCESS(HttpStatus.CREATED, "EVENT_01", "리워드 이벤트 생성에 성공했습니다."),
 
+    // User_reward
+    MY_REWARD_LIST_GET_SUCCESS(HttpStatus.OK, "REWARD_01", "획득 리워드 목록 조회에 성공했습니다."),
+
     ;
 
     private final HttpStatus httpStatus;
