@@ -115,6 +115,9 @@ jobs:
       # 애플리케이션 배포
       - name: Deploy Application
         run: |
+          echo "ECR 레지스트리 로그인 중..."
+          aws ecr get-login-password --region ap-northeast-2 | sudo docker login --username AWS --password-stdin ${{ secrets.ECR_REGISTRY }}
+    
           # 배포 변수 설정
           DOCKER_IMAGE_NAME=${{ secrets.ECR_REGISTRY }}/${{ secrets.ECR_REPOSITORY }}
           IMAGE_TAG=sai-${{ github.sha }}
