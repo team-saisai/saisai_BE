@@ -133,10 +133,7 @@ public class RideService {
         if (ride.getStatus() != RideStatus.IN_PROGRESS) {
             throw new CustomException(RIDE_NOT_IN_PROGRESS);
         }
-
-        String image = imageUtil.upload(rideCompleteReq.completedImage(), "ride");
-
-        ride.complete(rideCompleteReq, image);
+        ride.complete(rideCompleteReq);
     }
 
 

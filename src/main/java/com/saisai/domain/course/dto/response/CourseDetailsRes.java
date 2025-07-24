@@ -24,10 +24,9 @@ public record CourseDetailsRes(
     ChallengeStatus challengeStatus,
     LocalDate challengeEndedAt,
     Boolean isEventActive,
-    List<String> themeNames,
     List<GpxPoint> gpxPoints
 ) {
-    public static CourseDetailsRes from(CourseDetailsProjection course, String imageUrl, RideCountRes rideCountRes, List<GpxPoint> gpxPoints, boolean hasUncompletedRide, List<String> themeNames) {
+    public static CourseDetailsRes from(CourseDetailsProjection course, String imageUrl, RideCountRes rideCountRes, List<GpxPoint> gpxPoints, boolean hasUncompletedRide) {
 
         LocalDate challengeEndedAt = Optional.ofNullable(course.challengeEndedAt())
             .map(LocalDateTime::toLocalDate)
@@ -48,7 +47,6 @@ public record CourseDetailsRes(
             course.challengeStatus(),
             challengeEndedAt,
             course.isEventActive(),
-            themeNames,
             gpxPoints
         );
     }

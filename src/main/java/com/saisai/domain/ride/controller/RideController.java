@@ -19,9 +19,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -61,7 +59,7 @@ public class RideController {
     }
 
     @Operation(summary = "코스 라이딩 재개",
-        description = "사용자 라이딩 상태 변경(IN_PROGRESS)을 위한 API")
+        description = "사용자 라이딩 상태 변경(IN_PROGRESS)을 위한 API\n\n 라이드 한 시간(초) 반환")
     @PatchMapping("/rides/{rideId}/resume")
     public ResponseEntity<ApiResponse<RideResumeRes>> resumeRide(
         @PathVariable Long rideId,
@@ -72,12 +70,11 @@ public class RideController {
     }
 
     @Operation(summary = "코스 라이딩 완주",
-        description = "소요시간(초 단위, 1 이상 입력), 달린 거리(km단위, 0.1 이상 입력), 코스 완주한 사진 (크기 제한 2mb인데 더 크면 말해주세요.)")
-    @PatchMapping(value = "/rides/{rideId}/complete",
-        consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+        description = "소요시간(초 단위, 1 이상 입력), 달린 거리(km단위, 0.1 이상 입력)")
+    @PatchMapping(value = "/rides/{rideId}/complete")
     public ResponseEntity<ApiResponse<Void>> completeRide(
         @PathVariable Long rideId,
-        @Valid @ModelAttribute RideCompleteReq completeReq,
+        @Valid RideCompleteReq completeReq,
         @Auth AuthUserDetails authUserDetails
     ) {
         rideService.completeRide(rideId, completeReq, authUserDetails);
