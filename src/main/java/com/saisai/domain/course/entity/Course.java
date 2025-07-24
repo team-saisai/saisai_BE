@@ -84,7 +84,7 @@ public class Course extends BaseEntity {
     public static Course from (CourseItem courseItem, FirstGpxPoint firstGpxPoint, String gpxPath) {
         return Course.builder()
             .name(courseItem.courseName())
-            .summary(courseItem.summary())
+            .summary(courseItem.convertSummary())
             .level(courseItem.level())
             .distance(courseItem.distance())
             .estimatedTime(courseItem.estimatedTime())

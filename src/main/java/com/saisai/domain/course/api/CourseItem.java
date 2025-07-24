@@ -27,4 +27,8 @@ public record CourseItem(
     public Double estimatedTime() {
         return ParsingUtils.safeParseDouble(this.estimatedTimeStr);
     }
+
+    public String convertSummary() {
+        return this.summary.replaceAll("(?i)<br\\s*/?>", "\n");
+    }
 }
