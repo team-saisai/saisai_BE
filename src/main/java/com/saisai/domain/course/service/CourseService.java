@@ -16,11 +16,8 @@ import com.saisai.domain.gpx.dto.GpxPoint;
 import com.saisai.domain.gpx.util.GpxParser;
 import com.saisai.domain.ride.dto.response.RideCountRes;
 import com.saisai.domain.ride.repository.RideRepository;
-import com.saisai.domain.theme.repository.ThemeRepository;
 import com.saisai.domain.user.entity.User;
 import com.saisai.domain.user.repository.UserRepository;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
@@ -43,7 +40,6 @@ public class CourseService {
     private final ImageUtil imageUtil;
     private final GpxS3 gpxS3;
     private final UserRepository userRepository;
-    private final ThemeRepository themeRepository;
 
     // 코스 목록 조회 메서드
     public Page<CoursePageRes> getCourses(Pageable pageable, String challengeStatus) {
@@ -55,14 +51,6 @@ public class CourseService {
 
         final Map<Long, RideCountRes> rideCountResMap = rideRepository.countRidesMapByCourseIds(courseIds);
 
-        final Map<Long, List<String>> courseThemesMap;
-
-        if (!courseIds.isEmpty()) {
-            courseThemesMap = themeRepository.findThemeNamesMapByCourseIds(courseIds);
-        } else {
-            courseThemesMap = new HashMap<>();
-        }
-
         List<CoursePageRes> result = coursePage.getContent().stream()
             .map(projection -> {
                 RideCountRes rideCountRes = rideCountResMap.getOrDefault(
@@ -70,16 +58,10 @@ public class CourseService {
                     RideCountRes.empty(projection.courseId())
                 );
 
-                List<String> themeNames = courseThemesMap.getOrDefault(
-                    projection.courseId(),
-                    Collections.emptyList()
-                );
-
                 return CoursePageRes.from(
                     projection,
                     rideCountRes,
-                    imageUtil.getImageUrl(projection.imageUrl()),
-                    themeNames
+                    imageUtil.getImageUrl(projection.imageUrl())
                 );
 
             })
@@ -101,11 +83,9 @@ public class CourseService {
 
         RideCountRes rideCountRes = rideRepository.countRideByCourseId(courseId);
 
-        List<String> themenames = themeRepository.findThemeNamesByCourseId(courseId);
-
         String gpxContent = gpxS3.getGpxContent(course.gpxpath());
         List<GpxPoint> gpxPoints = gpxParser.parseGpxContent(gpxContent);
 
-        return CourseDetailsRes.from(course, imageUtil.getImageUrl(course.imageUrl()), rideCountRes, gpxPoints, hasUnCompletedRide, themenames);
+        return CourseDetailsRes.from(course, imageUtil.getImageUrl(course.imageUrl()), rideCountRes, gpxPoints, hasUnCompletedRide);
     }
 }

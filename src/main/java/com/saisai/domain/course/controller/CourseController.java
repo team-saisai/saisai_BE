@@ -33,7 +33,7 @@ public class CourseController {
     private final CourseService courseService;
 
     @Operation(summary = "코스 전체 목록 조회",
-        description = "코스명, 요약, 난이도(상(3)/중(2)/하(1)), 거리(km), 예상 소요시간(분), 시군, 도전자 수, 완주자 수, 챌린지 상태(ENDED(종료)/ONGOING(진행 중)/UPCOMING(예정), 챌린지 종료일, 이벤트 여부, 지급 리워드, 테마를 한 페이지 당 10개 씩 반환")
+        description = "코스명, 요약, 난이도(상(3)/중(2)/하(1)), 거리(km), 예상 소요시간(분), 시군, 도전자 수, 완주자 수, 챌린지 상태(ENDED(종료)/ONGOING(진행 중)/UPCOMING(예정), 챌린지 종료일, 이벤트 여부, 지급 리워드 한 페이지 당 10개 씩 반환")
     @GetMapping
     public ResponseEntity<ApiResponse<Page<CoursePageRes>>> getAllCourses(
         @Parameter(description = "페이지 번호") @RequestParam(defaultValue = "1") int page,
@@ -46,7 +46,7 @@ public class CourseController {
     }
 
     @Operation(summary = "코스 상세 조회",
-        description = "코스ID, 코스명, 코스 설명, 난이도(상(3)/중(2)/하(1)), 거리(km), 예상 소요시간(분), 시군(지역), gpx경로(위도, 경도, 고도, 앞뒤 좌표 거리(m), 현재까지의 누적 거리(km)), 도전자 수, 완주자 수, 라이딩 중단 기록 여부, 챌린지 종료일(Ended(종료), Ongoing(진행중), null), 챌린지 종료일, 이벤트 여부, 테마 반환 ")
+        description = "코스ID, 코스명, 코스 설명, 난이도(상(3)/중(2)/하(1)), 거리(km), 예상 소요시간(분), 시군(지역), gpx경로(위도, 경도, 고도, 앞뒤 좌표 거리(m), 현재까지의 누적 거리(km)), 도전자 수, 완주자 수, 라이딩 중단 기록 여부, 챌린지 종료일(Ended(종료), Ongoing(진행중), null), 챌린지 종료일, 이벤트 여부 ")
     @GetMapping("/{courseId}")
     public ResponseEntity<ApiResponse<CourseDetailsRes>> getCourseInfo(
         @PathVariable Long courseId,
