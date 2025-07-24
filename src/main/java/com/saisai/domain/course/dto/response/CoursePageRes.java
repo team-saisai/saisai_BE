@@ -26,7 +26,7 @@ public record CoursePageRes(
     public static CoursePageRes from(CoursePageProjection coursePageProjection, RideCountRes rideCountRes, String imageUrl) {
 
         RewardEventProjection rewardEventProjection = coursePageProjection.rewardEventProjection();
-        boolean isEventActive = rewardEventProjection != null;
+        boolean isEventActive = rewardEventProjection.rewardEventId() != null;
 
         Integer reward = isEventActive ?
             RewardUtils.calculateEventReward(

@@ -29,7 +29,7 @@ public record CourseCardRes(
     ) {
 
         RewardEventProjection rewardEventProjection = courseCardProjection.rewardEventProjection();
-        boolean isEventActive = rewardEventProjection != null;
+        boolean isEventActive = rewardEventProjection.rewardEventId() != null;
 
         Integer reward = isEventActive ?
             RewardUtils.calculateEventReward(
