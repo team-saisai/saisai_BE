@@ -59,9 +59,6 @@ public class Ride extends BaseEntity {
     @Column(name = "completed_at")
     private LocalDateTime completedAt;
 
-    @Column(name = "certified_image", length = 255)
-    private String certifiedImage;
-
     private Ride(User user, Course course) {
         this.status = RideStatus.IN_PROGRESS;
         this.user = user;
@@ -97,10 +94,9 @@ public class Ride extends BaseEntity {
         this.progressRate = progressRate;
     }
 
-    public void complete(RideCompleteReq rideCompleteReq, String certifiedImage) {
+    public void complete(RideCompleteReq rideCompleteReq) {
         this.status = RideStatus.COMPLETED;
         this.progressRate = 100;
-        this.certifiedImage = certifiedImage;
         this.durationSecond = rideCompleteReq.duration();
         this.actualDistance = rideCompleteReq.actualDistance();
         this.completedAt = LocalDateTime.now();
