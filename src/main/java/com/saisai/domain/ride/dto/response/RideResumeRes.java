@@ -4,12 +4,14 @@ import com.saisai.domain.ride.entity.Ride;
 
 public record RideResumeRes(
     Long rideId,
-    Long durationSecond
+    Long durationSecond,
+    Double actualDistance
 ) {
     public static RideResumeRes from (Ride ride) {
         return new RideResumeRes(
             ride.getId(),
-            ride.getDurationSecond()
+            ride.getDurationSecond(),
+            ride.getActualDistance()
         );
     }
 }
