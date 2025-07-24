@@ -59,7 +59,7 @@ public class RideController {
     }
 
     @Operation(summary = "코스 라이딩 재개",
-        description = "사용자 라이딩 상태 변경(IN_PROGRESS)을 위한 API")
+        description = "사용자 라이딩 상태 변경(IN_PROGRESS)을 위한 API\n\n 라이드 한 시간(초) 반환")
     @PatchMapping("/rides/{rideId}/resume")
     public ResponseEntity<ApiResponse<RideResumeRes>> resumeRide(
         @PathVariable Long rideId,
