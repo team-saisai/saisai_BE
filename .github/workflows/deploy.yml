@@ -34,11 +34,6 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      # Gradle 정리
-      - name: Clean Gradle
-        run: |
-          rm -rf ~/.gradle
-
       # Gradlew 권한 부여
       - name: Grant execute permission for gradlew
         run: chmod +x ./gradlew
@@ -77,10 +72,17 @@ jobs:
           context: . # Dockerfile이 있는 현재 디렉토리를 빌드 컨텍스트로 사용
           push: true
           tags: ${{ secrets.ECR_REGISTRY }}/${{ secrets.ECR_REPOSITORY }}:sai-${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max # 도커 빌드 캐시 적용
 
       # env 파일 생성
       - name: Create .env File
         run: |
+          echo "Length: ${#S3_BASE_PATH}"
+          echo "${S3_BASE_PATH}" | od -c
+          echo "Length: ${#S3_BUCKET}"
+          echo "${S3_BUCKET}" | od -c
+          
           # 비밀번호 디코딩
           DB_PASSWORD=$(echo "${{ secrets.DB_PASSWORD }}" | base64 -d)
           
@@ -128,11 +130,6 @@ jobs:
           echo "기존 컨테이너 정리 중..."
           sudo docker stop $CONTAINER_NAME 2>/dev/null || true
           sudo docker rm $CONTAINER_NAME 2>/dev/null || true
-          
-          # 디스크 공간 정리
-          echo "디스크 공간 정리 중..."
-          sudo docker system prune -f
-          sudo docker image prune -f
           
           # 최신 이미지 다운로드
           echo "최신 이미지 다운로드 중..."
