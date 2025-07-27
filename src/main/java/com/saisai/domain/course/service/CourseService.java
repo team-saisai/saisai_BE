@@ -79,13 +79,13 @@ public class CourseService {
         CourseDetailsProjection course = courseRepository.findCourseDetailsProjection(courseId)
             .orElseThrow(() -> new CustomException(COURSE_NOT_FOUND));
 
-        boolean hasUnCompletedRide = rideRepository.existsActiveRideByUserIdAndCourseId(user.getId(), courseId);
+        Long rideId = rideRepository.findActiveRideIdByUserIdAndCourseId(user.getId(), courseId);
 
         RideCountRes rideCountRes = rideRepository.countRideByCourseId(courseId);
 
         String gpxContent = gpxS3.getGpxContent(course.gpxpath());
         List<GpxPoint> gpxPoints = gpxParser.parseGpxContent(gpxContent);
 
-        return CourseDetailsRes.from(course, imageUtil.getImageUrl(course.imageUrl()), rideCountRes, gpxPoints, hasUnCompletedRide);
+        return CourseDetailsRes.from(course, imageUtil.getImageUrl(course.imageUrl()), rideCountRes, gpxPoints, rideId);
     }
 }
