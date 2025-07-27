@@ -46,7 +46,7 @@ public class CourseController {
     }
 
     @Operation(summary = "코스 상세 조회",
-        description = "코스ID, 코스명, 코스 설명, 난이도(상(3)/중(2)/하(1)), 거리(km), 예상 소요시간(분), 시군(지역), gpx경로(위도, 경도, 고도, 앞뒤 좌표 거리(m), 현재까지의 누적 거리(km)), 도전자 수, 완주자 수, 라이딩 중단 기록 여부, 챌린지 종료일(Ended(종료), Ongoing(진행중), null), 챌린지 종료일, 이벤트 여부 ")
+        description = "코스ID, 코스명, 코스 설명, 난이도(상(3)/중(2)/하(1)), 거리(km), 예상 소요시간(분), 시군(지역), gpx경로(위도, 경도, 고도, 앞뒤 좌표 거리(m), 현재까지의 누적 거리(km)), 도전자 수, 완주자 수, 라이딩 ID, 챌린지 종료일(Ended(종료), Ongoing(진행중), null), 챌린지 종료일, 이벤트 여부 ")
     @GetMapping("/{courseId}")
     public ResponseEntity<ApiResponse<CourseDetailsRes>> getCourseInfo(
         @PathVariable Long courseId,
