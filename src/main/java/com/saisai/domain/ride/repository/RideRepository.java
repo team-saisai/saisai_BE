@@ -55,11 +55,14 @@ public interface RideRepository extends JpaRepository<Ride, Long>, RideRepositor
     Boolean existsByUserAndStatus(User user, RideStatus status);
 
     @Query(""" 
-        SELECT COUNT(r.id) > 0 FROM Ride r
+        SELECT r.id FROM Ride r
         WHERE r.user.id = :userId
         AND r.course.id = :courseId
-        AND r.status NOT IN ('COMPLETED')""")
-    boolean existsActiveRideByUserIdAndCourseId(@Param("userId") Long userId,
+        AND r.status NOT IN ('COMPLETED')
+        ORDER BY r.modifiedAt DESC
+        LIMIT 1
+    """)
+    Long findActiveRideIdByUserIdAndCourseId(@Param("userId") Long userId,
         @Param("courseId") Long courseId);
 
     Optional<Ride> findByUserIdAndCourseIdAndStatus(Long userId, Long courseId, RideStatus rideStatus);
