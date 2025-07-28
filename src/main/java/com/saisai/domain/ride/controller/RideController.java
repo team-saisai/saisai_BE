@@ -74,7 +74,7 @@ public class RideController {
     @PatchMapping(value = "/rides/{rideId}/complete")
     public ResponseEntity<ApiResponse<Void>> completeRide(
         @PathVariable Long rideId,
-        @Valid RideCompleteReq completeReq,
+        @Valid @RequestBody RideCompleteReq completeReq,
         @Auth AuthUserDetails authUserDetails
     ) {
         rideService.completeRide(rideId, completeReq, authUserDetails);
