@@ -10,11 +10,11 @@ import org.springframework.data.repository.query.Param;
 public interface RewardEventRepository extends JpaRepository<RewardEvent, Long> {
 
     // 이벤트 겹치는 코스ID 조회
-    @Query("SELECT ec.course.id FROM EventCourse ec " +
-        "WHERE ec.course.id IN :courseIds " +
-        "AND ec.rewardEvent.status IN ('SCHEDULED', 'ACTIVE') " +
-        "AND ((ec.rewardEvent.startTime <= :endTime AND ec.rewardEvent.endTime >= :startTime))")
-    List<Long> findConflictingCourseIds(@Param("courseIds") List<Long> courseIds,
+    @Query("SELECT re.challenge.id FROM RewardEvent re " +
+        "WHERE re.challenge.id IN :challengeIds " +
+        "AND re..status IN ('SCHEDULED', 'ACTIVE') " +
+        "AND ((re.startTime <= :endTime AND re.endTime >= :startTime))")
+    List<Long> findConflictingChallengeIds(@Param("challengeIds") List<Long> challengeIds,
                                         @Param("startTime") LocalDateTime startTime,
                                         @Param("endTime") LocalDateTime endTime);
 
