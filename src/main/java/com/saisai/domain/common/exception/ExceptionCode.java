@@ -50,7 +50,7 @@ public enum ExceptionCode {
     RIDE_NOT_PAUSED(HttpStatus.CONFLICT, "RD_ER_06", "중단했던 라이딩이 아닙니다."),
 
     // reward_event
-    REWARD_EVENT_COURSE_CONFLICT(HttpStatus.CONFLICT, "RE_ER_01", "이미 다른 이벤트료 등록된 코스입니다."),
+    REWARD_EVENT_CHALLENGE_CONFLICT(HttpStatus.CONFLICT, "RE_ER_01", "이미 다른 이벤트로 등록된 챌린지입니다."),
 
     // gpx
     GPX_EMPTY(HttpStatus.NOT_FOUND, "GPX_ER_01", "GPX 파일이 비어있습니다."),

@@ -1,15 +1,13 @@
 package com.saisai.domain.reward.service;
 
 import static com.saisai.domain.common.exception.ExceptionCode.COURSE_NOT_FOUND;
-import static com.saisai.domain.common.exception.ExceptionCode.REWARD_EVENT_COURSE_CONFLICT;
+import static com.saisai.domain.common.exception.ExceptionCode.REWARD_EVENT_CHALLENGE_CONFLICT;
 
+import com.saisai.domain.challenge.entity.Challenge;
+import com.saisai.domain.challenge.repository.ChallengeRepository;
 import com.saisai.domain.common.exception.CustomException;
-import com.saisai.domain.course.entity.Course;
-import com.saisai.domain.course.repository.CourseRepository;
 import com.saisai.domain.reward.dto.request.RewardEventReq;
-import com.saisai.domain.reward.entity.EventCourse;
 import com.saisai.domain.reward.entity.RewardEvent;
-import com.saisai.domain.reward.repository.EventCourseRepository;
 import com.saisai.domain.reward.repository.RewardEventRepository;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -24,38 +22,33 @@ import org.springframework.transaction.annotation.Transactional;
 public class RewardEventService {
 
     private final RewardEventRepository rewardEventRepository;
-    private final EventCourseRepository eventCourseRepository;
-    private final CourseRepository courseRepository;
+    private final ChallengeRepository challengeRepository;
 
     // 리워드 이벤트 등록
     @Transactional
     public void createRewardEvent(RewardEventReq rewardEventReq) {
-        List<Course> courses = validateAndGetCourses(rewardEventReq.courseIds());
-        validateEventConflict(rewardEventReq.courseIds(),
+        List<Challenge> challenges = validateAndGetChallenge(rewardEventReq.challengeIds());
+        validateEventConflict(rewardEventReq.challengeIds(),
                             rewardEventReq.startTime(),
                             rewardEventReq.endTime());
 
-        RewardEvent rewardEvent = RewardEvent.from(rewardEventReq);
-
-        RewardEvent saveRewardEvent = rewardEventRepository.save(rewardEvent);
-
-        List<EventCourse> eventCourses = courses.stream()
-            .map(course -> EventCourse.from(saveRewardEvent, course))
+        List<RewardEvent> rewardEvents = challenges.stream()
+            .map(challenge -> RewardEvent.from(rewardEventReq, challenge))
             .toList();
 
-        eventCourseRepository.saveAll(eventCourses);
+        rewardEventRepository.saveAll(rewardEvents);
     }
 
-    // 코스 존재 검사
-    private List<Course> validateAndGetCourses(List<Long> courseIds) {
-        List<Course> courses = courseRepository.findAllById(courseIds);
+    // 챌린지 존재 검사
+    private List<Challenge> validateAndGetChallenge(List<Long> challengeIds) {
+        List<Challenge> challenges = challengeRepository.findAllById(challengeIds);
 
-        if (courses.size() != courseIds.size()) {
-            Set<Long> foundIds = courses.stream()
-                .map(Course::getId)
+        if (challenges.size() != challengeIds.size()) {
+            Set<Long> foundIds = challenges.stream()
+                .map(Challenge::getId)
                 .collect(Collectors.toSet());
 
-            String missingIds = courseIds.stream()
+            String missingIds = challengeIds.stream()
                 .filter(id -> !foundIds.contains(id))
                 .map(String::valueOf)
                 .collect(Collectors.joining(", "));
@@ -64,19 +57,17 @@ public class RewardEventService {
                 "존재하지 않는 코스 ID: " + missingIds);
         }
 
-
-        return courses;
+        return challenges;
     }
 
-    // 이벤트 진행 중인 코스인지 확인
-    private void validateEventConflict(List<Long> courseIds, LocalDateTime startTime, LocalDateTime endTime) {
-        List<Long> conflictCourseIds = rewardEventRepository.findConflictingCourseIds(courseIds,
+    // 이벤트 진행 중인 챌린지인지 확인
+    private void validateEventConflict(List<Long> challengeIds, LocalDateTime startTime, LocalDateTime endTime) {
+        List<Long> conflictChallengeeIds = rewardEventRepository.findConflictingChallengeIds(challengeIds,
             startTime, endTime);
 
-        if (!conflictCourseIds.isEmpty()) {
-            throw new CustomException(REWARD_EVENT_COURSE_CONFLICT,
-                "이미 다른 이벤트로 등룩 중인 코스: " + conflictCourseIds);
+        if (!conflictChallengeeIds.isEmpty()) {
+            throw new CustomException(REWARD_EVENT_CHALLENGE_CONFLICT,
+                "이미 다른 이벤트로 등룩 중인 챌린지: " + conflictChallengeeIds);
         }
     }
-
 }

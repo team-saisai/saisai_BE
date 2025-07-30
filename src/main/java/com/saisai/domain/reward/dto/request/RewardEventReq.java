@@ -11,8 +11,8 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 public record RewardEventReq(
-    @NotEmpty(message = "최소 하나의 코스는 선택해야 합니다.")
-    List<Long> courseIds,
+    @NotEmpty(message = "최소 하나의 챌린지는 선택해야 합니다.")
+    List<Long> challengeIds,
 
     @Future(message = "이벤트 시작 시간은 현재 시간 이후여야 합니다.")
     @NotNull(message = "이벤트 시작 시간은 필수입니다.")
