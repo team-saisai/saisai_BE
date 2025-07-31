@@ -1,14 +1,18 @@
 package com.saisai.domain.course.service;
 
 import static com.saisai.domain.common.exception.ExceptionCode.COURSE_NOT_FOUND;
+import static com.saisai.domain.common.exception.ExceptionCode.INVALID_SORT_OPTION_FOR_COURSE_TYPE;
 import static com.saisai.domain.common.exception.ExceptionCode.USER_NOT_FOUND;
 
 import com.saisai.config.jwt.AuthUserDetails;
 import com.saisai.domain.common.aws.s3.GpxS3;
 import com.saisai.domain.common.aws.s3.ImageUtil;
 import com.saisai.domain.common.exception.CustomException;
+import com.saisai.domain.course.constant.CourseSortOption;
+import com.saisai.domain.course.constant.CourseType;
+import com.saisai.domain.course.dto.projection.ChallengeCourseProjection;
 import com.saisai.domain.course.dto.projection.CourseDetailsProjection;
-import com.saisai.domain.course.dto.projection.CoursePageProjection;
+import com.saisai.domain.course.dto.projection.GeneralCourseProjection;
 import com.saisai.domain.course.dto.response.CourseDetailsRes;
 import com.saisai.domain.course.dto.response.CoursePageRes;
 import com.saisai.domain.course.repository.CourseRepository;
@@ -19,7 +23,6 @@ import com.saisai.domain.ride.repository.RideRepository;
 import com.saisai.domain.user.entity.User;
 import com.saisai.domain.user.repository.UserRepository;
 import java.util.List;
-import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -42,32 +45,43 @@ public class CourseService {
     private final UserRepository userRepository;
 
     // 코스 목록 조회 메서드
-    public Page<CoursePageRes> getCourses(Pageable pageable, String challengeStatus) {
-        Page<CoursePageProjection> coursePage = courseRepository.findCoursesByChallengeStatus(challengeStatus, pageable);
+    public Page<CoursePageRes> getCourses(Pageable pageable, CourseType type, CourseSortOption sortOption) {
 
-        List<Long> courseIds = coursePage.getContent().stream()
-            .map(CoursePageProjection::courseId)
-            .toList();
+        return switch (type) {
+            case CHALLENGE -> fetchChallengeCoursesAsPage(pageable, sortOption);
+            case GENERAL -> fetchGeneralCoursesAsPage(pageable, sortOption);
+        };
+    }
 
-        final Map<Long, RideCountRes> rideCountResMap = rideRepository.countRidesMapByCourseIds(courseIds);
+    // 챌린지 코스 조회
+    private Page<CoursePageRes> fetchGeneralCoursesAsPage(Pageable pageable, CourseSortOption sortOption) {
 
-        List<CoursePageRes> result = coursePage.getContent().stream()
-            .map(projection -> {
-                RideCountRes rideCountRes = rideCountResMap.getOrDefault(
-                    projection.courseId(),
-                    RideCountRes.empty(projection.courseId())
-                );
+        if (sortOption.equals(CourseSortOption.END_SOON)) {
+            throw new CustomException(INVALID_SORT_OPTION_FOR_COURSE_TYPE);
+        }
 
-                return CoursePageRes.from(
+        Page<GeneralCourseProjection> generalPage = courseRepository.findGeneralCourses(pageable, sortOption);
+        List<CoursePageRes> result = generalPage.getContent().stream()
+            .map(projection ->
+                CoursePageRes.from(
                     projection,
-                    rideCountRes,
                     imageUtil.getImageUrl(projection.imageUrl())
-                );
-
-            })
+                ))
             .toList();
+        return new PageImpl<>(result, pageable, generalPage.getTotalElements());
+    }
 
-        return new PageImpl<>(result, pageable, coursePage.getTotalElements());
+    // 일반 코스 조회
+    private Page<CoursePageRes> fetchChallengeCoursesAsPage(Pageable pageable, CourseSortOption sortOption) {
+        Page<ChallengeCourseProjection> challengePage = courseRepository.findChallengeCourses(pageable, sortOption);
+        List<CoursePageRes> result = challengePage.getContent().stream()
+            .map(projection ->
+                CoursePageRes.from(
+                    projection,
+                    imageUtil.getImageUrl(projection.imageUrl())
+                ))
+            .toList();
+        return new PageImpl<>(result, pageable, challengePage.getTotalElements());
     }
 
     // 코스 상세 조회 비즈니스 로직

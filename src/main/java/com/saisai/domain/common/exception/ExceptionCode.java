@@ -33,6 +33,7 @@ public enum ExceptionCode {
     COURSE_DISTANCE_INVALID(HttpStatus.BAD_REQUEST, "CR_ER_04", "코스 거리 정보가 유효하지 않습니다."),
     COURSE_ALREADY_BOOKMARK(HttpStatus.CONFLICT, "CR_ER_05", "이미 북마크된 코스입니다."),
     COURSE_BOOKMARK_NOT_FOUND(HttpStatus.NOT_FOUND, "CR_ER_06", "코스 북마크를 찾을 수 없습니다."),
+    INVALID_SORT_OPTION_FOR_COURSE_TYPE(HttpStatus.BAD_REQUEST, "CR_ER_07", "일반 코스에서는 종료일 기준으로 정렬할 수 없습니다."),
     COURSE_TYPE_NOT_FOUND(HttpStatus.NOT_FOUND, "CR_ER_08", "해당 코스 타입을 찾을 수 없습니다."),
 
     // badge
