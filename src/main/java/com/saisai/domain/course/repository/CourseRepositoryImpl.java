@@ -2,20 +2,22 @@ package com.saisai.domain.course.repository;
 
 import static com.saisai.domain.challenge.entity.QChallenge.challenge;
 import static com.saisai.domain.course.entity.QCourse.course;
-import static com.saisai.domain.reward.entity.QEventCourse.eventCourse;
 import static com.saisai.domain.reward.entity.QRewardEvent.rewardEvent;
+import static com.saisai.domain.ride.entity.QRide.ride;
 
-import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.saisai.domain.challenge.entity.ChallengeStatus;
+import com.saisai.domain.course.constant.CourseSortOption;
+import com.saisai.domain.course.dto.projection.ChallengeCourseProjection;
 import com.saisai.domain.course.dto.projection.CourseCardProjection;
 import com.saisai.domain.course.dto.projection.CourseDetailsProjection;
-import com.saisai.domain.course.dto.projection.CoursePageProjection;
+import com.saisai.domain.course.dto.projection.GeneralCourseProjection;
+import com.saisai.domain.course.dto.projection.QChallengeCourseProjection;
 import com.saisai.domain.course.dto.projection.QCourseCardProjection;
 import com.saisai.domain.course.dto.projection.QCourseDetailsProjection;
-import com.saisai.domain.course.dto.projection.QCoursePageProjection;
+import com.saisai.domain.course.dto.projection.QGeneralCourseProjection;
 import com.saisai.domain.reward.dto.projection.QRewardEventProjection;
 import com.saisai.domain.reward.entity.EventStatus;
 import java.util.List;
@@ -32,18 +34,13 @@ public class CourseRepositoryImpl implements CourseRepositoryCustom {
 
     private final JPAQueryFactory queryFactory;
 
-    // 전체 조회 메서드
+    // 일반 코스 조회
     @Override
-    public Page<CoursePageProjection> findCoursesByChallengeStatus(String challengeStatus, Pageable pageable) {
+    public Page<GeneralCourseProjection> findGeneralCourses(Pageable pageable,
+        CourseSortOption sortOption) {
 
-        BooleanBuilder searchConditions = searchConditions();
-
-        if (challengeStatus != null) {
-            searchConditions.and(challenge.status.eq(ChallengeStatus.valueOf(challengeStatus)));
-        }
-
-        List<CoursePageProjection> content = queryFactory
-            .select(new QCoursePageProjection(
+        List<GeneralCourseProjection> content = queryFactory
+            .select(new QGeneralCourseProjection(
                 course.id,
                 course.name,
                 course.level,
@@ -51,6 +48,51 @@ public class CourseRepositoryImpl implements CourseRepositoryCustom {
                 course.estimatedTime,
                 course.sigun,
                 course.image,
+                ride.count().coalesce(0L)
+            ))
+            .from(course)
+            .leftJoin(challenge).on(
+                challenge.course.eq(course)
+                    .and(challenge.status.eq(ChallengeStatus.ONGOING))
+            )
+            .leftJoin(ride).on(ride.course.eq(course))
+            .where(course.isDeleted.eq(false)
+                .and(challenge.id.isNull()))
+            .groupBy(course.id, course.name, course.level, course.distance,
+                course.estimatedTime, course.sigun, course.image)
+            .orderBy(sortOption.toOrderSpecifier())
+            .offset(pageable.getOffset())
+            .limit(pageable.getPageSize())
+            .fetch();
+
+        JPAQuery<Long> query = queryFactory
+            .select(course.countDistinct())
+            .from(course)
+            .leftJoin(challenge).on(
+                challenge.course.eq(course)
+                    .and(challenge.status.eq(ChallengeStatus.ONGOING))
+            )
+            .where(course.isDeleted.eq(false)
+                .and(challenge.id.isNull()));
+
+        return PageableExecutionUtils.getPage(content, pageable, query::fetchOne);
+    }
+
+    // 챌린지 코스 조회
+    @Override
+    public Page<ChallengeCourseProjection> findChallengeCourses(Pageable pageable,
+        CourseSortOption sortOption) {
+
+        List<ChallengeCourseProjection> content = queryFactory
+            .select(new QChallengeCourseProjection(
+                course.id,
+                course.name,
+                course.level,
+                course.distance,
+                course.estimatedTime,
+                course.sigun,
+                course.image,
+                ride.count().coalesce(0L),
                 challenge.status,
                 challenge.endedAt,
                 new QRewardEventProjection(
@@ -60,22 +102,34 @@ public class CourseRepositoryImpl implements CourseRepositoryCustom {
                     rewardEvent.value
                 )
             ))
-            .from(challenge)
-            .join(challenge.course, course)
-            .leftJoin(eventCourse).on(eventCourse.course.eq(course))
-            .leftJoin(rewardEvent).on(eventCourse.rewardEvent.eq(rewardEvent))
-            .where(searchConditions)
+            .from(course)
+            .leftJoin(challenge).on(
+                challenge.course.eq(course)
+                    .and(challenge.status.eq(ChallengeStatus.ONGOING))
+            )
+            .leftJoin(ride).on(ride.course.eq(course))
+            .leftJoin(rewardEvent).on(rewardEvent.challenge.eq(challenge))
+            .where(course.isDeleted.eq(false)
+                .and(challenge.id.isNotNull()))
+            .groupBy(course.id, course.name, course.level, course.distance,
+                course.estimatedTime, course.sigun, course.image,
+                challenge.status, challenge.endedAt,
+                rewardEvent.id, rewardEvent.status, rewardEvent.type, rewardEvent.value)
+            .orderBy(sortOption.toOrderSpecifier())
             .offset(pageable.getOffset())
             .limit(pageable.getPageSize())
             .fetch();
 
         JPAQuery<Long> total = queryFactory
             .select(course.countDistinct())
-            .from(challenge)
-            .join(challenge.course, course)
-            .leftJoin(eventCourse).on(eventCourse.course.eq(course))
-            .leftJoin(rewardEvent).on(eventCourse.rewardEvent.eq(rewardEvent))
-            .where(searchConditions);
+            .from(course)
+            .leftJoin(challenge).on(
+                challenge.course.eq(course)
+                    .and(challenge.status.eq(ChallengeStatus.ONGOING))
+            )
+            .leftJoin(rewardEvent).on(rewardEvent.challenge.eq(challenge))
+            .where(course.isDeleted.eq(false)
+                .and(challenge.id.isNotNull()));
 
         return PageableExecutionUtils.getPage(content, pageable, total::fetchOne);
     }
@@ -100,8 +154,7 @@ public class CourseRepositoryImpl implements CourseRepositoryCustom {
                 )
             ))
             .from(course)
-            .leftJoin(eventCourse).on(eventCourse.course.eq(course))
-            .leftJoin(rewardEvent).on(eventCourse.rewardEvent.eq(rewardEvent))
+            .leftJoin(rewardEvent).on(rewardEvent.challenge.eq(challenge))  // 이거 챌린지로 이동해야할듯
             .where(course.id.in(courseIds))
             .fetch();
     }
@@ -129,20 +182,10 @@ public class CourseRepositoryImpl implements CourseRepositoryCustom {
             .from(course)
             .leftJoin(challenge).on(challenge.course.eq(course)
                 .and(challenge.status.eq(ChallengeStatus.ONGOING)))
-            .leftJoin(eventCourse).on(eventCourse.course.eq(course))
-            .leftJoin(eventCourse.rewardEvent, rewardEvent)
+            .leftJoin(rewardEvent).on(rewardEvent.challenge.eq(challenge)) // 여기 동적 조건 추가해야할듯. 챌린지인지 아닌지.
             .where(course.id.eq(courseId))
             .fetchOne();
 
         return Optional.ofNullable(result);
-    }
-
-    // where절 기본 정의 메서드
-    private BooleanBuilder searchConditions() {
-        BooleanBuilder builder = new BooleanBuilder();
-
-        builder.and(course.isDeleted.eq(false));
-
-        return builder;
     }
 }
