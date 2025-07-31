@@ -2,10 +2,12 @@ package com.saisai.domain.course.repository;
 
 import static com.saisai.domain.challenge.entity.QChallenge.challenge;
 import static com.saisai.domain.course.entity.QCourse.course;
+import static com.saisai.domain.course.entity.QCourseBookmark.courseBookmark;
 import static com.saisai.domain.reward.entity.QRewardEvent.rewardEvent;
 import static com.saisai.domain.ride.entity.QRide.ride;
 
 import com.querydsl.core.types.dsl.Expressions;
+import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.saisai.domain.challenge.entity.ChallengeStatus;
@@ -37,7 +39,7 @@ public class CourseRepositoryImpl implements CourseRepositoryCustom {
     // 일반 코스 조회
     @Override
     public Page<GeneralCourseProjection> findGeneralCourses(Pageable pageable,
-        CourseSortOption sortOption) {
+        CourseSortOption sortOption, Long userId) {
 
         List<GeneralCourseProjection> content = queryFactory
             .select(new QGeneralCourseProjection(
@@ -48,14 +50,21 @@ public class CourseRepositoryImpl implements CourseRepositoryCustom {
                 course.estimatedTime,
                 course.sigun,
                 course.image,
-                ride.count().coalesce(0L)
+                ride.count().coalesce(0L),
+                JPAExpressions
+                    .selectOne()
+                    .from(courseBookmark)
+                    .where(courseBookmark.user.id.eq(userId)
+                        .and(courseBookmark.course.id.eq(course.id))
+                    )
+                    .exists()
             ))
             .from(course)
             .leftJoin(challenge).on(
-                challenge.course.eq(course)
+                challenge.course.id.eq(course.id)
                     .and(challenge.status.eq(ChallengeStatus.ONGOING))
             )
-            .leftJoin(ride).on(ride.course.eq(course))
+            .leftJoin(ride).on(ride.course.id.eq(course.id))
             .where(course.isDeleted.eq(false)
                 .and(challenge.id.isNull()))
             .groupBy(course.id, course.name, course.level, course.distance,
@@ -69,7 +78,7 @@ public class CourseRepositoryImpl implements CourseRepositoryCustom {
             .select(course.countDistinct())
             .from(course)
             .leftJoin(challenge).on(
-                challenge.course.eq(course)
+                challenge.course.id.eq(course.id)
                     .and(challenge.status.eq(ChallengeStatus.ONGOING))
             )
             .where(course.isDeleted.eq(false)
@@ -81,7 +90,7 @@ public class CourseRepositoryImpl implements CourseRepositoryCustom {
     // 챌린지 코스 조회
     @Override
     public Page<ChallengeCourseProjection> findChallengeCourses(Pageable pageable,
-        CourseSortOption sortOption) {
+        CourseSortOption sortOption, Long userId) {
 
         List<ChallengeCourseProjection> content = queryFactory
             .select(new QChallengeCourseProjection(
@@ -93,6 +102,13 @@ public class CourseRepositoryImpl implements CourseRepositoryCustom {
                 course.sigun,
                 course.image,
                 ride.count().coalesce(0L),
+                JPAExpressions
+                    .selectOne()
+                    .from(courseBookmark)
+                    .where(courseBookmark.user.id.eq(userId)
+                        .and(courseBookmark.course.id.eq(course.id))
+                    )
+                    .exists(),
                 challenge.status,
                 challenge.endedAt,
                 new QRewardEventProjection(
@@ -104,11 +120,11 @@ public class CourseRepositoryImpl implements CourseRepositoryCustom {
             ))
             .from(course)
             .leftJoin(challenge).on(
-                challenge.course.eq(course)
+                challenge.course.id.eq(course.id)
                     .and(challenge.status.eq(ChallengeStatus.ONGOING))
             )
-            .leftJoin(ride).on(ride.course.eq(course))
-            .leftJoin(rewardEvent).on(rewardEvent.challenge.eq(challenge))
+            .leftJoin(ride).on(ride.course.id.eq(course.id))
+            .leftJoin(rewardEvent).on(rewardEvent.challenge.id.eq(challenge.id))
             .where(course.isDeleted.eq(false)
                 .and(challenge.id.isNotNull()))
             .groupBy(course.id, course.name, course.level, course.distance,
@@ -124,10 +140,10 @@ public class CourseRepositoryImpl implements CourseRepositoryCustom {
             .select(course.countDistinct())
             .from(course)
             .leftJoin(challenge).on(
-                challenge.course.eq(course)
+                challenge.course.id.eq(course.id)
                     .and(challenge.status.eq(ChallengeStatus.ONGOING))
             )
-            .leftJoin(rewardEvent).on(rewardEvent.challenge.eq(challenge))
+            .leftJoin(rewardEvent).on(rewardEvent.challenge.id.eq(challenge.id))
             .where(course.isDeleted.eq(false)
                 .and(challenge.id.isNotNull()));
 

@@ -36,12 +36,13 @@ public class CourseController {
     private final CourseService courseService;
 
     @Operation(summary = "코스 전체 목록 조회",
-        description = "코스명, 요약, 난이도(상(3)/중(2)/하(1)), 거리(km), 예상 소요시간(분), 시군, 참가자수,챌린지 상태, 챌린지 종료일, 이벤트 여부, 지급 리워드 한 페이지 당 10개 씩 반환")
+        description = "코스명, 요약, 난이도(상(3)/중(2)/하(1)), 거리(km), 예상 소요시간(분), 시군, 참가자수, 북마크 여부, 챌린지 상태, 챌린지 종료일, 이벤트 여부, 지급 리워드 한 페이지 당 10개 씩 반환")
     @GetMapping
     public ResponseEntity<ApiResponse<Page<CoursePageRes>>> getAllCourses(
         @Parameter(description = "페이지 번호") @RequestParam(defaultValue = "1") int page,
         @Parameter(description = "challenge(챌린지 코스), general(일반 코스)") @RequestParam(defaultValue = "challenge") String type,
-        @Parameter(description = "levelAsc(난이도 낮은 순), levelDesc(난이도 높은 순), participantsDesc(참가자 순), endSoon(종료일 순)") @RequestParam(defaultValue = "levelAsc") String sort
+        @Parameter(description = "levelAsc(난이도 낮은 순), levelDesc(난이도 높은 순), participantsDesc(참가자 순), endSoon(종료일 순)") @RequestParam(defaultValue = "levelAsc") String sort,
+        @Auth AuthUserDetails authUserDetails
     ) {
         CourseType courseType = CourseType.from(type);
         CourseSortOption sortOption = CourseSortOption.from(sort);
@@ -52,7 +53,7 @@ public class CourseController {
             Sort.by(sortOption.getDirection(), sortOption.getSortColumn())
         );
         return ResponseEntity.status(HttpStatus.OK)
-            .body(ApiResponse.success(COURSE_LIST_GET_SUCCESS, courseService.getCourses(pageable, courseType, sortOption)));
+            .body(ApiResponse.success(COURSE_LIST_GET_SUCCESS, courseService.getCourses(pageable, courseType, sortOption, authUserDetails)));
     }
 
     @Operation(summary = "코스 상세 조회",
