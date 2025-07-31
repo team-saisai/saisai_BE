@@ -15,7 +15,7 @@ public interface CourseRepositoryCustom {
 
     Optional<CourseDetailsProjection> findCourseDetailsProjection(Long courseId);
 
-    Page<ChallengeCourseProjection> findChallengeCourses(Pageable pageable, CourseSortOption sortOption);
+    Page<ChallengeCourseProjection> findChallengeCourses(Pageable pageable, CourseSortOption sortOption, Long userId);
 
-    Page<GeneralCourseProjection> findGeneralCourses(Pageable pageable, CourseSortOption sortOption);
+    Page<GeneralCourseProjection> findGeneralCourses(Pageable pageable, CourseSortOption sortOption, Long userId);
 }

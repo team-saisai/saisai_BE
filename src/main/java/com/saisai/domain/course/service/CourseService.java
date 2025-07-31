@@ -45,22 +45,22 @@ public class CourseService {
     private final UserRepository userRepository;
 
     // 코스 목록 조회 메서드
-    public Page<CoursePageRes> getCourses(Pageable pageable, CourseType type, CourseSortOption sortOption) {
+    public Page<CoursePageRes> getCourses(Pageable pageable, CourseType type, CourseSortOption sortOption, AuthUserDetails authUserDetails) {
 
         return switch (type) {
-            case CHALLENGE -> fetchChallengeCoursesAsPage(pageable, sortOption);
-            case GENERAL -> fetchGeneralCoursesAsPage(pageable, sortOption);
+            case CHALLENGE -> fetchChallengeCoursesAsPage(pageable, sortOption, authUserDetails.userId());
+            case GENERAL -> fetchGeneralCoursesAsPage(pageable, sortOption, authUserDetails.userId());
         };
     }
 
     // 챌린지 코스 조회
-    private Page<CoursePageRes> fetchGeneralCoursesAsPage(Pageable pageable, CourseSortOption sortOption) {
+    private Page<CoursePageRes> fetchGeneralCoursesAsPage(Pageable pageable, CourseSortOption sortOption, Long userId) {
 
         if (sortOption.equals(CourseSortOption.END_SOON)) {
             throw new CustomException(INVALID_SORT_OPTION_FOR_COURSE_TYPE);
         }
 
-        Page<GeneralCourseProjection> generalPage = courseRepository.findGeneralCourses(pageable, sortOption);
+        Page<GeneralCourseProjection> generalPage = courseRepository.findGeneralCourses(pageable, sortOption, userId);
         List<CoursePageRes> result = generalPage.getContent().stream()
             .map(projection ->
                 CoursePageRes.from(
@@ -72,8 +72,8 @@ public class CourseService {
     }
 
     // 일반 코스 조회
-    private Page<CoursePageRes> fetchChallengeCoursesAsPage(Pageable pageable, CourseSortOption sortOption) {
-        Page<ChallengeCourseProjection> challengePage = courseRepository.findChallengeCourses(pageable, sortOption);
+    private Page<CoursePageRes> fetchChallengeCoursesAsPage(Pageable pageable, CourseSortOption sortOption, Long userId) {
+        Page<ChallengeCourseProjection> challengePage = courseRepository.findChallengeCourses(pageable, sortOption, userId);
         List<CoursePageRes> result = challengePage.getContent().stream()
             .map(projection ->
                 CoursePageRes.from(

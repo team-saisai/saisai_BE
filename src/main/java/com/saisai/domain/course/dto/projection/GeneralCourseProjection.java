@@ -10,7 +10,8 @@ public record GeneralCourseProjection(
     Double estimatedTime,
     String sigun,
     String imageUrl,
-    Long participantsCount
+    Long participantsCount,
+    Boolean isBookmarked
 ) {
 
     @QueryProjection
