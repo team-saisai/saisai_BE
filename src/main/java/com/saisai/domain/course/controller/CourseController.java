@@ -6,6 +6,8 @@ import static com.saisai.domain.common.response.SuccessCode.COURSE_LIST_GET_SUCC
 import com.saisai.config.jwt.AuthUserDetails;
 import com.saisai.domain.common.annotation.Auth;
 import com.saisai.domain.common.response.ApiResponse;
+import com.saisai.domain.course.constant.CourseSortOption;
+import com.saisai.domain.course.constant.CourseType;
 import com.saisai.domain.course.dto.response.CourseDetailsRes;
 import com.saisai.domain.course.dto.response.CoursePageRes;
 import com.saisai.domain.course.service.CourseService;
@@ -16,6 +18,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -33,16 +36,23 @@ public class CourseController {
     private final CourseService courseService;
 
     @Operation(summary = "코스 전체 목록 조회",
-        description = "코스명, 요약, 난이도(상(3)/중(2)/하(1)), 거리(km), 예상 소요시간(분), 시군, 도전자 수, 완주자 수, 챌린지 상태(ENDED(종료)/ONGOING(진행 중)/UPCOMING(예정), 챌린지 종료일, 이벤트 여부, 지급 리워드 한 페이지 당 10개 씩 반환")
+        description = "코스명, 요약, 난이도(상(3)/중(2)/하(1)), 거리(km), 예상 소요시간(분), 시군, 참가자수,챌린지 상태, 챌린지 종료일, 이벤트 여부, 지급 리워드 한 페이지 당 10개 씩 반환")
     @GetMapping
     public ResponseEntity<ApiResponse<Page<CoursePageRes>>> getAllCourses(
         @Parameter(description = "페이지 번호") @RequestParam(defaultValue = "1") int page,
-        @Parameter(description = "챌린지 상태 (챌린지 중 = ONGOING). 미입력시 모든 코스 조회") @RequestParam(required = false) String challengeStatus
+        @Parameter(description = "challenge(챌린지 코스), general(일반 코스)") @RequestParam(defaultValue = "challenge") String type,
+        @Parameter(description = "levelAsc(난이도 낮은 순), levelDesc(난이도 높은 순), participantsDesc(참가자 순), endSoon(종료일 순)") @RequestParam(defaultValue = "levelAsc") String sort
     ) {
+        CourseType courseType = CourseType.from(type);
+        CourseSortOption sortOption = CourseSortOption.from(sort);
 
-        Pageable pageable = PageRequest.of(page - 1, 10);
+        Pageable pageable = PageRequest.of(
+            page - 1,
+            10,
+            Sort.by(sortOption.getDirection(), sortOption.getSortColumn())
+        );
         return ResponseEntity.status(HttpStatus.OK)
-            .body(ApiResponse.success(COURSE_LIST_GET_SUCCESS, courseService.getCourses(pageable, challengeStatus)));
+            .body(ApiResponse.success(COURSE_LIST_GET_SUCCESS, courseService.getCourses(pageable, courseType, sortOption)));
     }
 
     @Operation(summary = "코스 상세 조회",
