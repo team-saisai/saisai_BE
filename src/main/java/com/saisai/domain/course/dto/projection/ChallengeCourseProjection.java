@@ -14,6 +14,7 @@ public record ChallengeCourseProjection(
     String sigun,
     String imageUrl,
     Long participantsCount,
+    Boolean isBookmarked,
     ChallengeStatus challengeStatus,
     LocalDateTime challengeEndedAt,
     RewardEventProjection rewardEventProjection
