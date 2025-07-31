@@ -31,10 +31,12 @@ public enum ExceptionCode {
     COURSE_NAME_REQUIRED(HttpStatus.BAD_REQUEST, "CR_ER_02", "코스명이 공백으로만 이루어져 있거나 비어있습니다."),
     COURSE_NOT_FOUND(HttpStatus.NOT_FOUND, "CR_ER_03", "코스를 찾을 수 없습니다."),
     COURSE_DISTANCE_INVALID(HttpStatus.BAD_REQUEST, "CR_ER_04", "코스 거리 정보가 유효하지 않습니다."),
-    COURSE_ALREADY_BOOKMARK(HttpStatus.CONFLICT, "CR_ER_05", "이미 북마크된 코스입니다."),
-    COURSE_BOOKMARK_NOT_FOUND(HttpStatus.NOT_FOUND, "CR_ER_06", "코스 북마크를 찾을 수 없습니다."),
-    INVALID_SORT_OPTION_FOR_COURSE_TYPE(HttpStatus.BAD_REQUEST, "CR_ER_07", "일반 코스에서는 종료일 기준으로 정렬할 수 없습니다."),
-    COURSE_TYPE_NOT_FOUND(HttpStatus.NOT_FOUND, "CR_ER_08", "해당 코스 타입을 찾을 수 없습니다."),
+    INVALID_SORT_OPTION_FOR_COURSE_TYPE(HttpStatus.BAD_REQUEST, "CR_ER_05", "일반 코스에서는 종료일 기준으로 정렬할 수 없습니다."),
+    COURSE_TYPE_NOT_FOUND(HttpStatus.NOT_FOUND, "CR_ER_06", "해당 코스 타입을 찾을 수 없습니다."),
+
+    // course bookmark
+    COURSE_ALREADY_BOOKMARK(HttpStatus.CONFLICT, "CB_ER_01", "이미 북마크된 코스입니다."),
+    COURSE_BOOKMARK_NOT_FOUND(HttpStatus.NOT_FOUND, "CB_ER_02", "삭제할 북마크가 존재하지 않습니다."),
 
     // badge
     BADGE_NAME_DUPLICATE(HttpStatus.BAD_REQUEST, "BG_ER_01", "뱃지명이 중복됩니다."),
