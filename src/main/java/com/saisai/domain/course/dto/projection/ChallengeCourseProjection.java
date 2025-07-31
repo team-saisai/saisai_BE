@@ -13,6 +13,7 @@ public record CoursePageProjection(
     Double estimatedTime,
     String sigun,
     String imageUrl,
+    Long participantsCount,
     ChallengeStatus challengeStatus,
     LocalDateTime challengeEndedAt,
     RewardEventProjection rewardEventProjection
