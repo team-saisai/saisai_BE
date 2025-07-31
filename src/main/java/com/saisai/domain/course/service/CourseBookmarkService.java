@@ -7,11 +7,12 @@ import static com.saisai.domain.common.exception.ExceptionCode.USER_NOT_FOUND;
 
 import com.saisai.config.jwt.AuthUserDetails;
 import com.saisai.domain.common.exception.CustomException;
+import com.saisai.domain.course.dto.request.BookmarksRemoveReq;
 import com.saisai.domain.course.dto.response.CourseBookmarkRes;
 import com.saisai.domain.course.entity.Course;
 import com.saisai.domain.course.entity.CourseBookmark;
-import com.saisai.domain.course.repository.CourseRepository;
 import com.saisai.domain.course.repository.CourseBookmarkRepository;
+import com.saisai.domain.course.repository.CourseRepository;
 import com.saisai.domain.user.entity.User;
 import com.saisai.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -62,6 +63,19 @@ public class CourseBookmarkService {
 
         return CourseBookmarkRes.of(false);
 
+    }
+
+    // 북마크 여러개 삭제
+    @Transactional
+    public void removeBookmarks(BookmarksRemoveReq bookmarksRemoveReq, AuthUserDetails authUserDetails) {
+
+        int deletedCount = courseBookMarkRepository.deleteByUserIdAndCourseIdIn(
+            authUserDetails.userId(), bookmarksRemoveReq.courseIds()
+        );
+
+        if (deletedCount == 0) {
+            throw new CustomException(COURSE_BOOKMARK_NOT_FOUND);
+        }
     }
 
     // 코스 저장 이미 존재하는지 확인
