@@ -5,7 +5,7 @@ import com.saisai.domain.challenge.entity.ChallengeStatus;
 import com.saisai.domain.reward.dto.projection.RewardEventProjection;
 import java.time.LocalDateTime;
 
-public record CoursePageProjection(
+public record ChallengeCourseProjection(
     Long courseId,
     String courseName,
     Integer level,
@@ -20,6 +20,6 @@ public record CoursePageProjection(
 ) {
 
     @QueryProjection
-    public CoursePageProjection {
+    public ChallengeCourseProjection {
     }
 }

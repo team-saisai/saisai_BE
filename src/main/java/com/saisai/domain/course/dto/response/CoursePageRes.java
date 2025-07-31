@@ -1,11 +1,12 @@
 package com.saisai.domain.course.dto.response;
 
 import com.saisai.domain.challenge.entity.ChallengeStatus;
-import com.saisai.domain.course.dto.projection.CoursePageProjection;
+import com.saisai.domain.course.dto.projection.ChallengeCourseProjection;
+import com.saisai.domain.course.dto.projection.GeneralCourseProjection;
 import com.saisai.domain.reward.dto.projection.RewardEventProjection;
 import com.saisai.domain.reward.util.RewardUtils;
-import com.saisai.domain.ride.dto.response.RideCountRes;
 import java.time.LocalDate;
+import java.util.Optional;
 
 public record CoursePageRes(
     Long courseId,
@@ -15,40 +16,58 @@ public record CoursePageRes(
     Double estimatedTime,
     String sigun,
     String imageUrl,
-    Long courseChallengerCount,
-    Long courseFinisherCount,
+    Long participantsCount,
     ChallengeStatus challengeStatus,
     LocalDate challengeEndedAt,
     Boolean isEventActive,
     Integer reward
 ) {
 
-    public static CoursePageRes from(CoursePageProjection coursePageProjection, RideCountRes rideCountRes, String imageUrl) {
+    public static CoursePageRes from(ChallengeCourseProjection challengeCourseProjection, String imageUrl) {
 
-        RewardEventProjection rewardEventProjection = coursePageProjection.rewardEventProjection();
-        boolean isEventActive = rewardEventProjection.rewardEventId() != null;
+        RewardEventProjection rewardEventProjection = challengeCourseProjection.rewardEventProjection();
+
+        boolean isEventActive = Optional.ofNullable(challengeCourseProjection.rewardEventProjection())
+            .map(RewardEventProjection::rewardEventId)
+            .isPresent();
 
         Integer reward = isEventActive ?
             RewardUtils.calculateEventReward(
-                coursePageProjection.level(),
+                challengeCourseProjection.level(),
                 rewardEventProjection.rewardEventType(),
                 rewardEventProjection.value()) :
-            RewardUtils.calculateEventReward(coursePageProjection.level());
+            RewardUtils.calculateEventReward(challengeCourseProjection.level());
 
         return new CoursePageRes(
-            coursePageProjection.courseId(),
-            coursePageProjection.courseName(),
-            coursePageProjection.level(),
-            coursePageProjection.distance(),
-            coursePageProjection.estimatedTime(),
-            coursePageProjection.sigun(),
+            challengeCourseProjection.courseId(),
+            challengeCourseProjection.courseName(),
+            challengeCourseProjection.level(),
+            challengeCourseProjection.distance(),
+            challengeCourseProjection.estimatedTime(),
+            challengeCourseProjection.sigun(),
             imageUrl,
-            rideCountRes.courseChallengerCount(),
-            rideCountRes.courseFinisherCount(),
-            coursePageProjection.challengeStatus(),
-            coursePageProjection.challengeEndedAt().toLocalDate(),
+            challengeCourseProjection.participantsCount(),
+            challengeCourseProjection.challengeStatus(),
+            challengeCourseProjection.challengeEndedAt().toLocalDate(),
             isEventActive,
             reward
+        );
+    }
+
+    public static CoursePageRes from(GeneralCourseProjection generalCourseProjection, String imageUrl) {
+        return new CoursePageRes(
+            generalCourseProjection.courseId(),
+            generalCourseProjection.courseName(),
+            generalCourseProjection.level(),
+            generalCourseProjection.distance(),
+            generalCourseProjection.estimatedTime(),
+            generalCourseProjection.sigun(),
+            imageUrl,
+            generalCourseProjection.participantsCount(),
+            null,
+            null,
+            null,
+            null
         );
     }
 }
