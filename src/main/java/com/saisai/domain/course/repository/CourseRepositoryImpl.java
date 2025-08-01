@@ -116,16 +116,14 @@ public class CourseRepositoryImpl implements CourseRepositoryCustom {
                     rewardEvent.value
                 )
             ))
-            .from(course)
-            .innerJoin(challenge).on(
-                challenge.course.id.eq(course.id)
-                    .and(challenge.status.eq(ChallengeStatus.ONGOING))
-            )
+            .from(challenge)
+            .innerJoin(challenge.course, course)
             .leftJoin(ride).on(ride.course.id.eq(course.id))
             .leftJoin(rewardEvent).on(
                 rewardEvent.challenge.id.eq(challenge.id)
                     .and(rewardEvent.status.eq(EventStatus.ACTIVE)))
-            .where(course.isDeleted.eq(false))
+            .where(course.isDeleted.eq(false)
+                .and(challenge.status.eq(ChallengeStatus.ONGOING)))
             .groupBy(course.id, course.name, course.level, course.distance,
                 course.estimatedTime, course.sigun, course.image,
                 challenge.status, challenge.endedAt,
@@ -138,11 +136,9 @@ public class CourseRepositoryImpl implements CourseRepositoryCustom {
         JPAQuery<Long> total = queryFactory
             .select(course.countDistinct())
             .from(course)
-            .innerJoin(challenge).on(
-                challenge.course.id.eq(course.id)
-                    .and(challenge.status.eq(ChallengeStatus.ONGOING))
-            )
-            .where(course.isDeleted.eq(false));
+            .innerJoin(challenge.course, course)
+            .where(course.isDeleted.eq(false)
+                .and(challenge.status.eq(ChallengeStatus.ONGOING)));
 
         return PageableExecutionUtils.getPage(content, pageable, total::fetchOne);
     }
