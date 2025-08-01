@@ -13,11 +13,9 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.saisai.domain.challenge.entity.ChallengeStatus;
 import com.saisai.domain.course.constant.CourseSortOption;
 import com.saisai.domain.course.dto.projection.ChallengeCourseProjection;
-import com.saisai.domain.course.dto.projection.CourseCardProjection;
 import com.saisai.domain.course.dto.projection.CourseDetailsProjection;
 import com.saisai.domain.course.dto.projection.GeneralCourseProjection;
 import com.saisai.domain.course.dto.projection.QChallengeCourseProjection;
-import com.saisai.domain.course.dto.projection.QCourseCardProjection;
 import com.saisai.domain.course.dto.projection.QCourseDetailsProjection;
 import com.saisai.domain.course.dto.projection.QGeneralCourseProjection;
 import com.saisai.domain.reward.dto.projection.QRewardEventProjection;
@@ -147,31 +145,6 @@ public class CourseRepositoryImpl implements CourseRepositoryCustom {
             .where(course.isDeleted.eq(false));
 
         return PageableExecutionUtils.getPage(content, pageable, total::fetchOne);
-    }
-
-    // 코스 Id List 기반으로 CourseCard 조회 메서드
-    @Override
-    public List<CourseCardProjection> findCourseCardByIds(List<Long> courseIds) {
-        return queryFactory
-            .select(new QCourseCardProjection(
-                course.id,
-                course.name,
-                course.level,
-                course.distance,
-                course.estimatedTime,
-                course.sigun,
-                course.image,
-                new QRewardEventProjection(
-                    rewardEvent.id,
-                    rewardEvent.status,
-                    rewardEvent.type,
-                    rewardEvent.value
-                )
-            ))
-            .from(course)
-            .leftJoin(rewardEvent).on(rewardEvent.challenge.eq(challenge))  // 이거 챌린지로 이동해야할듯
-            .where(course.id.in(courseIds))
-            .fetch();
     }
 
     // 코스 상세 조회

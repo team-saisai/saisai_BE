@@ -4,8 +4,6 @@ import static com.saisai.domain.challenge.entity.QChallenge.challenge;
 import static com.saisai.domain.ride.entity.QRide.ride;
 
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import com.saisai.domain.challenge.dto.projection.ChallengeCardProjection;
-import com.saisai.domain.challenge.dto.projection.QChallengeCardProjection;
 import com.saisai.domain.challenge.entity.ChallengeStatus;
 import com.saisai.domain.ride.entity.RideStatus;
 import java.util.List;
