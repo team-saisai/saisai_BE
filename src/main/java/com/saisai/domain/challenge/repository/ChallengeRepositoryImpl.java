@@ -2,6 +2,7 @@ package com.saisai.domain.challenge.repository;
 
 import static com.saisai.domain.challenge.entity.QChallenge.challenge;
 import static com.saisai.domain.course.entity.QCourse.course;
+import static com.saisai.domain.course.entity.QCourseBookmark.courseBookmark;
 import static com.saisai.domain.reward.entity.QRewardEvent.rewardEvent;
 import static com.saisai.domain.ride.entity.QRide.ride;
 
@@ -26,9 +27,6 @@ public class ChallengeRepositoryImpl implements ChallengeRepositoryCustom {
     @Override
     public List<ChallengeCourseProjection> findTop10CoursesByOngoingChallengeRides(Long userId) {
         return queryFactory
-            .select(new QChallengeCardProjection(
-                challenge.id,
-                challenge.course.id,
             .select(new QChallengeCourseProjection(
                 course.id,
                 course.name,
@@ -38,6 +36,13 @@ public class ChallengeRepositoryImpl implements ChallengeRepositoryCustom {
                 course.sigun,
                 course.image,
                 ride.count().coalesce(0L),
+                JPAExpressions
+                    .selectOne()
+                    .from(courseBookmark)
+                    .where(courseBookmark.user.id.eq(userId)
+                        .and(courseBookmark.course.id.eq(course.id))
+                    )
+                    .exists(),
                 challenge.status,
                 challenge.endedAt,
                 new QRewardEventProjection(

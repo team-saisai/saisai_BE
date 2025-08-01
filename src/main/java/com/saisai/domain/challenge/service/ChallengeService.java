@@ -23,9 +23,9 @@ public class ChallengeService {
     private final ImageUtil imageUtil;
 
     // 현재 인기 챌린지 조회 메서드
-    public List<CourseCardRes> getPopularChallenges() {
+    public List<PopularChallengeCourseRes> getPopularChallenges(AuthUserDetails authUserDetails) {
         // 인기 코스Id + 도전자 수 조회
-        List<ChallengeCardProjection> popularChallengeInfos = challengeRepository.findTop10CoursesByOngoingChallengeRides();
+        List<ChallengeCourseProjection> popularChallengeInfos = challengeRepository.findTop10CoursesByOngoingChallengeRides(authUserDetails.userId());
 
         if (popularChallengeInfos.isEmpty()) {
             return Collections.emptyList();
