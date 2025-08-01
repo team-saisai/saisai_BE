@@ -53,7 +53,7 @@ public class CourseService {
         };
     }
 
-    // 챌린지 코스 조회
+    // 일반 코스 조회
     private Page<CoursePageRes> fetchGeneralCoursesAsPage(Pageable pageable, CourseSortOption sortOption, Long userId) {
 
         if (sortOption.equals(CourseSortOption.END_SOON)) {
@@ -71,7 +71,7 @@ public class CourseService {
         return new PageImpl<>(result, pageable, generalPage.getTotalElements());
     }
 
-    // 일반 코스 조회
+    // 챌린지 코스 조회
     private Page<CoursePageRes> fetchChallengeCoursesAsPage(Pageable pageable, CourseSortOption sortOption, Long userId) {
         Page<ChallengeCourseProjection> challengePage = courseRepository.findChallengeCourses(pageable, sortOption, userId);
         List<CoursePageRes> result = challengePage.getContent().stream()

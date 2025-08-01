@@ -74,7 +74,7 @@ public class CourseRepositoryImpl implements CourseRepositoryCustom {
             .limit(pageable.getPageSize())
             .fetch();
 
-        JPAQuery<Long> query = queryFactory
+        JPAQuery<Long> total = queryFactory
             .select(course.countDistinct())
             .from(course)
             .leftJoin(challenge).on(
@@ -84,7 +84,7 @@ public class CourseRepositoryImpl implements CourseRepositoryCustom {
             .where(course.isDeleted.eq(false)
                 .and(challenge.id.isNull()));
 
-        return PageableExecutionUtils.getPage(content, pageable, query::fetchOne);
+        return PageableExecutionUtils.getPage(content, pageable, total::fetchOne);
     }
 
     // 챌린지 코스 조회
