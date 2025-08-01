@@ -22,9 +22,10 @@ public enum SuccessCode {
     COURSE_API_SYNC_SUCCESS(HttpStatus.OK, "COURSE_03", "두루누비(코스) API 동기화에 성공했습니다."),
 
     // courseBookmark
-    COURSE_BOOKMARK_ADD_SUCCESS(HttpStatus.CREATED, "COURSE_04", "코스 북마크 추가에 성공했습니다."),
-    COURSE_BOOKMARK_REMOVE_SUCCESS(HttpStatus.OK, "COURSE_05", "코스 북마크 삭제에 성공했습니다."),
-    COURSE_BOOKMARK_EDIT_SUCCESS(HttpStatus.OK, "COURSE_06", "저장한 코스 편집에 성공했습니다."),
+    COURSE_BOOKMARK_ADD_SUCCESS(HttpStatus.CREATED, "C_BOOKMARK_01", "코스 북마크 추가에 성공했습니다."),
+    COURSE_BOOKMARK_REMOVE_SUCCESS(HttpStatus.OK, "C_BOOKMARK_02", "코스 북마크 삭제에 성공했습니다."),
+    COURSE_BOOKMARK_EDIT_SUCCESS(HttpStatus.OK, "C_BOOKMARK_03", "저장한 코스 편집에 성공했습니다."),
+    COURSE_BOOKMARK_GET_SUCCESS(HttpStatus.OK, "C_BOOKMARK_04", "저장한 코스 조회에 성공했습니다."),
 
     // Challenge
     CHALLENGE_POPULAR_LIST_GET_SUCCESS(HttpStatus.OK, "CHALLENGE_04", "인기 챌린지 리스트 조회에 성공했습니다."),
