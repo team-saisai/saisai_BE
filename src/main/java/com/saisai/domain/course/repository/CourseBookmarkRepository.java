@@ -5,7 +5,7 @@ import java.util.Optional;
 import java.util.Set;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface CourseBookmarkRepository extends JpaRepository<CourseBookmark, Long> {
+public interface CourseBookmarkRepository extends JpaRepository<CourseBookmark, Long>, CourseBookmarkRepositoryCustom {
 
     boolean existsByCourseIdAndUserId(Long courseId, Long userId);
 
