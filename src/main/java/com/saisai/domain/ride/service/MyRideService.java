@@ -4,17 +4,20 @@ import static com.saisai.domain.common.exception.ExceptionCode.COURSE_NOT_FOUND;
 import static com.saisai.domain.common.exception.ExceptionCode.USER_NOT_FOUND;
 
 import com.saisai.config.jwt.AuthUserDetails;
-import com.saisai.domain.common.exception.CustomException;
 import com.saisai.domain.common.aws.s3.ImageUtil;
+import com.saisai.domain.common.exception.CustomException;
 import com.saisai.domain.course.entity.Course;
 import com.saisai.domain.course.repository.CourseRepository;
+import com.saisai.domain.ride.dto.request.RideDeleteReq;
 import com.saisai.domain.ride.dto.response.RecentRideInfoRes;
+import com.saisai.domain.ride.dto.response.RideDeleteRes;
 import com.saisai.domain.ride.entity.Ride;
 import com.saisai.domain.ride.repository.RideRepository;
 import com.saisai.domain.user.entity.User;
 import com.saisai.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -25,6 +28,7 @@ public class MyRideService {
     private final UserRepository userRepository;
     private final ImageUtil imageUtil;
 
+    @Transactional(readOnly = true)
     public RecentRideInfoRes getRecentRideInfo(AuthUserDetails authUserDetails) {
         User user = userRepository.findById(authUserDetails.userId())
             .orElseThrow(() -> new CustomException(USER_NOT_FOUND));
@@ -41,5 +45,16 @@ public class MyRideService {
         String courseImageUrl = imageUtil.getImageUrl(course.getImage());
 
         return RecentRideInfoRes.from(recentRide, course, courseImageUrl);
+    }
+
+    @Transactional
+    public RideDeleteRes deleteRides(AuthUserDetails authUserDetails, RideDeleteReq rideDeleteReq) {
+
+        long deleteCount = rideRepository.markRideAsDeleted(
+            authUserDetails.userId(),
+            rideDeleteReq.rideIds()
+        );
+
+        return RideDeleteRes.of(deleteCount);
     }
 }
