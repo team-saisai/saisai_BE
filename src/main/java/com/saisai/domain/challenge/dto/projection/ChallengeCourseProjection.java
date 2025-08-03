@@ -1,4 +1,4 @@
-package com.saisai.domain.course.dto.projection;
+package com.saisai.domain.challenge.dto.projection;
 
 import com.querydsl.core.annotations.QueryProjection;
 import com.saisai.domain.challenge.entity.ChallengeStatus;

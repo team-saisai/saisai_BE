@@ -11,7 +11,7 @@ import com.saisai.domain.common.aws.s3.ImageUtil;
 import com.saisai.domain.common.exception.CustomException;
 import com.saisai.domain.course.constant.CourseSortOption;
 import com.saisai.domain.course.constant.CourseType;
-import com.saisai.domain.course.dto.projection.ChallengeCourseProjection;
+import com.saisai.domain.challenge.dto.projection.ChallengeCourseProjection;
 import com.saisai.domain.course.dto.projection.GeneralCourseProjection;
 import com.saisai.domain.course.dto.request.BookmarksRemoveReq;
 import com.saisai.domain.course.dto.response.BookmarksRemoveRes;

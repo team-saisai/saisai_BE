@@ -1,7 +1,7 @@
 package com.saisai.domain.course.dto.response;
 
+import com.saisai.domain.challenge.dto.projection.ChallengeCourseProjection;
 import com.saisai.domain.challenge.entity.ChallengeStatus;
-import com.saisai.domain.course.dto.projection.ChallengeCourseProjection;
 import com.saisai.domain.course.dto.projection.GeneralCourseProjection;
 import com.saisai.domain.reward.dto.projection.RewardEventProjection;
 import com.saisai.domain.reward.util.RewardUtils;

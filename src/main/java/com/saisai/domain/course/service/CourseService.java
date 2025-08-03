@@ -5,13 +5,13 @@ import static com.saisai.domain.common.exception.ExceptionCode.INVALID_SORT_OPTI
 import static com.saisai.domain.common.exception.ExceptionCode.USER_NOT_FOUND;
 
 import com.saisai.config.jwt.AuthUserDetails;
+import com.saisai.domain.challenge.dto.projection.ChallengeCourseProjection;
 import com.saisai.domain.challenge.repository.ChallengeRepository;
 import com.saisai.domain.common.aws.s3.GpxS3;
 import com.saisai.domain.common.aws.s3.ImageUtil;
 import com.saisai.domain.common.exception.CustomException;
 import com.saisai.domain.course.constant.CourseSortOption;
 import com.saisai.domain.course.constant.CourseType;
-import com.saisai.domain.course.dto.projection.ChallengeCourseProjection;
 import com.saisai.domain.course.dto.projection.CourseDetailsProjection;
 import com.saisai.domain.course.dto.projection.GeneralCourseProjection;
 import com.saisai.domain.course.dto.response.CourseDetailsRes;

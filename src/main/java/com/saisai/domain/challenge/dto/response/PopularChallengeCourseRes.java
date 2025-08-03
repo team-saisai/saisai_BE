@@ -1,7 +1,7 @@
 package com.saisai.domain.challenge.dto.response;
 
 import com.saisai.domain.challenge.entity.ChallengeStatus;
-import com.saisai.domain.course.dto.projection.ChallengeCourseProjection;
+import com.saisai.domain.challenge.dto.projection.ChallengeCourseProjection;
 import java.time.LocalDate;
 
 public record PopularChallengeCourseRes(
