@@ -3,10 +3,7 @@ package com.saisai.domain.course.dto.response;
 import com.saisai.domain.challenge.dto.projection.ChallengeCourseProjection;
 import com.saisai.domain.challenge.entity.ChallengeStatus;
 import com.saisai.domain.course.dto.projection.GeneralCourseProjection;
-import com.saisai.domain.reward.dto.projection.RewardEventProjection;
-import com.saisai.domain.reward.util.RewardUtils;
 import java.time.LocalDate;
-import java.util.Optional;
 
 public record CoursePageRes(
     Long courseId,
@@ -24,20 +21,7 @@ public record CoursePageRes(
     Integer reward
 ) {
 
-    public static CoursePageRes from(ChallengeCourseProjection challengeCourseProjection, String imageUrl) {
-
-        RewardEventProjection rewardEventProjection = challengeCourseProjection.rewardEventProjection();
-
-        boolean isEventActive = Optional.ofNullable(challengeCourseProjection.rewardEventProjection())
-            .map(RewardEventProjection::rewardEventId)
-            .isPresent();
-
-        Integer reward = isEventActive ?
-            RewardUtils.calculateEventReward(
-                challengeCourseProjection.level(),
-                rewardEventProjection.rewardEventType(),
-                rewardEventProjection.value()) :
-            RewardUtils.calculateEventReward(challengeCourseProjection.level());
+    public static CoursePageRes from(ChallengeCourseProjection challengeCourseProjection, String imageUrl, boolean isEventActive, int reward) {
 
         return new CoursePageRes(
             challengeCourseProjection.courseId(),

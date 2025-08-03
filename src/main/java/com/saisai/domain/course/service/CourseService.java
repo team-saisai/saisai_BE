@@ -19,11 +19,14 @@ import com.saisai.domain.course.dto.response.CoursePageRes;
 import com.saisai.domain.course.repository.CourseRepository;
 import com.saisai.domain.gpx.dto.GpxPoint;
 import com.saisai.domain.gpx.util.GpxParser;
+import com.saisai.domain.reward.dto.projection.RewardEventProjection;
+import com.saisai.domain.reward.util.RewardUtils;
 import com.saisai.domain.ride.dto.response.RideCountRes;
 import com.saisai.domain.ride.repository.RideRepository;
 import com.saisai.domain.user.entity.User;
 import com.saisai.domain.user.repository.UserRepository;
 import java.util.List;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -77,11 +80,13 @@ public class CourseService {
     private Page<CoursePageRes> fetchChallengeCoursesAsPage(Pageable pageable, CourseSortOption sortOption, Long userId) {
         Page<ChallengeCourseProjection> challengePage = challengeRepository.findChallengeCourses(pageable, sortOption, userId);
         List<CoursePageRes> result = challengePage.getContent().stream()
-            .map(projection ->
-                CoursePageRes.from(
-                    projection,
-                    imageUtil.getImageUrl(projection.imageUrl())
-                ))
+            .map(projection -> {
+                String imageUrl = imageUtil.getImageUrl(projection.imageUrl());
+                boolean isEventActive = isRewardEventActive(projection.rewardEventProjection());
+                int reward = calculateReward(projection, isEventActive);
+
+                return CoursePageRes.from(projection, imageUrl, isEventActive, reward);
+            })
             .toList();
         return new PageImpl<>(result, pageable, challengePage.getTotalElements());
     }
@@ -103,5 +108,22 @@ public class CourseService {
         List<GpxPoint> gpxPoints = gpxParser.parseGpxContent(gpxContent);
 
         return CourseDetailsRes.from(course, imageUtil.getImageUrl(course.imageUrl()), rideCountRes, gpxPoints, rideId);
+    }
+
+    // 이벤트 활성화 확인
+    private boolean isRewardEventActive(RewardEventProjection rewardEventProjection) {
+        return Optional.ofNullable(rewardEventProjection)
+            .map(RewardEventProjection::rewardEventId)
+            .isPresent();
+    }
+
+    // 리워드 계산
+    private int calculateReward(ChallengeCourseProjection challengeCourseProjection, boolean isEventActive) {
+        return isEventActive ?
+            RewardUtils.calculateEventReward(
+                challengeCourseProjection.level(),
+                challengeCourseProjection.rewardEventProjection().rewardEventType(),
+                challengeCourseProjection.rewardEventProjection().value()) :
+            RewardUtils.calculateEventReward(challengeCourseProjection.level());
     }
 }
