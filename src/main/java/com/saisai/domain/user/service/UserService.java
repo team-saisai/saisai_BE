@@ -3,6 +3,7 @@ package com.saisai.domain.user.service;
 import com.saisai.config.jwt.AuthUserDetails;
 import com.saisai.domain.common.exception.CustomException;
 import com.saisai.domain.common.exception.ExceptionCode;
+import com.saisai.domain.user.dto.response.MypageRes;
 import com.saisai.domain.user.dto.response.UserGreetingRes;
 import com.saisai.domain.user.entity.User;
 import com.saisai.domain.user.repository.UserRepository;
@@ -23,4 +24,8 @@ public class UserService {
         return UserGreetingRes.from(user);
     }
 
+    // 유저 정보 조회  (마이페이지)
+    public MypageRes getMypageInfo(AuthUserDetails authUserDetails) {
+        return userRepository.findUserInfoById(authUserDetails.userId());
+    }
 }

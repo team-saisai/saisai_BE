@@ -1,10 +1,12 @@
 package com.saisai.domain.user.controller;
 
+import static com.saisai.domain.common.response.SuccessCode.MYPAGE_INFO_GET_SUCCESS;
 import static com.saisai.domain.common.response.SuccessCode.USER_GREETING_INFO_GET_SUCCESS;
 
 import com.saisai.config.jwt.AuthUserDetails;
 import com.saisai.domain.common.annotation.Auth;
 import com.saisai.domain.common.response.ApiResponse;
+import com.saisai.domain.user.dto.response.MypageRes;
 import com.saisai.domain.user.dto.response.UserGreetingRes;
 import com.saisai.domain.user.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -31,6 +33,15 @@ public class UserMyController {
     ) {
         return ResponseEntity.status(HttpStatus.OK)
             .body(ApiResponse.success(USER_GREETING_INFO_GET_SUCCESS, userService.getUserGreetingInfo(authUserDetails)));
+    }
+
+    @Operation(summary = "유저 정보 조회(마이페이지)")
+    @GetMapping("/profile")
+    public ResponseEntity<ApiResponse<MypageRes>> getMyPageInfo(
+        @Auth AuthUserDetails authUserDetails
+    ) {
+        return ResponseEntity.status(HttpStatus.OK)
+            .body(ApiResponse.success(MYPAGE_INFO_GET_SUCCESS, userService.getMypageInfo(authUserDetails)));
     }
 
 }
