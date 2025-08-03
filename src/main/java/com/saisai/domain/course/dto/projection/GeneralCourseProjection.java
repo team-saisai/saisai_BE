@@ -11,7 +11,8 @@ public record GeneralCourseProjection(
     String sigun,
     String imageUrl,
     Long participantsCount,
-    Boolean isBookmarked
+    Boolean isBookmarked,
+    Boolean isCompleted
 ) {
 
     @QueryProjection

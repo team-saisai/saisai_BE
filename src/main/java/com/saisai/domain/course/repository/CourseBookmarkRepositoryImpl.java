@@ -7,6 +7,7 @@ import static com.saisai.domain.reward.entity.QRewardEvent.rewardEvent;
 import static com.saisai.domain.ride.entity.QRide.ride;
 
 import com.querydsl.core.types.dsl.Expressions;
+import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.saisai.domain.challenge.dto.projection.ChallengeCourseProjection;
@@ -17,6 +18,7 @@ import com.saisai.domain.course.dto.projection.GeneralCourseProjection;
 import com.saisai.domain.course.dto.projection.QGeneralCourseProjection;
 import com.saisai.domain.reward.dto.projection.QRewardEventProjection;
 import com.saisai.domain.reward.entity.EventStatus;
+import com.saisai.domain.ride.entity.RideStatus;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -45,6 +47,15 @@ public class CourseBookmarkRepositoryImpl implements CourseBookmarkRepositoryCus
                 course.image,
                 ride.count().coalesce(0L),
                 Expressions.TRUE,
+                JPAExpressions
+                    .selectOne()
+                    .from(ride)
+                    .where(
+                        ride.course.id.eq(course.id)
+                            .and(ride.user.id.eq(userId))
+                            .and(ride.status.eq(RideStatus.COMPLETED))
+                    )
+                    .exists(),
                 challenge.status,
                 challenge.endedAt,
                 new QRewardEventProjection(
@@ -103,7 +114,16 @@ public class CourseBookmarkRepositoryImpl implements CourseBookmarkRepositoryCus
                 course.sigun,
                 course.image,
                 ride.count().coalesce(0L),
-                Expressions.TRUE
+                Expressions.TRUE,
+                JPAExpressions
+                    .selectOne()
+                    .from(ride)
+                    .where(
+                        ride.course.id.eq(course.id)
+                            .and(ride.user.id.eq(userId))
+                            .and(ride.status.eq(RideStatus.COMPLETED))
+                    )
+                    .exists()
             ))
             .from(courseBookmark)
             .innerJoin(courseBookmark.course, course)
