@@ -2,6 +2,7 @@ package com.saisai.domain.course.dto.response;
 
 import com.saisai.domain.challenge.dto.projection.ChallengeCourseProjection;
 import com.saisai.domain.challenge.entity.ChallengeStatus;
+import com.saisai.domain.course.dto.projection.CourseUnifiedProjection;
 import com.saisai.domain.course.dto.projection.GeneralCourseProjection;
 import java.time.LocalDate;
 
@@ -60,4 +61,43 @@ public record CoursePageRes(
             null
         );
     }
+
+    public static CoursePageRes from(CourseUnifiedProjection courseUnifiedProjection, String imageUrl, boolean isEventActive, int reward) {
+        return new CoursePageRes(
+            courseUnifiedProjection.courseId(),
+            courseUnifiedProjection.courseName(),
+            courseUnifiedProjection.level(),
+            courseUnifiedProjection.distance(),
+            courseUnifiedProjection.estimatedTime(),
+            courseUnifiedProjection.sigun(),
+            imageUrl,
+            courseUnifiedProjection.participantsCount(),
+            courseUnifiedProjection.isBookmarked(),
+            courseUnifiedProjection.isCompleted(),
+            courseUnifiedProjection.challengeStatus(),
+            courseUnifiedProjection.challengeEndedAt().toLocalDate(),
+            isEventActive,
+            reward
+        );
+    }
+
+    public static CoursePageRes from(CourseUnifiedProjection courseUnifiedProjection, String imageUrl) {
+        return new CoursePageRes(
+            courseUnifiedProjection.courseId(),
+            courseUnifiedProjection.courseName(),
+            courseUnifiedProjection.level(),
+            courseUnifiedProjection.distance(),
+            courseUnifiedProjection.estimatedTime(),
+            courseUnifiedProjection.sigun(),
+            imageUrl,
+            courseUnifiedProjection.participantsCount(),
+            courseUnifiedProjection.isBookmarked(),
+            courseUnifiedProjection.isCompleted(),
+            null,
+            null,
+            null,
+            null
+        );
+    }
+
 }
