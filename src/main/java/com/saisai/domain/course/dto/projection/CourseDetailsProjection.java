@@ -16,7 +16,8 @@ public record CourseDetailsProjection(
     String gpxpath,
     ChallengeStatus challengeStatus,
     LocalDateTime challengeEndedAt,
-    Boolean isEventActive
+    Boolean isEventActive,
+    Boolean isCompleted
 ) {
     @QueryProjection
     public CourseDetailsProjection {}
