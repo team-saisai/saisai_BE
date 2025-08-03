@@ -15,6 +15,7 @@ public enum SuccessCode {
 
     // User
     USER_GREETING_INFO_GET_SUCCESS(HttpStatus.OK, "USER_01", "사용자 정보 조회에 성공했습니다."),
+    MYPAGE_INFO_GET_SUCCESS(HttpStatus.OK, "USER_02", "마이페이지 조회에 성공했습니다."),
 
     // Course
     COURSE_LIST_GET_SUCCESS(HttpStatus.OK, "COURSE_01", "코스 전체 목록 조회에 성공했습니다."),
