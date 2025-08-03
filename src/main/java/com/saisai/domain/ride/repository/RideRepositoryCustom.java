@@ -1,8 +1,8 @@
 package com.saisai.domain.ride.repository;
 
-import com.saisai.domain.ride.entity.RideStatus;
+import java.util.Set;
 
 public interface RideRepositoryCustom {
 
-    Long countByCourseIdAndStatus(Long courseId, RideStatus status);
+    long markRideAsDeleted(Long userId, Set<Long> rideIds);
 }
