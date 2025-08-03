@@ -2,7 +2,6 @@ package com.saisai.domain.challenge.repository;
 
 import static com.saisai.domain.challenge.entity.QChallenge.challenge;
 import static com.saisai.domain.course.entity.QCourse.course;
-import static com.saisai.domain.course.entity.QCourseBookmark.courseBookmark;
 import static com.saisai.domain.reward.entity.QRewardEvent.rewardEvent;
 import static com.saisai.domain.ride.entity.QRide.ride;
 
@@ -13,8 +12,11 @@ import com.saisai.domain.challenge.dto.projection.ChallengeCourseProjection;
 import com.saisai.domain.challenge.dto.projection.QChallengeCourseProjection;
 import com.saisai.domain.challenge.entity.ChallengeStatus;
 import com.saisai.domain.course.constant.CourseSortOption;
+import com.saisai.domain.course.entity.QCourseBookmark;
 import com.saisai.domain.reward.dto.projection.QRewardEventProjection;
 import com.saisai.domain.reward.entity.EventStatus;
+import com.saisai.domain.ride.entity.QRide;
+import com.saisai.domain.ride.entity.RideStatus;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -33,6 +35,9 @@ public class ChallengeRepositoryImpl implements ChallengeRepositoryCustom {
     public Page<ChallengeCourseProjection> findChallengeCourses(Pageable pageable,
         CourseSortOption sortOption, Long userId) {
 
+        QCourseBookmark courseBookmarkSub = new QCourseBookmark("courseBookmarkSub");
+        QRide rideSub = new QRide("rideSub");
+
         List<ChallengeCourseProjection> content = queryFactory
             .select(new QChallengeCourseProjection(
                 course.id,
@@ -45,9 +50,17 @@ public class ChallengeRepositoryImpl implements ChallengeRepositoryCustom {
                 ride.count().coalesce(0L),
                 JPAExpressions
                     .selectOne()
-                    .from(courseBookmark)
-                    .where(courseBookmark.user.id.eq(userId)
-                        .and(courseBookmark.course.id.eq(course.id))
+                    .from(courseBookmarkSub)
+                    .where(courseBookmarkSub.user.id.eq(userId)
+                        .and(courseBookmarkSub.course.id.eq(course.id)))
+                    .exists(),
+                JPAExpressions
+                    .selectOne()
+                    .from(rideSub)
+                    .where(
+                        rideSub.course.id.eq(course.id)
+                            .and(rideSub.user.id.eq(userId))
+                            .and(rideSub.status.eq(RideStatus.COMPLETED))
                     )
                     .exists(),
                 challenge.status,
@@ -95,6 +108,10 @@ public class ChallengeRepositoryImpl implements ChallengeRepositoryCustom {
     // 챌린지 진행 중인 코스 중에서 참가자가 많은 순으로 정렬 후 반환하는 메서드
     @Override
     public List<ChallengeCourseProjection> findTop10CoursesByOngoingChallengeRides(Long userId) {
+
+        QCourseBookmark courseBookmarkSub = new QCourseBookmark("courseBookmarkSub");
+        QRide rideSub = new QRide("rideSub");
+
         return queryFactory
             .select(new QChallengeCourseProjection(
                 course.id,
@@ -107,9 +124,17 @@ public class ChallengeRepositoryImpl implements ChallengeRepositoryCustom {
                 ride.count().coalesce(0L),
                 JPAExpressions
                     .selectOne()
-                    .from(courseBookmark)
-                    .where(courseBookmark.user.id.eq(userId)
-                        .and(courseBookmark.course.id.eq(course.id))
+                    .from(courseBookmarkSub)
+                    .where(courseBookmarkSub.user.id.eq(userId)
+                        .and(courseBookmarkSub.course.id.eq(course.id)))
+                    .exists(),
+                JPAExpressions
+                    .selectOne()
+                    .from(rideSub)
+                    .where(
+                        rideSub.course.id.eq(course.id)
+                            .and(rideSub.user.id.eq(userId))
+                            .and(rideSub.status.eq(RideStatus.COMPLETED))
                     )
                     .exists(),
                 challenge.status,

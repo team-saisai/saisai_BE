@@ -2,11 +2,9 @@ package com.saisai.domain.course.repository;
 
 import static com.saisai.domain.challenge.entity.QChallenge.challenge;
 import static com.saisai.domain.course.entity.QCourse.course;
-import static com.saisai.domain.course.entity.QCourseBookmark.courseBookmark;
 import static com.saisai.domain.reward.entity.QRewardEvent.rewardEvent;
 import static com.saisai.domain.ride.entity.QRide.ride;
 
-import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -16,7 +14,10 @@ import com.saisai.domain.course.dto.projection.CourseDetailsProjection;
 import com.saisai.domain.course.dto.projection.GeneralCourseProjection;
 import com.saisai.domain.course.dto.projection.QCourseDetailsProjection;
 import com.saisai.domain.course.dto.projection.QGeneralCourseProjection;
+import com.saisai.domain.course.entity.QCourseBookmark;
 import com.saisai.domain.reward.entity.EventStatus;
+import com.saisai.domain.ride.entity.QRide;
+import com.saisai.domain.ride.entity.RideStatus;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -36,6 +37,9 @@ public class CourseRepositoryImpl implements CourseRepositoryCustom {
     public Page<GeneralCourseProjection> findGeneralCourses(Pageable pageable,
         CourseSortOption sortOption, Long userId) {
 
+        QCourseBookmark courseBookmarkSub = new QCourseBookmark("courseBookmarkSub");
+        QRide rideSub = new QRide("rideSub");
+
         List<GeneralCourseProjection> content = queryFactory
             .select(new QGeneralCourseProjection(
                 course.id,
@@ -48,9 +52,17 @@ public class CourseRepositoryImpl implements CourseRepositoryCustom {
                 ride.count().coalesce(0L),
                 JPAExpressions
                     .selectOne()
-                    .from(courseBookmark)
-                    .where(courseBookmark.user.id.eq(userId)
-                        .and(courseBookmark.course.id.eq(course.id))
+                    .from(courseBookmarkSub)
+                    .where(courseBookmarkSub.user.id.eq(userId)
+                        .and(courseBookmarkSub.course.id.eq(course.id)))
+                    .exists(),
+                JPAExpressions
+                    .selectOne()
+                    .from(rideSub)
+                    .where(
+                        rideSub.course.id.eq(course.id)
+                            .and(rideSub.user.id.eq(userId))
+                            .and(rideSub.status.eq(RideStatus.COMPLETED))
                     )
                     .exists()
             ))
@@ -86,7 +98,9 @@ public class CourseRepositoryImpl implements CourseRepositoryCustom {
 
     // 코스 상세 조회
     @Override
-    public Optional<CourseDetailsProjection> findCourseDetailsProjection(Long courseId) {
+    public Optional<CourseDetailsProjection> findCourseDetailsProjection(Long courseId, Long userId) {
+
+        QRide rideSub = new QRide("rideSub");
 
         CourseDetailsProjection result = queryFactory
             .select(new QCourseDetailsProjection(
@@ -101,13 +115,22 @@ public class CourseRepositoryImpl implements CourseRepositoryCustom {
                 course.gpxPath,
                 challenge.status,
                 challenge.endedAt,
-                Expressions.asBoolean(rewardEvent.status.eq(EventStatus.ACTIVE))
-                    .coalesce(false)
+                rewardEvent.id.isNotNull(),
+                JPAExpressions
+                    .selectOne()
+                    .from(rideSub)
+                    .where(
+                        rideSub.course.id.eq(course.id)
+                            .and(rideSub.user.id.eq(userId))
+                            .and(rideSub.status.eq(RideStatus.COMPLETED))
+                    )
+                    .exists()
             ))
             .from(course)
             .leftJoin(challenge).on(challenge.course.eq(course)
                 .and(challenge.status.eq(ChallengeStatus.ONGOING)))
-            .leftJoin(rewardEvent).on(rewardEvent.challenge.eq(challenge)) // 여기 동적 조건 추가해야할듯. 챌린지인지 아닌지.
+            .leftJoin(rewardEvent).on(rewardEvent.challenge.eq(challenge)
+                .and(rewardEvent.status.eq(EventStatus.ACTIVE)))
             .where(course.id.eq(courseId))
             .fetchOne();
 

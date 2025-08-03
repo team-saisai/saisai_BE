@@ -2,7 +2,6 @@ package com.saisai.domain.course.service;
 
 import static com.saisai.domain.common.exception.ExceptionCode.COURSE_NOT_FOUND;
 import static com.saisai.domain.common.exception.ExceptionCode.INVALID_SORT_OPTION_FOR_COURSE_TYPE;
-import static com.saisai.domain.common.exception.ExceptionCode.USER_NOT_FOUND;
 
 import com.saisai.config.jwt.AuthUserDetails;
 import com.saisai.domain.challenge.dto.projection.ChallengeCourseProjection;
@@ -23,7 +22,6 @@ import com.saisai.domain.reward.dto.projection.RewardEventProjection;
 import com.saisai.domain.reward.util.RewardUtils;
 import com.saisai.domain.ride.dto.response.RideCountRes;
 import com.saisai.domain.ride.repository.RideRepository;
-import com.saisai.domain.user.entity.User;
 import com.saisai.domain.user.repository.UserRepository;
 import java.util.List;
 import java.util.Optional;
@@ -93,14 +91,10 @@ public class CourseService {
 
     // 코스 상세 조회 비즈니스 로직
     public CourseDetailsRes getCourseInfo(Long courseId, AuthUserDetails authUserDetails) {
-
-        User user = userRepository.findById(authUserDetails.userId())
-            .orElseThrow(() -> new CustomException(USER_NOT_FOUND));
-
-        CourseDetailsProjection course = courseRepository.findCourseDetailsProjection(courseId)
+        CourseDetailsProjection course = courseRepository.findCourseDetailsProjection(courseId, authUserDetails.userId())
             .orElseThrow(() -> new CustomException(COURSE_NOT_FOUND));
 
-        Long rideId = rideRepository.findActiveRideIdByUserIdAndCourseId(user.getId(), courseId);
+        Long rideId = rideRepository.findActiveRideIdByUserIdAndCourseId(authUserDetails.userId(), courseId);
 
         RideCountRes rideCountRes = rideRepository.countRideByCourseId(courseId);
 
