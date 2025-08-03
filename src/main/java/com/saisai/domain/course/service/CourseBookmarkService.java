@@ -3,16 +3,12 @@ package com.saisai.domain.course.service;
 import static com.saisai.domain.common.exception.ExceptionCode.COURSE_ALREADY_BOOKMARK;
 import static com.saisai.domain.common.exception.ExceptionCode.COURSE_BOOKMARK_NOT_FOUND;
 import static com.saisai.domain.common.exception.ExceptionCode.COURSE_NOT_FOUND;
-import static com.saisai.domain.common.exception.ExceptionCode.INVALID_SORT_OPTION_FOR_COURSE_TYPE;
 import static com.saisai.domain.common.exception.ExceptionCode.USER_NOT_FOUND;
 
 import com.saisai.config.jwt.AuthUserDetails;
 import com.saisai.domain.common.aws.s3.ImageUtil;
 import com.saisai.domain.common.exception.CustomException;
-import com.saisai.domain.course.constant.CourseSortOption;
-import com.saisai.domain.course.constant.CourseType;
-import com.saisai.domain.challenge.dto.projection.ChallengeCourseProjection;
-import com.saisai.domain.course.dto.projection.GeneralCourseProjection;
+import com.saisai.domain.course.dto.projection.CourseUnifiedProjection;
 import com.saisai.domain.course.dto.request.BookmarksRemoveReq;
 import com.saisai.domain.course.dto.response.BookmarksRemoveRes;
 import com.saisai.domain.course.dto.response.CourseBookmarkRes;
@@ -21,9 +17,12 @@ import com.saisai.domain.course.entity.Course;
 import com.saisai.domain.course.entity.CourseBookmark;
 import com.saisai.domain.course.repository.CourseBookmarkRepository;
 import com.saisai.domain.course.repository.CourseRepository;
+import com.saisai.domain.reward.dto.projection.RewardEventProjection;
+import com.saisai.domain.reward.util.RewardUtils;
 import com.saisai.domain.user.entity.User;
 import com.saisai.domain.user.repository.UserRepository;
 import java.util.List;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -90,47 +89,47 @@ public class CourseBookmarkService {
     }
 
     // 저장한 코스 조회
-    public Page<CoursePageRes> getBookmarkCourses(Pageable pageable, CourseType type, CourseSortOption sortOption, AuthUserDetails authUserDetails) {
-        return switch (type) {
-            case CHALLENGE -> fetchChallengeCoursesAsPage(pageable, sortOption, authUserDetails.userId());
-            case GENERAL -> fetchGeneralCoursesAsPage(pageable, sortOption, authUserDetails.userId());
-        };
-    }
+    public Page<CoursePageRes> getBookmarkCourses(Pageable pageable, AuthUserDetails authUserDetails) {
 
-    // 저장한 챌린지 코스 조회
-    private Page<CoursePageRes> fetchChallengeCoursesAsPage(Pageable pageable, CourseSortOption sortOption, Long userId) {
-        Page<ChallengeCourseProjection> challengePage = courseBookMarkRepository.findChallengeBookmarkCourses(pageable, sortOption, userId);
-        List<CoursePageRes> result = challengePage.getContent().stream()
-            .map(projection ->
-                CoursePageRes.from(
-                    projection,
-                    imageUtil.getImageUrl(projection.imageUrl())
-                ))
+        Page<CourseUnifiedProjection> coursePages = courseBookMarkRepository.findByBookmarkCourses(pageable, authUserDetails.userId());
+
+        List<CoursePageRes> result = coursePages.getContent().stream()
+            .map(projection -> {
+                String imageUrl = imageUtil.getImageUrl(projection.imageUrl());
+
+                if (projection.challengeStatus() == null) {
+                    return CoursePageRes.from(projection, imageUrl);
+                }
+
+                boolean isEventActive = isRewardEventActive(projection.rewardEventProjection());
+                int reward = calculateReward(projection, isEventActive);
+                return CoursePageRes.from(projection, imageUrl, isEventActive, reward);
+            })
             .toList();
-        return new PageImpl<>(result, pageable, challengePage.getTotalElements());
-    }
 
-    // 저장한 일반 코스 조회
-    private Page<CoursePageRes> fetchGeneralCoursesAsPage(Pageable pageable, CourseSortOption sortOption, Long userId) {
-
-        if (sortOption.equals(CourseSortOption.END_SOON)) {
-            throw new CustomException(INVALID_SORT_OPTION_FOR_COURSE_TYPE);
-        }
-
-        Page<GeneralCourseProjection> generalPage = courseBookMarkRepository.findGeneralBookmarkCourses(pageable, sortOption, userId);
-        List<CoursePageRes> result = generalPage.getContent().stream()
-            .map(projection ->
-                CoursePageRes.from(
-                    projection,
-                    imageUtil.getImageUrl(projection.imageUrl())
-                ))
-            .toList();
-        return new PageImpl<>(result, pageable, generalPage.getTotalElements());
+        return new PageImpl<>(result, pageable, coursePages.getTotalElements());
     }
 
 
     // 코스 저장 이미 존재하는지 확인
     private boolean isBookmarkExists(Course course, User user) {
         return courseBookMarkRepository.existsByCourseIdAndUserId(course.getId(), user.getId());
+    }
+
+    // 이벤트 활성화 확인
+    private boolean isRewardEventActive(RewardEventProjection rewardEventProjection) {
+        return Optional.ofNullable(rewardEventProjection)
+            .map(RewardEventProjection::rewardEventId)
+            .isPresent();
+    }
+
+    // 리워드 계산
+    private int calculateReward(CourseUnifiedProjection courseUnifiedProjection, boolean isEventActive) {
+        return isEventActive ?
+            RewardUtils.calculateEventReward(
+                courseUnifiedProjection.level(),
+                courseUnifiedProjection.rewardEventProjection().rewardEventType(),
+                courseUnifiedProjection.rewardEventProjection().value()) :
+            RewardUtils.calculateEventReward(courseUnifiedProjection.level());
     }
 }
