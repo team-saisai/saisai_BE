@@ -5,6 +5,7 @@ import static com.saisai.domain.common.exception.ExceptionCode.INVALID_SORT_OPTI
 import static com.saisai.domain.common.exception.ExceptionCode.USER_NOT_FOUND;
 
 import com.saisai.config.jwt.AuthUserDetails;
+import com.saisai.domain.challenge.repository.ChallengeRepository;
 import com.saisai.domain.common.aws.s3.GpxS3;
 import com.saisai.domain.common.aws.s3.ImageUtil;
 import com.saisai.domain.common.exception.CustomException;
@@ -39,10 +40,11 @@ public class CourseService {
 
     private final RideRepository rideRepository;
     private final CourseRepository courseRepository;
+    private final UserRepository userRepository;
+    private final ChallengeRepository challengeRepository;
     private final GpxParser gpxParser;
     private final ImageUtil imageUtil;
     private final GpxS3 gpxS3;
-    private final UserRepository userRepository;
 
     // 코스 목록 조회 메서드
     public Page<CoursePageRes> getCourses(Pageable pageable, CourseType type, CourseSortOption sortOption, AuthUserDetails authUserDetails) {
@@ -73,7 +75,7 @@ public class CourseService {
 
     // 챌린지 코스 조회
     private Page<CoursePageRes> fetchChallengeCoursesAsPage(Pageable pageable, CourseSortOption sortOption, Long userId) {
-        Page<ChallengeCourseProjection> challengePage = courseRepository.findChallengeCourses(pageable, sortOption, userId);
+        Page<ChallengeCourseProjection> challengePage = challengeRepository.findChallengeCourses(pageable, sortOption, userId);
         List<CoursePageRes> result = challengePage.getContent().stream()
             .map(projection ->
                 CoursePageRes.from(

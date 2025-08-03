@@ -1,7 +1,6 @@
 package com.saisai.domain.course.repository;
 
 import com.saisai.domain.course.constant.CourseSortOption;
-import com.saisai.domain.course.dto.projection.ChallengeCourseProjection;
 import com.saisai.domain.course.dto.projection.CourseDetailsProjection;
 import com.saisai.domain.course.dto.projection.GeneralCourseProjection;
 import java.util.Optional;
@@ -10,8 +9,6 @@ import org.springframework.data.domain.Pageable;
 
 public interface CourseRepositoryCustom {
     Optional<CourseDetailsProjection> findCourseDetailsProjection(Long courseId);
-
-    Page<ChallengeCourseProjection> findChallengeCourses(Pageable pageable, CourseSortOption sortOption, Long userId);
 
     Page<GeneralCourseProjection> findGeneralCourses(Pageable pageable, CourseSortOption sortOption, Long userId);
 }
