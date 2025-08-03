@@ -10,14 +10,12 @@ import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import com.saisai.domain.challenge.dto.projection.ChallengeCourseProjection;
-import com.saisai.domain.challenge.dto.projection.QChallengeCourseProjection;
 import com.saisai.domain.challenge.entity.ChallengeStatus;
-import com.saisai.domain.course.constant.CourseSortOption;
-import com.saisai.domain.course.dto.projection.GeneralCourseProjection;
-import com.saisai.domain.course.dto.projection.QGeneralCourseProjection;
+import com.saisai.domain.course.dto.projection.CourseUnifiedProjection;
+import com.saisai.domain.course.dto.projection.QCourseUnifiedProjection;
 import com.saisai.domain.reward.dto.projection.QRewardEventProjection;
 import com.saisai.domain.reward.entity.EventStatus;
+import com.saisai.domain.ride.entity.QRide;
 import com.saisai.domain.ride.entity.RideStatus;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -32,12 +30,13 @@ public class CourseBookmarkRepositoryImpl implements CourseBookmarkRepositoryCus
 
     private final JPAQueryFactory queryFactory;
 
-    // 북마크한 챌린지 코스 조회
     @Override
-    public Page<ChallengeCourseProjection> findChallengeBookmarkCourses(Pageable pageable,
-        CourseSortOption sortOption, Long userId) {
-        List<ChallengeCourseProjection> content = queryFactory
-            .select(new QChallengeCourseProjection(
+    public Page<CourseUnifiedProjection> findByBookmarkCourses(Pageable pageable, Long userId) {
+
+        QRide rideSub = new QRide("rideSub");
+
+        List<CourseUnifiedProjection> content = queryFactory
+            .select(new QCourseUnifiedProjection(
                 course.id,
                 course.name,
                 course.level,
@@ -49,11 +48,11 @@ public class CourseBookmarkRepositoryImpl implements CourseBookmarkRepositoryCus
                 Expressions.TRUE,
                 JPAExpressions
                     .selectOne()
-                    .from(ride)
+                    .from(rideSub)
                     .where(
-                        ride.course.id.eq(course.id)
-                            .and(ride.user.id.eq(userId))
-                            .and(ride.status.eq(RideStatus.COMPLETED))
+                        rideSub.course.id.eq(course.id)
+                            .and(rideSub.user.id.eq(userId))
+                            .and(rideSub.status.eq(RideStatus.COMPLETED))
                     )
                     .exists(),
                 challenge.status,
@@ -66,11 +65,9 @@ public class CourseBookmarkRepositoryImpl implements CourseBookmarkRepositoryCus
                 )
             ))
             .from(courseBookmark)
-            .innerJoin(courseBookmark.course, course)
-            .innerJoin(challenge).on(
-                challenge.course.id.eq(course.id)
-                    .and(challenge.status.eq(ChallengeStatus.ONGOING))
-            )
+            .leftJoin(course).on(courseBookmark.course.id.eq(course.id))
+            .leftJoin(challenge).on(challenge.course.id.eq(course.id)
+                .and(challenge.status.eq(ChallengeStatus.ONGOING)))
             .leftJoin(ride).on(ride.course.id.eq(course.id))
             .leftJoin(rewardEvent).on(
                 rewardEvent.challenge.id.eq(challenge.id)
@@ -81,79 +78,19 @@ public class CourseBookmarkRepositoryImpl implements CourseBookmarkRepositoryCus
                 course.estimatedTime, course.sigun, course.image,
                 challenge.status, challenge.endedAt,
                 rewardEvent.id, rewardEvent.status, rewardEvent.type, rewardEvent.value)
-            .orderBy(sortOption.toOrderSpecifier())
+            .orderBy(courseBookmark.createdAt.desc(),
+                course.name.asc())
             .offset(pageable.getOffset())
             .limit(pageable.getPageSize())
             .fetch();
 
         JPAQuery<Long> total = queryFactory
             .select(course.countDistinct())
-            .from(course)
-            .innerJoin(courseBookmark.course, course)
-            .innerJoin(challenge).on(
-                challenge.course.id.eq(course.id)
-                    .and(challenge.status.eq(ChallengeStatus.ONGOING))
-            )
+            .from(courseBookmark)
+            .leftJoin(courseBookmark.course, course)
             .where(courseBookmark.user.id.eq(userId)
                 .and(course.isDeleted.eq(false)));
 
         return PageableExecutionUtils.getPage(content, pageable, total::fetchOne);
-    }
-
-    // 북마크한 일반 코스 조회
-    @Override
-    public Page<GeneralCourseProjection> findGeneralBookmarkCourses(Pageable pageable,
-        CourseSortOption sortOption, Long userId) {
-        List<GeneralCourseProjection> content = queryFactory
-            .select(new QGeneralCourseProjection(
-                course.id,
-                course.name,
-                course.level,
-                course.distance,
-                course.estimatedTime,
-                course.sigun,
-                course.image,
-                ride.count().coalesce(0L),
-                Expressions.TRUE,
-                JPAExpressions
-                    .selectOne()
-                    .from(ride)
-                    .where(
-                        ride.course.id.eq(course.id)
-                            .and(ride.user.id.eq(userId))
-                            .and(ride.status.eq(RideStatus.COMPLETED))
-                    )
-                    .exists()
-            ))
-            .from(courseBookmark)
-            .innerJoin(courseBookmark.course, course)
-            .leftJoin(challenge).on(
-                challenge.course.id.eq(course.id)
-                    .and(challenge.status.eq(ChallengeStatus.ONGOING))
-            )
-            .leftJoin(ride).on(ride.course.id.eq(course.id))
-            .where(courseBookmark.user.id.eq(userId)
-                .and(course.isDeleted.eq(false))
-                .and(challenge.id.isNull()))
-            .groupBy(course.id, course.name, course.level, course.distance,
-                course.estimatedTime, course.sigun, course.image)
-            .orderBy(sortOption.toOrderSpecifier())
-            .offset(pageable.getOffset())
-            .limit(pageable.getPageSize())
-            .fetch();
-
-        JPAQuery<Long> query = queryFactory
-            .select(courseBookmark.countDistinct())
-            .from(courseBookmark)
-            .innerJoin(courseBookmark.course, course)
-            .leftJoin(challenge).on(
-                challenge.course.id.eq(course.id)
-                    .and(challenge.status.eq(ChallengeStatus.ONGOING))
-            )
-            .where(courseBookmark.user.id.eq(userId)
-                .and(course.isDeleted.eq(false))
-                .and(challenge.id.isNull()));
-
-        return PageableExecutionUtils.getPage(content, pageable, query::fetchOne);
     }
 }
