@@ -59,6 +59,12 @@ public class Ride extends BaseEntity {
     @Column(name = "completed_at")
     private LocalDateTime completedAt;
 
+    @Column(name = "is_deleted", nullable = false)
+    private Boolean isDeleted;
+
+    @Column(name = "deleted_at")
+    private LocalDateTime deletedAt;
+
     private Ride(User user, Course course) {
         this.status = RideStatus.IN_PROGRESS;
         this.user = user;
@@ -66,6 +72,7 @@ public class Ride extends BaseEntity {
         this.progressRate = 0;
         this.durationSecond = 0L;
         this.actualDistance = 0D;
+        this.isDeleted = false;
     }
 
     public static Ride start(User user, Course course) {

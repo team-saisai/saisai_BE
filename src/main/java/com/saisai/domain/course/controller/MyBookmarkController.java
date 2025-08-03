@@ -9,6 +9,7 @@ import com.saisai.domain.common.response.ApiResponse;
 import com.saisai.domain.course.constant.CourseSortOption;
 import com.saisai.domain.course.constant.CourseType;
 import com.saisai.domain.course.dto.request.BookmarksRemoveReq;
+import com.saisai.domain.course.dto.response.BookmarksRemoveRes;
 import com.saisai.domain.course.dto.response.CoursePageRes;
 import com.saisai.domain.course.service.CourseBookmarkService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -38,15 +39,12 @@ public class MyBookmarkController {
 
     @Operation(summary = "북마크 선택 삭제")
     @DeleteMapping
-    public ResponseEntity<ApiResponse<Void>> removeBookmarks(
+    public ResponseEntity<ApiResponse<BookmarksRemoveRes>> removeBookmarks(
         @RequestBody BookmarksRemoveReq bookmarksRemoveReq,
         @Auth AuthUserDetails authUserDetails
     ) {
-
-        courseBookmarkService.removeBookmarks(bookmarksRemoveReq, authUserDetails);
-
         return ResponseEntity.status(HttpStatus.OK)
-            .body(ApiResponse.success(COURSE_BOOKMARK_EDIT_SUCCESS));
+            .body(ApiResponse.success(COURSE_BOOKMARK_EDIT_SUCCESS, courseBookmarkService.removeBookmarks(bookmarksRemoveReq, authUserDetails)));
     }
 
     @Operation(summary = "저장한 코스 조회")
