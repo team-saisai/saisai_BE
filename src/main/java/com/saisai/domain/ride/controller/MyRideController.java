@@ -1,18 +1,23 @@
 package com.saisai.domain.ride.controller;
 
 import static com.saisai.domain.common.response.SuccessCode.RECENT_RIDE_COURSE_GET_SUCCESS;
+import static com.saisai.domain.common.response.SuccessCode.RIDE_DELETE_SUCCESS;
 
 import com.saisai.config.jwt.AuthUserDetails;
 import com.saisai.domain.common.annotation.Auth;
 import com.saisai.domain.common.response.ApiResponse;
+import com.saisai.domain.ride.dto.request.RideDeleteReq;
 import com.saisai.domain.ride.dto.response.RecentRideInfoRes;
+import com.saisai.domain.ride.dto.response.RideDeleteRes;
 import com.saisai.domain.ride.service.MyRideService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -32,5 +37,15 @@ public class MyRideController {
     ) {
         return ResponseEntity.status(HttpStatus.OK)
             .body(ApiResponse.success(RECENT_RIDE_COURSE_GET_SUCCESS, myRideService.getRecentRideInfo(authUserDetails)));
+    }
+
+    @Operation(summary = "나의 기록 삭제")
+    @DeleteMapping
+    public ResponseEntity<ApiResponse<RideDeleteRes>> deleteRides(
+        @Auth AuthUserDetails authUserDetails,
+        @RequestBody RideDeleteReq rideDeleteReq
+    ) {
+        return ResponseEntity.status(HttpStatus.OK)
+            .body(ApiResponse.success(RIDE_DELETE_SUCCESS, myRideService.deleteRides(authUserDetails, rideDeleteReq)));
     }
 }
