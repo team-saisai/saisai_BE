@@ -67,7 +67,8 @@ public class CourseRepositoryImpl implements CourseRepositoryCustom {
                 .and(challenge.id.isNull()))
             .groupBy(course.id, course.name, course.level, course.distance,
                 course.estimatedTime, course.sigun, course.image)
-            .orderBy(sortOption.toOrderSpecifier())
+            .orderBy(sortOption.toOrderSpecifier(),
+                course.name.asc())
             .offset(pageable.getOffset())
             .limit(pageable.getPageSize())
             .fetch();
@@ -79,6 +80,7 @@ public class CourseRepositoryImpl implements CourseRepositoryCustom {
                 challenge.course.id.eq(course.id)
                     .and(challenge.status.eq(ChallengeStatus.ONGOING))
             )
+            .leftJoin(ride).on(ride.course.id.eq(course.id))
             .where(course.isDeleted.eq(false)
                 .and(challenge.id.isNull()));
 
