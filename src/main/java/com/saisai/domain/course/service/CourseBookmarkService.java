@@ -14,6 +14,7 @@ import com.saisai.domain.course.constant.CourseType;
 import com.saisai.domain.course.dto.projection.ChallengeCourseProjection;
 import com.saisai.domain.course.dto.projection.GeneralCourseProjection;
 import com.saisai.domain.course.dto.request.BookmarksRemoveReq;
+import com.saisai.domain.course.dto.response.BookmarksRemoveRes;
 import com.saisai.domain.course.dto.response.CourseBookmarkRes;
 import com.saisai.domain.course.dto.response.CoursePageRes;
 import com.saisai.domain.course.entity.Course;
@@ -79,15 +80,13 @@ public class CourseBookmarkService {
 
     // 북마크 여러개 삭제
     @Transactional
-    public void removeBookmarks(BookmarksRemoveReq bookmarksRemoveReq, AuthUserDetails authUserDetails) {
+    public BookmarksRemoveRes removeBookmarks(BookmarksRemoveReq bookmarksRemoveReq, AuthUserDetails authUserDetails) {
 
-        int deletedCount = courseBookMarkRepository.deleteByUserIdAndCourseIdIn(
+        int deleteCount = courseBookMarkRepository.deleteByUserIdAndCourseIdIn(
             authUserDetails.userId(), bookmarksRemoveReq.courseIds()
         );
 
-        if (deletedCount == 0) {
-            throw new CustomException(COURSE_BOOKMARK_NOT_FOUND);
-        }
+        return BookmarksRemoveRes.of(deleteCount);
     }
 
     // 저장한 코스 조회
