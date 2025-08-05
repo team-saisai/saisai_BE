@@ -45,6 +45,7 @@ public class BadgeService {
             .name(badgeRegisterReq.name())
             .description(badgeRegisterReq.description())
             .image(image)
+            .unlockCondition(badgeRegisterReq.unlockCondition())
             .build();
 
         Badge saveBadge = badgeRepository.save(badge);

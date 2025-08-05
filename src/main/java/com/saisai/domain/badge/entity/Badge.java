@@ -32,10 +32,14 @@ public class Badge extends BaseEntity {
     @Column(name = "image", nullable = false)
     private String image;
 
+    @Column(name = "unlock_condition", nullable = false)
+    private String unlockCondition;
+
     @Builder
-    public Badge(String name, String description, String image) {
+    public Badge(String name, String description, String image, String unlockCondition) {
         this.name = name;
         this.description = description;
         this.image = image;
+        this.unlockCondition = unlockCondition;
     }
 }

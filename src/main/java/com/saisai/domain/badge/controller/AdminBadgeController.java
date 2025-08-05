@@ -30,7 +30,7 @@ public class AdminBadgeController {
     @Operation(summary = "새 뱃지 등록",
         description =
             "ADMIN이 새로운 뱃지를 등록할 때 사용\n\n" +
-            "뱃지명, 설명, 이미지 필수 입력값")
+            "뱃지명, 설명, 획득조건, 이미지 필수 입력값")
     public ResponseEntity<ApiResponse<BadgeRegisterRes>> createBadge(
         @ModelAttribute @Valid BadgeRegisterReq badgeRegisterReq
     ) {
