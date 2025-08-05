@@ -9,7 +9,7 @@ import com.saisai.config.jwt.AuthUserDetails;
 import com.saisai.domain.badge.dto.request.BadgeRegisterReq;
 import com.saisai.domain.badge.dto.response.BadgeDetailRes;
 import com.saisai.domain.badge.dto.response.BadgeRegisterRes;
-import com.saisai.domain.badge.dto.response.BadgeSummaryRes;
+import com.saisai.domain.badge.dto.response.UserBadgeRes;
 import com.saisai.domain.badge.entity.Badge;
 import com.saisai.domain.badge.entity.UserBadge;
 import com.saisai.domain.badge.repository.BadgeRepository;
@@ -53,19 +53,11 @@ public class BadgeService {
         return BadgeRegisterRes.from(saveBadge);
     }
 
-    public List<BadgeSummaryRes> getMyBadgeList(AuthUserDetails authUserDetails) {
-        User user = userRepository.findById(authUserDetails.userId())
-            .orElseThrow(() -> new CustomException(USER_NOT_FOUND));
+    public UserBadgeRes getMyBadgeList(AuthUserDetails authUserDetails) {
 
-        List<BadgeSummaryRes> badges = userBadgeRepository.findBadgeByUserId(user.getId());
+        List<Long> badgeIds = userBadgeRepository.findBadgeByUserId(authUserDetails.userId());
 
-        return badges.stream()
-            .map(badge -> new BadgeSummaryRes(
-                badge.userBadgeId(),
-                badge.badgeName(),
-                imageUtil.getImageUrl(badge.badgeImageUrl())
-            ))
-            .toList();
+        return UserBadgeRes.of(badgeIds);
     }
 
     public BadgeDetailRes getBadgeInfo(AuthUserDetails authUserDetails, Long userBadgeId) {
