@@ -50,9 +50,9 @@ public class GpxParser {
     public List<GpxPoint> parseGpxContent(String gpxContent) throws CustomException {
         Gpx gpx = getGpxFromContent(gpxContent);
 
-        validGpx(gpx);
+        List<TrackPoint> trackPoints = validGpx(gpx);
 
-        return convertGpxToGpxPoints(gpx);
+        return convertGpxToGpxPoints(trackPoints);
     }
 
     // 특정 gpx 좌표만 파싱 메서드
@@ -97,9 +97,8 @@ public class GpxParser {
         }
     }
 
-    // gpx -> List<GpxPoint> 변환 메서드
-    private List<GpxPoint> convertGpxToGpxPoints(Gpx gpx) {
-        List<TrackPoint> trackPoints = flattenTrackPoints(gpx).toList();
+    // gpxTrackPoint -> List<GpxPoint> 변환 메서드
+    private List<GpxPoint> convertGpxToGpxPoints(List<TrackPoint> trackPoints) {
         List<GpxPoint> gpxPoints = new ArrayList<>();
 
         TrackPoint prev = trackPoints.get(0);
@@ -127,10 +126,6 @@ public class GpxParser {
 
     // Track -> segment -> point 구조를 스트림으로 평탄화하는 메서드
     private Stream<TrackPoint> flattenTrackPoints(Gpx gpx) {
-
-        if (gpx == null || gpx.tracks() == null || gpx.tracks().isEmpty()) {
-            throw new CustomException(GPX_EMPTY);
-        }
 
         return gpx.tracks().stream()
             .flatMap(track -> track.trackSegments().stream())
