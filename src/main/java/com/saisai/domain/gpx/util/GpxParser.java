@@ -59,13 +59,28 @@ public class GpxParser {
     public GpxKeyPoints parseKeyGpxpath(String gpxContent) {
         Gpx gpx = getGpxFromContent(gpxContent);
 
-        validGpx(gpx);
+        List<TrackPoint> trackPoints = validGpx(gpx);
 
-        TrackPoint firstTrackPoint = flattenTrackPoints(gpx)
-            .findFirst()
-            .orElseThrow(() -> new CustomException(GPX_NO_FIRST_POINT));
+        TrackPoint first = trackPoints.get(0);
 
-        return new FirstGpxPoint(firstTrackPoint.lat(), firstTrackPoint.lon());
+        double firstLat = first.lat();
+        double firstLon = first.lon();
+
+        double minLat = firstLat;
+        double maxLat = firstLat;
+        double minLon = firstLon;
+        double maxLon = firstLon;
+
+        for (TrackPoint p : trackPoints) {
+            double lat = p.lat();
+            double lon = p.lon();
+            if (lat < minLat) minLat = lat;
+            if (lat > maxLat) maxLat = lat;
+            if (lon < minLon) minLon = lon;
+            if (lon > maxLon) maxLon = lon;
+        }
+
+        return new GpxKeyPoints(firstLat, firstLon, minLat, minLon, maxLat, maxLon);
     }
 
     // gpx 파일 내용 (gpxContent) 파싱 -> gpx 클래스로 반환 메서드
@@ -123,14 +138,16 @@ public class GpxParser {
     }
 
     // gpx 포인트 존재 여부 검사 메서드
-    private void validGpx(Gpx gpx) {
-        if (gpx.tracks() == null || gpx.tracks().isEmpty()) {
+    private List<TrackPoint> validGpx(Gpx gpx) {
+        if (gpx == null || gpx.tracks() == null || gpx.tracks().isEmpty()) {
             throw new CustomException(GPX_EMPTY);
         }
 
-        boolean hasPoints = flattenTrackPoints(gpx).findAny().isPresent();
-        if (!hasPoints) {
+        List<TrackPoint> points = flattenTrackPoints(gpx).toList();
+        if (points.isEmpty()) {
             throw new CustomException(GPX_NO_FIRST_POINT);
         }
+
+        return points;
     }
 }
