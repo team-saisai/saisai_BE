@@ -14,6 +14,7 @@ public record CourseDetailsProjection(
     String sigun,
     String imageUrl,
     String gpxpath,
+    String checkpointPath,
     ChallengeStatus challengeStatus,
     LocalDateTime challengeEndedAt,
     Boolean isEventActive,

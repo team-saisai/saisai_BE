@@ -6,9 +6,12 @@ import static com.saisai.domain.common.exception.ExceptionCode.INVALID_SORT_OPTI
 import com.saisai.config.jwt.AuthUserDetails;
 import com.saisai.domain.challenge.dto.projection.ChallengeCourseProjection;
 import com.saisai.domain.challenge.repository.ChallengeRepository;
+import com.saisai.domain.common.aws.s3.CheckpointS3;
 import com.saisai.domain.common.aws.s3.GpxS3;
 import com.saisai.domain.common.aws.s3.ImageUtil;
 import com.saisai.domain.common.exception.CustomException;
+import com.saisai.domain.course.api.checkpoint.CheckpointJsonParser;
+import com.saisai.domain.course.dto.response.CheckpointRes;
 import com.saisai.domain.course.constant.CourseSortOption;
 import com.saisai.domain.course.constant.CourseType;
 import com.saisai.domain.course.dto.projection.CourseDetailsProjection;
@@ -44,8 +47,10 @@ public class CourseService {
     private final UserRepository userRepository;
     private final ChallengeRepository challengeRepository;
     private final GpxParser gpxParser;
+    private final CheckpointJsonParser checkpointJsonParser;
     private final ImageUtil imageUtil;
     private final GpxS3 gpxS3;
+    private final CheckpointS3 checkpointS3;
 
     // 코스 목록 조회 메서드
     public Page<CoursePageRes> getCourses(Pageable pageable, CourseType type, CourseSortOption sortOption, AuthUserDetails authUserDetails) {
@@ -101,7 +106,11 @@ public class CourseService {
         String gpxContent = gpxS3.getGpxContent(course.gpxpath());
         List<GpxPoint> gpxPoints = gpxParser.parseGpxContent(gpxContent);
 
-        return CourseDetailsRes.from(course, imageUtil.getImageUrl(course.imageUrl()), rideCountRes, gpxPoints, rideId);
+        String checkpointContent = checkpointS3.getCheckpointContent(course.checkpointPath());
+        List<CheckpointRes> checkpointRes = checkpointJsonParser.deserialize(checkpointContent);
+
+        return CourseDetailsRes.from(course, imageUtil.getImageUrl(course.imageUrl()), rideCountRes, gpxPoints,
+            checkpointRes, rideId);
     }
 
     // 이벤트 활성화 확인
