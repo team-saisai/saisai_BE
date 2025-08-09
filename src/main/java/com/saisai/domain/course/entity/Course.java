@@ -2,13 +2,14 @@ package com.saisai.domain.course.entity;
 
 import com.saisai.domain.common.BaseEntity;
 import com.saisai.domain.course.api.CourseItem;
-import com.saisai.domain.gpx.dto.FirstGpxPoint;
+import com.saisai.domain.gpx.dto.GpxKeyPoints;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import java.time.LocalDateTime;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -58,14 +59,29 @@ public class Course extends BaseEntity {
     @Column(name = "start_lon")
     private Double startLon;
 
+    @Column(name = "min_lat")
+    private Double minLat;
+
+    @Column(name = "min_lon")
+    private Double minLon;
+
+    @Column(name = "max_lat")
+    private Double maxLat;
+
+    @Column(name = "max_lon")
+    private Double maxLon;
+
     @Column(name = "is_deleted")
     private Boolean isDeleted;
 
+    @Column(name = "deleted_at")
+    private LocalDateTime deletedAt;
 
     @Builder
     public Course(String name, String summary, Integer level, Double distance,
         Double estimatedTime, String sigun, String gpxPath,
-        String durunubiCourseId, String image, Double startLat, Double startLon
+        String durunubiCourseId, String image, Double startLat, Double startLon,
+        Double minLat, Double minLon, Double maxLat, Double maxLon
     ) {
         this.name = name;
         this.summary = summary;
@@ -78,10 +94,14 @@ public class Course extends BaseEntity {
         this.image = image;
         this.startLat = startLat;
         this.startLon = startLon;
+        this.minLat = minLat;
+        this.minLon = minLon;
+        this.maxLat = maxLat;
+        this.maxLon = maxLon;
         this.isDeleted = false;
     }
 
-    public static Course from (CourseItem courseItem, FirstGpxPoint firstGpxPoint, String gpxPath) {
+    public static Course from (CourseItem courseItem, GpxKeyPoints gpxKeyPoints, String gpxPath) {
         return Course.builder()
             .name(courseItem.courseName())
             .summary(courseItem.convertSummary())
@@ -91,8 +111,12 @@ public class Course extends BaseEntity {
             .sigun(courseItem.sigun())
             .gpxPath(gpxPath)
             .durunubiCourseId(courseItem.durunubiCourseId())
-            .startLat(firstGpxPoint.lat())
-            .startLon(firstGpxPoint.lon())
+            .startLat(gpxKeyPoints.startLat())
+            .startLon(gpxKeyPoints.startLon())
+            .minLat(gpxKeyPoints.minLat())
+            .minLon(gpxKeyPoints.minLon())
+            .maxLat(gpxKeyPoints.maxLat())
+            .maxLon(gpxKeyPoints.maxLon())
             .build();
     }
 }
