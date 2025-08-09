@@ -5,10 +5,13 @@ import static java.lang.Boolean.TRUE;
 import com.saisai.domain.common.api.dto.Body;
 import com.saisai.domain.common.api.dto.ExternalResponse;
 import com.saisai.domain.common.api.dto.Items;
-import com.saisai.domain.common.exception.CustomException;
+import com.saisai.domain.common.aws.s3.CheckpointS3;
 import com.saisai.domain.common.aws.s3.GpxS3;
+import com.saisai.domain.common.exception.CustomException;
 import com.saisai.domain.course.api.CourseApi;
 import com.saisai.domain.course.api.CourseItem;
+import com.saisai.domain.course.api.checkpoint.CheckpointApiService;
+import com.saisai.domain.course.api.checkpoint.internal.CheckpointInfo;
 import com.saisai.domain.course.entity.Course;
 import com.saisai.domain.course.repository.CourseRepository;
 import com.saisai.domain.gpx.dto.GpxKeyPoints;
@@ -30,8 +33,10 @@ public class CourseApiService {
 
     private final CourseRepository courseRepository;
     private final CourseApi courseApi;
+    private final CheckpointApiService checkpointApiService;
     private final GpxParser gpxParser;
     private final GpxS3 gpxS3;
+    private final CheckpointS3 checkpointS3;
 
     // 두루누비 API 데이터 DB에 저장하는 메서드
     @Transactional
@@ -69,7 +74,10 @@ public class CourseApiService {
 
                     String s3GpxPath = gpxS3.upload(gpxContent, item.courseName());
 
-                    Course course = Course.from(item, gpxKeyPoints, s3GpxPath);
+                    List<CheckpointInfo> checkpointList = checkpointApiService.getCheckpoints(gpxKeyPoints, item.durunubiCourseId());
+                    String s3CheckpointGpxPath = checkpointS3.upload(checkpointList, item.courseName());
+
+                    Course course = Course.from(item, gpxKeyPoints, s3GpxPath, s3CheckpointGpxPath);
 
                     courseRepository.save(course);
 

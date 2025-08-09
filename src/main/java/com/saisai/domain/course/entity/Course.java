@@ -47,6 +47,9 @@ public class Course extends BaseEntity {
     @Column(name = "gpx_path", nullable = false, length = 255) // GPX 파일 경로 (URL)
     private String gpxPath;
 
+    @Column(name = "checkpoint_gpx_path", length = 255)
+    private String checkpointGpxPath;
+
     @Column(name = "durunubi_course_id") // 두루누비API 제공 코스 고유번호 (구분하기 위해 추가)
     private String durunubiCourseId;
 
@@ -79,7 +82,7 @@ public class Course extends BaseEntity {
 
     @Builder
     public Course(String name, String summary, Integer level, Double distance,
-        Double estimatedTime, String sigun, String gpxPath,
+        Double estimatedTime, String sigun, String gpxPath, String checkpointGpxPath,
         String durunubiCourseId, String image, Double startLat, Double startLon,
         Double minLat, Double minLon, Double maxLat, Double maxLon
     ) {
@@ -90,6 +93,7 @@ public class Course extends BaseEntity {
         this.estimatedTime = estimatedTime;
         this.sigun = sigun;
         this.gpxPath = gpxPath;
+        this.checkpointGpxPath = checkpointGpxPath;
         this.durunubiCourseId = durunubiCourseId;
         this.image = image;
         this.startLat = startLat;
@@ -101,7 +105,7 @@ public class Course extends BaseEntity {
         this.isDeleted = false;
     }
 
-    public static Course from (CourseItem courseItem, GpxKeyPoints gpxKeyPoints, String gpxPath) {
+    public static Course from (CourseItem courseItem, GpxKeyPoints gpxKeyPoints, String gpxPath, String checkpointGpxPath) {
         return Course.builder()
             .name(courseItem.courseName())
             .summary(courseItem.convertSummary())
@@ -110,6 +114,7 @@ public class Course extends BaseEntity {
             .estimatedTime(courseItem.estimatedTime())
             .sigun(courseItem.sigun())
             .gpxPath(gpxPath)
+            .checkpointGpxPath(checkpointGpxPath)
             .durunubiCourseId(courseItem.durunubiCourseId())
             .startLat(gpxKeyPoints.startLat())
             .startLon(gpxKeyPoints.startLon())
