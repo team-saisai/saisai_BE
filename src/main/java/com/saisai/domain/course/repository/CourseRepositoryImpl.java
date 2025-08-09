@@ -113,6 +113,7 @@ public class CourseRepositoryImpl implements CourseRepositoryCustom {
                 course.sigun,
                 course.image,
                 course.gpxPath,
+                course.checkpointGpxPath,
                 challenge.status,
                 challenge.endedAt,
                 rewardEvent.id.isNotNull(),
