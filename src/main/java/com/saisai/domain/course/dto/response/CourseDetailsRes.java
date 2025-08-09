@@ -1,6 +1,7 @@
 package com.saisai.domain.course.dto.response;
 
 import com.saisai.domain.challenge.entity.ChallengeStatus;
+import com.saisai.domain.checkpoint.dto.response.CheckpointRes;
 import com.saisai.domain.course.dto.projection.CourseDetailsProjection;
 import com.saisai.domain.gpx.dto.GpxPoint;
 import com.saisai.domain.ride.dto.response.RideCountRes;

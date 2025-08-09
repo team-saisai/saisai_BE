@@ -1,5 +1,6 @@
-package com.saisai.domain.common.aws.s3;
+package com.saisai.domain.gpx.service;
 
+import com.saisai.infra.aws.s3.S3Service;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

@@ -10,13 +10,15 @@ import static com.saisai.domain.common.exception.ExceptionCode.USER_NOT_FOUND;
 import static java.lang.Boolean.TRUE;
 
 import com.saisai.config.jwt.AuthUserDetails;
-import com.saisai.domain.common.aws.s3.GpxS3;
-import com.saisai.domain.common.aws.s3.ImageUtil;
+import com.saisai.domain.checkpoint.client.CheckpointS3;
+import com.saisai.domain.checkpoint.dto.response.CheckpointRes;
+import com.saisai.domain.checkpoint.service.CheckpointJsonParser;
 import com.saisai.domain.common.exception.CustomException;
 import com.saisai.domain.course.entity.Course;
 import com.saisai.domain.course.repository.CourseRepository;
 import com.saisai.domain.gpx.dto.GpxPoint;
-import com.saisai.domain.gpx.util.GpxParser;
+import com.saisai.domain.gpx.service.GpxParser;
+import com.saisai.domain.gpx.service.GpxS3;
 import com.saisai.domain.ride.dto.request.RideCompleteReq;
 import com.saisai.domain.ride.dto.request.RidePausedReq;
 import com.saisai.domain.ride.dto.response.RidePausedRes;
@@ -44,7 +46,8 @@ public class RideService {
     private final CacheRideService cacheRideService;
     private final GpxS3 gpxS3;
     private final GpxParser gpxParser;
-    private final ImageUtil imageUtil;
+    private final CheckpointS3 checkpointS3;
+    private final CheckpointJsonParser checkpointJsonParser;
 
     private static final Set<Long> ADMIN_USER_IDS = Set.of(1L, 2L, 53L, 54L);
 
@@ -57,29 +60,13 @@ public class RideService {
         User user = userRepository.findById(authUserDetails.userId())
             .orElseThrow(() -> new CustomException(USER_NOT_FOUND));
 
-        Ride currentRide;
+        validateUserNotRiding(user);
 
-        if (!isAdminUser(user.getId())) {
-            validateUserNotRiding(user);
+        Ride ride = findOrCreateOrResumeRide(user, course);
 
-            Optional<Ride> pausedRideOptional =
-                rideRepository.findByUserIdAndCourseIdAndStatus(user.getId(), course.getId(), RideStatus.PAUSED);
-
-            if (pausedRideOptional.isPresent()) {
-                currentRide = pausedRideOptional.get();
-                currentRide.resume();
-            } else {
-                currentRide = Ride.start(user, course);
-                rideRepository.save(currentRide);
-            }
-        } else {
-            currentRide = Ride.start(user, course);
-            rideRepository.save(currentRide);
-        }
-
-        List<GpxPoint> gpxPoints = getGpxPoints(currentRide);
-
-        return RideStartRes.from(currentRide, course, gpxPoints);
+        List<GpxPoint> gpxPoints = getGpxPoints(ride);
+        List<CheckpointRes> checkpoints = getCheckpoint(ride);
+        return RideStartRes.from(ride, ride.getCourse(), gpxPoints, checkpoints);
     }
 
     // Ride 중단
@@ -93,12 +80,7 @@ public class RideService {
 
         int progressRate = calculateProgressRate(ridePausedReq, ride);
 
-        // 관리자 계정이면 라이딩 상태 예외처리 X
-        if (isAdminUser(authUserDetails.userId())) {
-            ride.pausedForAdmin(progressRate);
-        } else {
-            ride.paused(progressRate);
-        }
+        ride.paused(progressRate);
 
         //cacheRideService.savePausedData(authUserDetails.userId(), rideId, ridePausedReq);
 
@@ -143,6 +125,12 @@ public class RideService {
         return gpxParser.parseGpxContent(gpxContent);
     }
 
+    // checkpoint 조회
+    private List<CheckpointRes> getCheckpoint(Ride ride) {
+        String checkpointContent = checkpointS3.getCheckpointContent(ride.getCourse().getCheckpointGpxPath());
+        return checkpointJsonParser.deserialize(checkpointContent);
+    }
+
     // 관리자 계정인지 검사
     private boolean isAdminUser(Long userId) {
         return ADMIN_USER_IDS.contains(userId);
@@ -150,6 +138,8 @@ public class RideService {
 
     // 라이딩 중인 코스가 있는지 검사
     private void validateUserNotRiding(User user) {
+
+        if (isAdminUser(user.getId())) return;
         Boolean isRiding = rideRepository.existsByUserAndStatus(user, RideStatus.IN_PROGRESS);
         if (TRUE.equals(isRiding)) {
             throw new CustomException(RIDE_ALREADY_IN_PROGRESS);
@@ -181,5 +171,19 @@ public class RideService {
         double progressRate = Math.min(currentDistance / courseDistance * 100, 100.0);
 
         return (int) Math.round(progressRate);
+    }
+
+    // ride 생성하거나 재시작 결정
+    private Ride findOrCreateOrResumeRide(User user, Course course) {
+        Optional<Ride> pausedRide = rideRepository.findByUserIdAndCourseIdAndStatus(user.getId(), course.getId(), RideStatus.PAUSED);
+
+        if (pausedRide.isPresent()) {
+            Ride ride = pausedRide.get();
+            ride.resume(); // 이미 존재하는 Ride를 재개
+            return ride;
+        } else {
+            Ride newRide = Ride.start(user, course);
+            return rideRepository.save(newRide); // 새로운 Ride 생성 및 저장
+        }
     }
 }

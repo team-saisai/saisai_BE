@@ -1,7 +1,7 @@
 package com.saisai.domain.course.entity;
 
 import com.saisai.domain.common.BaseEntity;
-import com.saisai.domain.course.api.CourseItem;
+import com.saisai.domain.course.api.dto.CourseItem;
 import com.saisai.domain.gpx.dto.GpxKeyPoints;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

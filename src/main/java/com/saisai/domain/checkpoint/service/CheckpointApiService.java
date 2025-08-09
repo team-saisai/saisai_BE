@@ -1,4 +1,4 @@
-package com.saisai.domain.course.api.checkpoint;
+package com.saisai.domain.checkpoint.service;
 
 import static com.saisai.domain.common.exception.ExceptionCode.API_CLIENT_ERROR;
 import static com.saisai.domain.common.exception.ExceptionCode.API_NETWORK_ERROR;
@@ -8,8 +8,9 @@ import static com.saisai.domain.common.exception.ExceptionCode.COURSE_CHECKPOINT
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.saisai.domain.common.exception.CustomException;
-import com.saisai.domain.course.api.checkpoint.external.CheckpointResponse;
-import com.saisai.domain.course.api.checkpoint.internal.CheckpointInfo;
+import com.saisai.domain.checkpoint.client.DurunubiCheckpointClient;
+import com.saisai.domain.checkpoint.dto.external.CheckpointResponse;
+import com.saisai.domain.checkpoint.dto.CheckpointInfo;
 import com.saisai.domain.gpx.dto.GpxKeyPoints;
 import java.util.List;
 import java.util.Objects;

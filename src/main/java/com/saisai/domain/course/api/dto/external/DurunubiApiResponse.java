@@ -1,10 +1,10 @@
-package com.saisai.domain.common.api.dto;
+package com.saisai.domain.course.api.dto.external;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public record ExternalResponse<T>(
+public record DurunubiApiResponse<T>(
     @JsonProperty("response") Response<T> response
 ) {
     @JsonIgnoreProperties(ignoreUnknown = true)

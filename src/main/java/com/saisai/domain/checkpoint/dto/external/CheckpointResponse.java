@@ -1,4 +1,4 @@
-package com.saisai.domain.course.api.checkpoint.external;
+package com.saisai.domain.checkpoint.dto.external;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.util.List;

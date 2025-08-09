@@ -2,20 +2,20 @@ package com.saisai.domain.course.service;
 
 import static java.lang.Boolean.TRUE;
 
-import com.saisai.domain.common.api.dto.Body;
-import com.saisai.domain.common.api.dto.ExternalResponse;
-import com.saisai.domain.common.api.dto.Items;
-import com.saisai.domain.common.aws.s3.CheckpointS3;
-import com.saisai.domain.common.aws.s3.GpxS3;
+import com.saisai.domain.course.api.DurunubiCourseApiService;
+import com.saisai.domain.course.api.dto.external.Body;
+import com.saisai.domain.course.api.dto.external.DurunubiApiResponse;
+import com.saisai.domain.course.api.dto.external.DurunubiItems;
+import com.saisai.domain.checkpoint.client.CheckpointS3;
+import com.saisai.domain.gpx.service.GpxS3;
 import com.saisai.domain.common.exception.CustomException;
-import com.saisai.domain.course.api.CourseApi;
-import com.saisai.domain.course.api.CourseItem;
-import com.saisai.domain.course.api.checkpoint.CheckpointApiService;
-import com.saisai.domain.course.api.checkpoint.internal.CheckpointInfo;
+import com.saisai.domain.course.api.dto.CourseItem;
+import com.saisai.domain.checkpoint.service.CheckpointApiService;
+import com.saisai.domain.checkpoint.dto.CheckpointInfo;
 import com.saisai.domain.course.entity.Course;
 import com.saisai.domain.course.repository.CourseRepository;
 import com.saisai.domain.gpx.dto.GpxKeyPoints;
-import com.saisai.domain.gpx.util.GpxParser;
+import com.saisai.domain.gpx.service.GpxParser;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -27,12 +27,12 @@ import org.springframework.transaction.annotation.Transactional;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class CourseApiService {
+public class CourseSyncService {
 
     private static final int GET_COURSE_DEFAULT_NUM_OF_ROWS = 100;// 단건 조회용
 
     private final CourseRepository courseRepository;
-    private final CourseApi courseApi;
+    private final DurunubiCourseApiService durunubiCourseApiService;
     private final CheckpointApiService checkpointApiService;
     private final GpxParser gpxParser;
     private final GpxS3 gpxS3;
@@ -49,13 +49,13 @@ public class CourseApiService {
         int newCount = 0;
 
         while (hasMoreData) {
-            ExternalResponse<Body<CourseItem>> result = courseApi.callCourseApi(page);
+            DurunubiApiResponse<Body<CourseItem>> result = durunubiCourseApiService.callCourseApi(page);
 
             List<CourseItem> currentItems = Optional.ofNullable(result)
-                .map(ExternalResponse::response)
-                .map(ExternalResponse.Response::body)
-                .map(Body::items)
-                .map(Items::item)
+                .map(DurunubiApiResponse::response)
+                .map(DurunubiApiResponse.Response::body)
+                .map(Body::durunubiItems)
+                .map(DurunubiItems::item)
                 .orElseGet(ArrayList::new);
 
             for (CourseItem item : currentItems) {

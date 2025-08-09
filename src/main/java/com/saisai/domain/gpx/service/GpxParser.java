@@ -1,4 +1,4 @@
-package com.saisai.domain.gpx.util;
+package com.saisai.domain.gpx.service;
 
 import static com.saisai.domain.common.exception.ExceptionCode.GPX_DOWNLOAD_FAILED;
 import static com.saisai.domain.common.exception.ExceptionCode.GPX_EMPTY;
@@ -13,6 +13,7 @@ import com.saisai.domain.gpx.dto.GpxKeyPoints;
 import com.saisai.domain.gpx.dto.GpxPoint;
 import com.saisai.domain.gpx.dto.format.Gpx;
 import com.saisai.domain.gpx.dto.format.TrackPoint;
+import com.saisai.domain.gpx.util.DistanceUtils;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;

@@ -1,11 +1,11 @@
-package com.saisai.domain.common.api.dto;
+package com.saisai.domain.course.api.dto.external;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.List;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public record Items<T>(
+public record DurunubiItems<T>(
     @JsonProperty("item") List<T> item
     ) {
 }

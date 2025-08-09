@@ -1,8 +1,9 @@
-package com.saisai.domain.common.aws.s3;
+package com.saisai.domain.checkpoint.client;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.saisai.domain.course.api.checkpoint.internal.CheckpointInfo;
+import com.saisai.infra.aws.s3.S3Service;
+import com.saisai.domain.checkpoint.dto.CheckpointInfo;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;

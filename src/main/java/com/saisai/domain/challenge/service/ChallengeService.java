@@ -3,7 +3,7 @@ package com.saisai.domain.challenge.service;
 import com.saisai.config.jwt.AuthUserDetails;
 import com.saisai.domain.challenge.dto.response.PopularChallengeCourseRes;
 import com.saisai.domain.challenge.repository.ChallengeRepository;
-import com.saisai.domain.common.aws.s3.ImageUtil;
+import com.saisai.infra.aws.s3.ImageUtil;
 import com.saisai.domain.challenge.dto.projection.ChallengeCourseProjection;
 import com.saisai.domain.reward.dto.projection.RewardEventProjection;
 import com.saisai.domain.reward.util.RewardUtils;

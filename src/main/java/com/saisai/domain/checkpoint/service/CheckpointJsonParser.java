@@ -1,4 +1,4 @@
-package com.saisai.domain.course.api.checkpoint;
+package com.saisai.domain.checkpoint.service;
 
 import static com.saisai.domain.common.exception.ExceptionCode.JSON_DESERIALIZATION_FAILED;
 import static com.saisai.domain.common.exception.ExceptionCode.JSON_UNKNOWN_ERROR;
@@ -7,7 +7,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.saisai.domain.common.exception.CustomException;
-import com.saisai.domain.course.dto.response.CheckpointRes;
+import com.saisai.domain.checkpoint.dto.response.CheckpointRes;
 import java.util.Collections;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
