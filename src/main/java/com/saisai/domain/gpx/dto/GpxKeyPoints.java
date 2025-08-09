@@ -1,8 +1,6 @@
 package com.saisai.domain.gpx.dto;
 
-public record FirstGpxPoint(
-    Double lat,
-    Double lon
+public record GpxKeyPoints(
     Double startLat,
     Double startLon,
     Double minLat,

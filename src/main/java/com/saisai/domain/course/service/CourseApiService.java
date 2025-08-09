@@ -65,11 +65,11 @@ public class CourseApiService {
                 try {
                     String gpxContent = gpxParser.downloadGpxContent(item.gpxpath());
 
-                    FirstGpxPoint firstGpxPoint = gpxParser.parseFirstGpxpath(gpxContent);
+                    GpxKeyPoints gpxKeyPoints = gpxParser.parseKeyGpxpath(gpxContent);
 
                     String s3GpxPath = gpxS3.upload(gpxContent, item.courseName());
 
-                    Course course = Course.from(item, firstGpxPoint, s3GpxPath);
+                    Course course = Course.from(item, gpxKeyPoints, s3GpxPath);
 
                     courseRepository.save(course);
 

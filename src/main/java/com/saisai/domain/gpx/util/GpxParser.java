@@ -9,7 +9,7 @@ import static com.saisai.domain.common.exception.ExceptionCode.GPX_UNKNOWN_ERROR
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import com.saisai.domain.common.exception.CustomException;
-import com.saisai.domain.gpx.dto.FirstGpxPoint;
+import com.saisai.domain.gpx.dto.GpxKeyPoints;
 import com.saisai.domain.gpx.dto.GpxPoint;
 import com.saisai.domain.gpx.dto.format.Gpx;
 import com.saisai.domain.gpx.dto.format.TrackPoint;
@@ -55,8 +55,8 @@ public class GpxParser {
         return convertGpxToGpxPoints(gpx);
     }
 
-    // 첫번째 gpx 좌표만 파싱 메서드
-    public FirstGpxPoint parseFirstGpxpath(String gpxContent) throws CustomException {
+    // 특정 gpx 좌표만 파싱 메서드
+    public GpxKeyPoints parseKeyGpxpath(String gpxContent) {
         Gpx gpx = getGpxFromContent(gpxContent);
 
         validGpx(gpx);
