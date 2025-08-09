@@ -11,7 +11,7 @@ import com.saisai.domain.course.api.CourseApi;
 import com.saisai.domain.course.api.CourseItem;
 import com.saisai.domain.course.entity.Course;
 import com.saisai.domain.course.repository.CourseRepository;
-import com.saisai.domain.gpx.dto.FirstGpxPoint;
+import com.saisai.domain.gpx.dto.GpxKeyPoints;
 import com.saisai.domain.gpx.util.GpxParser;
 import java.util.ArrayList;
 import java.util.List;
