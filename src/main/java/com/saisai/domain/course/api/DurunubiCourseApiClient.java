@@ -5,7 +5,7 @@ import org.springframework.web.service.annotation.GetExchange;
 import org.springframework.web.service.annotation.HttpExchange;
 
 @HttpExchange("http://apis.data.go.kr/B551011/Durunubi")
-public interface CourseApiInterface {
+public interface DurunubiCourseApiClient {
 
     @GetExchange("/courseList")
     String callCourseApi(

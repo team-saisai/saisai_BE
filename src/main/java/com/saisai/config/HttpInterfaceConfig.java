@@ -1,7 +1,7 @@
 package com.saisai.config;
 
-import com.saisai.domain.course.api.CourseApiInterface;
-import com.saisai.domain.course.api.checkpoint.DurunubiCheckpointClient;
+import com.saisai.domain.course.api.DurunubiCourseApiClient;
+import com.saisai.domain.checkpoint.client.DurunubiCheckpointClient;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.client.RestClient;
@@ -12,12 +12,12 @@ import org.springframework.web.service.invoker.HttpServiceProxyFactory;
 public class HttpInterfaceConfig {
 
     @Bean
-    public CourseApiInterface courseApiClient(RestClient restClient) {
+    public DurunubiCourseApiClient courseApiClient(RestClient restClient) {
         HttpServiceProxyFactory factory = HttpServiceProxyFactory
             .builderFor(RestClientAdapter.create(restClient))
             .build();
 
-        return factory.createClient(CourseApiInterface.class);
+        return factory.createClient(DurunubiCourseApiClient.class);
     }
 
     @Bean

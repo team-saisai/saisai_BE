@@ -1,4 +1,4 @@
-package com.saisai.domain.common.aws.s3;
+package com.saisai.infra.aws.s3;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

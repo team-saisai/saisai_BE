@@ -1,4 +1,4 @@
-package com.saisai.domain.course.api;
+package com.saisai.domain.course.api.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -11,7 +11,6 @@ public record CourseItem(
     @JsonProperty("crsLevel") String levelStr,
     @JsonProperty("crsDstnc") String distanceStr,
     @JsonProperty("crsTotlRqrmHour") String estimatedTimeStr,
-    @JsonProperty("crsContents") String contents,
     @JsonProperty("crsSummary") String summary,
     @JsonProperty("sigun") String sigun,
     @JsonProperty("gpxpath") String gpxpath

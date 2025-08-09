@@ -1,4 +1,4 @@
-package com.saisai.domain.course.api.checkpoint;
+package com.saisai.domain.checkpoint.client;
 
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.service.annotation.GetExchange;

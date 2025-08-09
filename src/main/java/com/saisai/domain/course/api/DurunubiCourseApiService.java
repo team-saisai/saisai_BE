@@ -8,8 +8,9 @@ import static com.saisai.domain.common.exception.ExceptionCode.COURSE_API_CALL_F
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.saisai.domain.common.api.dto.Body;
-import com.saisai.domain.common.api.dto.ExternalResponse;
+import com.saisai.domain.course.api.dto.external.Body;
+import com.saisai.domain.course.api.dto.CourseItem;
+import com.saisai.domain.course.api.dto.external.DurunubiApiResponse;
 import com.saisai.domain.common.exception.CustomException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -22,13 +23,13 @@ import org.springframework.web.client.ResourceAccessException;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class CourseApi {
+public class DurunubiCourseApiService {
 
     @Value("${durunubi.secret}")
     private String API_SECERET_KEY;
 
-    private static final TypeReference<ExternalResponse<Body<CourseItem>>> COURSE_API_RESPONSE_TYPE =
-        new TypeReference<ExternalResponse<Body<CourseItem>>>() {};
+    private static final TypeReference<DurunubiApiResponse<Body<CourseItem>>> COURSE_API_RESPONSE_TYPE =
+        new TypeReference<DurunubiApiResponse<Body<CourseItem>>>() {};
 
     private static final String DEFAULT_MOBILE_OS = "ETC";
     private static final String DEFAULT_MOBILE_APP = "saisai";
@@ -37,12 +38,12 @@ public class CourseApi {
     private static final int GET_COURSE_DEFAULT_NUM_OF_ROWS = 100;// 단건 조회용
 
     private final ObjectMapper objectMapper;
-    private final CourseApiInterface courseApiInterface;
+    private final DurunubiCourseApiClient durunubiCourseApiClient;
 
     // 두루누비(코스)API 호출 메서드
-    public ExternalResponse<Body<CourseItem>> callCourseApi(int page) throws CustomException {
+    public DurunubiApiResponse<Body<CourseItem>> callCourseApi(int page) throws CustomException {
         try {
-            String result = courseApiInterface.callCourseApi(
+            String result = durunubiCourseApiClient.callCourseApi(
                 DEFAULT_MOBILE_OS,
                 DEFAULT_MOBILE_APP,
                 API_SECERET_KEY,

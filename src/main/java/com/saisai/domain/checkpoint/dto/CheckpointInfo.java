@@ -1,4 +1,4 @@
-package com.saisai.domain.course.api.checkpoint.internal;
+package com.saisai.domain.checkpoint.dto;
 
 public record CheckpointInfo(
     String internalId,

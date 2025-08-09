@@ -4,7 +4,7 @@ import static com.saisai.domain.common.exception.ExceptionCode.COURSE_NOT_FOUND;
 import static com.saisai.domain.common.exception.ExceptionCode.USER_NOT_FOUND;
 
 import com.saisai.config.jwt.AuthUserDetails;
-import com.saisai.domain.common.aws.s3.ImageUtil;
+import com.saisai.infra.aws.s3.ImageUtil;
 import com.saisai.domain.common.exception.CustomException;
 import com.saisai.domain.course.entity.Course;
 import com.saisai.domain.course.repository.CourseRepository;
