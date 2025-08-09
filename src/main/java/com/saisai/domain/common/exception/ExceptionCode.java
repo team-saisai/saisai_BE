@@ -33,6 +33,7 @@ public enum ExceptionCode {
     COURSE_DISTANCE_INVALID(HttpStatus.BAD_REQUEST, "CR_ER_04", "코스 거리 정보가 유효하지 않습니다."),
     INVALID_SORT_OPTION_FOR_COURSE_TYPE(HttpStatus.BAD_REQUEST, "CR_ER_05", "일반 코스에서는 종료일 기준으로 정렬할 수 없습니다."),
     COURSE_TYPE_NOT_FOUND(HttpStatus.NOT_FOUND, "CR_ER_06", "해당 코스 타입을 찾을 수 없습니다."),
+    COURSE_CHECKPOINT_API_CALL_FAIL(HttpStatus.INTERNAL_SERVER_ERROR, "CR_ER_07", "코스 체크포인트 API 호출에 실패했습니다."),
 
     // course bookmark
     COURSE_ALREADY_BOOKMARK(HttpStatus.CONFLICT, "CB_ER_01", "이미 북마크된 코스입니다."),
@@ -70,7 +71,8 @@ public enum ExceptionCode {
     API_UNKNOWN_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "API_ER_04", "외부 API 호출 중 알 수 없는 오류가 발생했습니다."),
 
     // json
-    INVALID_JSON_RESPONSE(HttpStatus.INTERNAL_SERVER_ERROR, "JSON_ER_01", "서버 응답에서 JSON을 파싱할 수 없습니다."),
+    JSON_DESERIALIZATION_FAILED(HttpStatus.BAD_REQUEST, "JSON_ER_01", " JSON 역직렬화에 실패했습니다."),
+    JSON_UNKNOWN_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "JSON_ER_02", "JSON 파일 처리 중 예상치 못한 오류가 발생했습니다."),
 
     // format
     INVALID_INTEGER_FORMAT(HttpStatus.BAD_REQUEST, "FMT_ER_01", "Integer 형식 변환에 실패했습니다."),
