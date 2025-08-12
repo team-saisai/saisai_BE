@@ -14,6 +14,6 @@ public class CacheConfig {
     @Bean // 로컬캐시 우선
     @Primary
     public CacheManager cacheManager() {
-        return new ConcurrentMapCacheManager("pausedRideCacheData");
+        return new ConcurrentMapCacheManager();
     }
 }

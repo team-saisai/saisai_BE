@@ -7,11 +7,9 @@ import com.saisai.config.jwt.AuthUserDetails;
 import com.saisai.domain.challenge.dto.projection.ChallengeCourseProjection;
 import com.saisai.domain.challenge.repository.ChallengeRepository;
 import com.saisai.domain.checkpoint.client.CheckpointS3;
-import com.saisai.domain.gpx.service.GpxS3;
-import com.saisai.infra.aws.s3.ImageUtil;
-import com.saisai.domain.common.exception.CustomException;
+import com.saisai.domain.checkpoint.dto.response.Checkpoint;
 import com.saisai.domain.checkpoint.service.CheckpointJsonParser;
-import com.saisai.domain.checkpoint.dto.response.CheckpointRes;
+import com.saisai.domain.common.exception.CustomException;
 import com.saisai.domain.course.constant.CourseSortOption;
 import com.saisai.domain.course.constant.CourseType;
 import com.saisai.domain.course.dto.projection.CourseDetailsProjection;
@@ -20,12 +18,12 @@ import com.saisai.domain.course.dto.response.CourseDetailsRes;
 import com.saisai.domain.course.dto.response.CoursePageRes;
 import com.saisai.domain.course.repository.CourseRepository;
 import com.saisai.domain.gpx.dto.GpxPoint;
-import com.saisai.domain.gpx.service.GpxParser;
+import com.saisai.domain.gpx.service.GpxCacheService;
 import com.saisai.domain.reward.dto.projection.RewardEventProjection;
 import com.saisai.domain.reward.util.RewardUtils;
 import com.saisai.domain.ride.dto.response.RideCountRes;
 import com.saisai.domain.ride.repository.RideRepository;
-import com.saisai.domain.user.repository.UserRepository;
+import com.saisai.infra.aws.s3.ImageUtil;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -44,13 +42,11 @@ public class CourseService {
 
     private final RideRepository rideRepository;
     private final CourseRepository courseRepository;
-    private final UserRepository userRepository;
     private final ChallengeRepository challengeRepository;
-    private final GpxParser gpxParser;
     private final CheckpointJsonParser checkpointJsonParser;
     private final ImageUtil imageUtil;
-    private final GpxS3 gpxS3;
     private final CheckpointS3 checkpointS3;
+    private final GpxCacheService gpxCacheService;
 
     // 코스 목록 조회 메서드
     public Page<CoursePageRes> getCourses(Pageable pageable, CourseType type, CourseSortOption sortOption, AuthUserDetails authUserDetails) {
@@ -103,14 +99,13 @@ public class CourseService {
 
         RideCountRes rideCountRes = rideRepository.countRideByCourseId(courseId);
 
-        String gpxContent = gpxS3.getGpxContent(course.gpxpath());
-        List<GpxPoint> gpxPoints = gpxParser.parseGpxContent(gpxContent);
-
         String checkpointContent = checkpointS3.getCheckpointContent(course.checkpointPath());
-        List<CheckpointRes> checkpointRes = checkpointJsonParser.deserialize(checkpointContent);
+        List<Checkpoint> checkpoint = checkpointJsonParser.deserialize(checkpointContent);
 
-        return CourseDetailsRes.from(course, imageUtil.getImageUrl(course.imageUrl()), rideCountRes, gpxPoints,
-            checkpointRes, rideId);
+        List<GpxPoint> mergedGpxPoints = gpxCacheService.getMergedGpxPoints(courseId, checkpoint);
+
+        return CourseDetailsRes.from(course, imageUtil.getImageUrl(course.imageUrl()), rideCountRes, mergedGpxPoints,
+            checkpoint, rideId);
     }
 
     // 이벤트 활성화 확인

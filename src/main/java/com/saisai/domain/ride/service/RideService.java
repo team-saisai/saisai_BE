@@ -11,14 +11,16 @@ import static java.lang.Boolean.TRUE;
 
 import com.saisai.config.jwt.AuthUserDetails;
 import com.saisai.domain.checkpoint.client.CheckpointS3;
-import com.saisai.domain.checkpoint.dto.response.CheckpointRes;
+import com.saisai.domain.checkpoint.dto.response.Checkpoint;
 import com.saisai.domain.checkpoint.service.CheckpointJsonParser;
 import com.saisai.domain.common.exception.CustomException;
 import com.saisai.domain.course.entity.Course;
 import com.saisai.domain.course.repository.CourseRepository;
+import com.saisai.domain.gpx.client.GpxS3;
 import com.saisai.domain.gpx.dto.GpxPoint;
+import com.saisai.domain.gpx.dto.format.TrackPoint;
+import com.saisai.domain.gpx.service.GpxCacheService;
 import com.saisai.domain.gpx.service.GpxParser;
-import com.saisai.domain.gpx.service.GpxS3;
 import com.saisai.domain.ride.dto.request.RideCompleteReq;
 import com.saisai.domain.ride.dto.request.RidePausedReq;
 import com.saisai.domain.ride.dto.response.RidePausedRes;
@@ -48,6 +50,7 @@ public class RideService {
     private final GpxParser gpxParser;
     private final CheckpointS3 checkpointS3;
     private final CheckpointJsonParser checkpointJsonParser;
+    private final GpxCacheService gpxCacheService;
 
     private static final Set<Long> ADMIN_USER_IDS = Set.of(1L, 2L, 53L, 54L);
 
@@ -64,9 +67,11 @@ public class RideService {
 
         Ride ride = findOrCreateOrResumeRide(user, course);
 
-        List<GpxPoint> gpxPoints = getGpxPoints(ride);
-        List<CheckpointRes> checkpoints = getCheckpoint(ride);
-        return RideStartRes.from(ride, ride.getCourse(), gpxPoints, checkpoints);
+        List<Checkpoint> checkpoints = getCheckpoint(ride);
+
+        List<GpxPoint> mergeGpxPoints = gpxCacheService.getMergedGpxPoints(courseId, checkpoints);
+
+        return RideStartRes.from(ride, ride.getCourse(), mergeGpxPoints, checkpoints);
     }
 
     // Ride 중단
@@ -120,13 +125,13 @@ public class RideService {
 
 
     // ride course Gpx 포인트 조회
-    private List<GpxPoint> getGpxPoints(Ride ride) {
+    private List<TrackPoint> getGpxPoints(Ride ride) {
         String gpxContent = gpxS3.getGpxContent(ride.getCourse().getGpxPath());
         return gpxParser.parseGpxContent(gpxContent);
     }
 
     // checkpoint 조회
-    private List<CheckpointRes> getCheckpoint(Ride ride) {
+    private List<Checkpoint> getCheckpoint(Ride ride) {
         String checkpointContent = checkpointS3.getCheckpointContent(ride.getCourse().getCheckpointGpxPath());
         return checkpointJsonParser.deserialize(checkpointContent);
     }
