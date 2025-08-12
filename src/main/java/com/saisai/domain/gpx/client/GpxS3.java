@@ -1,4 +1,4 @@
-package com.saisai.domain.gpx.service;
+package com.saisai.domain.gpx.client;
 
 import com.saisai.infra.aws.s3.S3Service;
 import java.util.UUID;

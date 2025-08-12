@@ -7,7 +7,7 @@ import com.saisai.domain.course.api.dto.external.Body;
 import com.saisai.domain.course.api.dto.external.DurunubiApiResponse;
 import com.saisai.domain.course.api.dto.external.DurunubiItems;
 import com.saisai.domain.checkpoint.client.CheckpointS3;
-import com.saisai.domain.gpx.service.GpxS3;
+import com.saisai.domain.gpx.client.GpxS3;
 import com.saisai.domain.common.exception.CustomException;
 import com.saisai.domain.course.api.dto.CourseItem;
 import com.saisai.domain.checkpoint.service.CheckpointApiService;
