@@ -1,6 +1,6 @@
 package com.saisai.domain.ride.dto.response;
 
-import com.saisai.domain.checkpoint.dto.response.CheckpointRes;
+import com.saisai.domain.checkpoint.dto.response.Checkpoint;
 import com.saisai.domain.course.entity.Course;
 import com.saisai.domain.gpx.dto.GpxPoint;
 import com.saisai.domain.ride.entity.Ride;
@@ -12,10 +12,10 @@ public record RideStartRes(
     String courseName,
     Double distance,
     List<GpxPoint> gpxPoints,
-    List<CheckpointRes> checkpoints
+    List<Checkpoint> checkpoints
 ) {
 
-    public static RideStartRes from(Ride ride, Course course, List<GpxPoint> gpxPoints, List<CheckpointRes> checkpoints) {
+    public static RideStartRes from(Ride ride, Course course, List<GpxPoint> gpxPoints, List<Checkpoint> checkpoints) {
         return new RideStartRes(
             ride.getId(),
             course.getSigun(),

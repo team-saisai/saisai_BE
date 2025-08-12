@@ -7,7 +7,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.saisai.domain.common.exception.CustomException;
-import com.saisai.domain.checkpoint.dto.response.CheckpointRes;
+import com.saisai.domain.checkpoint.dto.response.Checkpoint;
 import java.util.Collections;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -17,12 +17,12 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class CheckpointJsonParser {
 
-    private static final TypeReference<List<CheckpointRes>> CHECKPOINT_LIST_TYPE =
+    private static final TypeReference<List<Checkpoint>> CHECKPOINT_LIST_TYPE =
         new TypeReference<>() {};
 
     private final ObjectMapper objectMapper;
 
-    public List<CheckpointRes> deserialize(String jsonContent) {
+    public List<Checkpoint> deserialize(String jsonContent) {
         if (jsonContent == null || jsonContent.isBlank()) {
             return Collections.emptyList();
         }
