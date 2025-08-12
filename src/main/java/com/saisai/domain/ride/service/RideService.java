@@ -1,7 +1,9 @@
 package com.saisai.domain.ride.service;
 
-import static com.saisai.domain.common.exception.ExceptionCode.COURSE_DISTANCE_INVALID;
+import static com.saisai.domain.common.exception.ExceptionCode.CHECKPOINT_INDEX_OUT_OF_RANGE;
+import static com.saisai.domain.common.exception.ExceptionCode.COURSE_CHECKPOINT_INVALID;
 import static com.saisai.domain.common.exception.ExceptionCode.COURSE_NOT_FOUND;
+import static com.saisai.domain.common.exception.ExceptionCode.INSUFFICIENT_CHECKPOINT_COUNT;
 import static com.saisai.domain.common.exception.ExceptionCode.RIDE_ALREADY_IN_PROGRESS;
 import static com.saisai.domain.common.exception.ExceptionCode.RIDE_NOT_FOUND;
 import static com.saisai.domain.common.exception.ExceptionCode.RIDE_NOT_IN_PROGRESS;
@@ -125,11 +127,21 @@ public class RideService {
         ride.complete(rideCompleteReq);
     }
 
+    // 기록 동기화
+    @Transactional
+    public void syncRideRecord(Long rideId, RideRecordReq rideRecordReq, AuthUserDetails authUserDetails) {
+        Ride ride = rideRepository.findById(rideId)
+            .orElseThrow(() -> new CustomException(RIDE_NOT_FOUND));
 
-    // ride course Gpx 포인트 조회
-    private List<TrackPoint> getGpxPoints(Ride ride) {
-        String gpxContent = gpxS3.getGpxContent(ride.getCourse().getGpxPath());
-        return gpxParser.parseGpxContent(gpxContent);
+        validateRideAccess(ride, authUserDetails.userId());
+
+        if (ride.getCourse().getCheckpointCount() < rideRecordReq.checkpointIdx()+1) {
+            throw new CustomException(CHECKPOINT_INDEX_OUT_OF_RANGE);
+        }
+
+        int progressRate = calculateProgressRate(rideRecordReq, ride);
+
+        ride.sync(rideRecordReq, progressRate);
     }
 
     // checkpoint 조회

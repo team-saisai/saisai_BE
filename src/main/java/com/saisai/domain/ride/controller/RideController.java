@@ -2,6 +2,7 @@ package com.saisai.domain.ride.controller;
 
 import static com.saisai.domain.common.response.SuccessCode.RIDE_COMPLETE_SUCCESS;
 import static com.saisai.domain.common.response.SuccessCode.RIDE_PAUSED_SUCCESS;
+import static com.saisai.domain.common.response.SuccessCode.RIDE_RECORD_SYNC_SUCCESS;
 import static com.saisai.domain.common.response.SuccessCode.RIDE_RESUME_SUCCESS;
 import static com.saisai.domain.common.response.SuccessCode.RIDE_START_SUCCESS;
 
@@ -81,5 +82,19 @@ public class RideController {
 
         return ResponseEntity.status(HttpStatus.OK)
             .body(ApiResponse.success(RIDE_COMPLETE_SUCCESS));
+    }
+
+    @Operation(summary = "라이딩 기록 중간 저장",
+    description = "체크포인트 인덱스 번호로 입력")
+    @PatchMapping("rides/{rideId}/sync")
+    public ResponseEntity<ApiResponse<Void>> syncRideRecord(
+        @PathVariable Long rideId,
+        @Valid @RequestBody RideRecordReq rideRecordReq,
+        @Auth AuthUserDetails authUserDetails
+    ) {
+        rideService.syncRideRecord(rideId, rideRecordReq, authUserDetails);
+
+        return ResponseEntity.status(HttpStatus.OK)
+            .body(ApiResponse.success(RIDE_RECORD_SYNC_SUCCESS));
     }
 }
