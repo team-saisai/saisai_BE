@@ -1,16 +1,11 @@
 package com.saisai.domain.ride.dto.request;
 
-import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 
 public record RideCompleteReq(
     @Min(value = 1, message = "소요시간은 1초 이상이어야 합니다.")
     @NotNull(message = "소요시간(초)은 필수 입력값입니다.")
-    Long duration,
-
-    @DecimalMin(value = "0.1", message = "완주 거리는 0.1km 이상이어야 합니다.")
-    @NotNull(message = "완주 거리(km)는 필수 입력값입니다.")
-    Double actualDistance
+    Long duration
 ) {
 }
