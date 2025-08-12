@@ -38,6 +38,7 @@ public enum SuccessCode {
     RIDE_RESUME_SUCCESS(HttpStatus.OK, "RIDE_04", "코스 라아드 재개에 성공했습니다."),
     RIDE_COMPLETE_SUCCESS(HttpStatus.OK, "RIDE_05", "코스 라이드 완주에 성공했습니다."),
     RIDE_DELETE_SUCCESS(HttpStatus.OK, "RIDE_06","코스 라이드 기록 삭제에 성공했습니다."),
+    RIDE_RECORD_SYNC_SUCCESS(HttpStatus.OK, "RIDE_07", "기록 동기화에 성공했습니다. "),
 
     // Badge
     BADGE_CREATE_SUCCESS(HttpStatus.CREATED, "BADGE_01", "뱃지 생성에 성공했습니다."),

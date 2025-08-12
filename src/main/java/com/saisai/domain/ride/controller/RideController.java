@@ -2,6 +2,7 @@ package com.saisai.domain.ride.controller;
 
 import static com.saisai.domain.common.response.SuccessCode.RIDE_COMPLETE_SUCCESS;
 import static com.saisai.domain.common.response.SuccessCode.RIDE_PAUSED_SUCCESS;
+import static com.saisai.domain.common.response.SuccessCode.RIDE_RECORD_SYNC_SUCCESS;
 import static com.saisai.domain.common.response.SuccessCode.RIDE_RESUME_SUCCESS;
 import static com.saisai.domain.common.response.SuccessCode.RIDE_START_SUCCESS;
 
@@ -9,7 +10,7 @@ import com.saisai.config.jwt.AuthUserDetails;
 import com.saisai.domain.common.annotation.Auth;
 import com.saisai.domain.common.response.ApiResponse;
 import com.saisai.domain.ride.dto.request.RideCompleteReq;
-import com.saisai.domain.ride.dto.request.RidePausedReq;
+import com.saisai.domain.ride.dto.request.RideRecordReq;
 import com.saisai.domain.ride.dto.response.RidePausedRes;
 import com.saisai.domain.ride.dto.response.RideResumeRes;
 import com.saisai.domain.ride.dto.response.RideStartRes;
@@ -52,10 +53,10 @@ public class RideController {
     public ResponseEntity<ApiResponse<RidePausedRes>> pausedRide(
         @PathVariable Long rideId,
         @Auth AuthUserDetails authUserDetails,
-        @Valid @RequestBody RidePausedReq ridePausedReq
+        @Valid @RequestBody RideRecordReq rideRecordReq
     ) {
         return ResponseEntity.status(HttpStatus.OK)
-            .body(ApiResponse.success(RIDE_PAUSED_SUCCESS, rideService.pausedRide(rideId, authUserDetails, ridePausedReq)));
+            .body(ApiResponse.success(RIDE_PAUSED_SUCCESS, rideService.pausedRide(rideId, authUserDetails, rideRecordReq)));
     }
 
     @Operation(summary = "코스 라이딩 재개",
@@ -74,12 +75,26 @@ public class RideController {
     @PatchMapping(value = "/rides/{rideId}/complete")
     public ResponseEntity<ApiResponse<Void>> completeRide(
         @PathVariable Long rideId,
-        @Valid @RequestBody RideCompleteReq completeReq,
+        @Valid @RequestBody RideCompleteReq rideCompleteReq,
         @Auth AuthUserDetails authUserDetails
     ) {
-        rideService.completeRide(rideId, completeReq, authUserDetails);
+        rideService.completeRide(rideId, rideCompleteReq, authUserDetails);
 
         return ResponseEntity.status(HttpStatus.OK)
             .body(ApiResponse.success(RIDE_COMPLETE_SUCCESS));
+    }
+
+    @Operation(summary = "라이딩 기록 중간 저장",
+    description = "체크포인트 인덱스 번호로 입력")
+    @PatchMapping("rides/{rideId}/sync")
+    public ResponseEntity<ApiResponse<Void>> syncRideRecord(
+        @PathVariable Long rideId,
+        @Valid @RequestBody RideRecordReq rideRecordReq,
+        @Auth AuthUserDetails authUserDetails
+    ) {
+        rideService.syncRideRecord(rideId, rideRecordReq, authUserDetails);
+
+        return ResponseEntity.status(HttpStatus.OK)
+            .body(ApiResponse.success(RIDE_RECORD_SYNC_SUCCESS));
     }
 }

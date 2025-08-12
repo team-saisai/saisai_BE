@@ -7,6 +7,7 @@ import com.saisai.domain.common.BaseEntity;
 import com.saisai.domain.common.exception.CustomException;
 import com.saisai.domain.course.entity.Course;
 import com.saisai.domain.ride.dto.request.RideCompleteReq;
+import com.saisai.domain.ride.dto.request.RideRecordReq;
 import com.saisai.domain.user.entity.User;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -53,8 +54,8 @@ public class Ride extends BaseEntity {
     @Column(name = "duration_second", nullable = false)
     private Long durationSecond;
 
-    @Column(name = "actual_distance", nullable = false)
-    private Double actualDistance;
+    @Column(name = "checkpoint_idx", nullable = false)
+    private Integer checkpointIdx;
 
     @Column(name = "completed_at")
     private LocalDateTime completedAt;
@@ -71,7 +72,7 @@ public class Ride extends BaseEntity {
         this.course = course;
         this.progressRate = 0;
         this.durationSecond = 0L;
-        this.actualDistance = 0D;
+        this.checkpointIdx = 0;
         this.isDeleted = false;
     }
 
@@ -79,13 +80,13 @@ public class Ride extends BaseEntity {
         return new Ride(user, course);
     }
 
-    public void paused(int progressRate) {
+    public void paused(int progressRate, RideRecordReq rideRecordReq) {
         if (this.status != RideStatus.IN_PROGRESS) {
             throw new CustomException(RIDE_NOT_IN_PROGRESS);
         }
 
         this.status = RideStatus.PAUSED;
-        this.progressRate = progressRate;
+        updateRecord(rideRecordReq, progressRate);
     }
 
     public void resume() {
@@ -96,16 +97,25 @@ public class Ride extends BaseEntity {
         this.status = RideStatus.IN_PROGRESS;
     }
 
-    public void pausedForAdmin(int progressRate) {
-        this.status = RideStatus.PAUSED;
-        this.progressRate = progressRate;
-    }
-
     public void complete(RideCompleteReq rideCompleteReq) {
         this.status = RideStatus.COMPLETED;
         this.progressRate = 100;
         this.durationSecond = rideCompleteReq.duration();
-        this.actualDistance = rideCompleteReq.actualDistance();
         this.completedAt = LocalDateTime.now();
+        this.checkpointIdx += 1;
+    }
+
+    public void sync(RideRecordReq rideRecordReq, int progressRate) {
+        if (this.status != RideStatus.IN_PROGRESS) {
+            throw new CustomException(RIDE_NOT_IN_PROGRESS);
+        }
+
+        updateRecord(rideRecordReq, progressRate);
+    }
+
+    private void updateRecord(RideRecordReq rideRecordReq, int progressRate) {
+        this.checkpointIdx = rideRecordReq.checkpointIdx();
+        this.durationSecond = rideRecordReq.duration();
+        this.progressRate = progressRate;
     }
 }

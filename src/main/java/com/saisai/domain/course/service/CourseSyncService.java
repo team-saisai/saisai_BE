@@ -2,18 +2,18 @@ package com.saisai.domain.course.service;
 
 import static java.lang.Boolean.TRUE;
 
+import com.saisai.domain.checkpoint.client.CheckpointS3;
+import com.saisai.domain.checkpoint.dto.CheckpointInfo;
+import com.saisai.domain.checkpoint.service.CheckpointApiService;
+import com.saisai.domain.common.exception.CustomException;
 import com.saisai.domain.course.api.DurunubiCourseApiService;
+import com.saisai.domain.course.api.dto.CourseItem;
 import com.saisai.domain.course.api.dto.external.Body;
 import com.saisai.domain.course.api.dto.external.DurunubiApiResponse;
 import com.saisai.domain.course.api.dto.external.DurunubiItems;
-import com.saisai.domain.checkpoint.client.CheckpointS3;
-import com.saisai.domain.gpx.client.GpxS3;
-import com.saisai.domain.common.exception.CustomException;
-import com.saisai.domain.course.api.dto.CourseItem;
-import com.saisai.domain.checkpoint.service.CheckpointApiService;
-import com.saisai.domain.checkpoint.dto.CheckpointInfo;
 import com.saisai.domain.course.entity.Course;
 import com.saisai.domain.course.repository.CourseRepository;
+import com.saisai.domain.gpx.client.GpxS3;
 import com.saisai.domain.gpx.dto.GpxKeyPoints;
 import com.saisai.domain.gpx.service.GpxParser;
 import java.util.ArrayList;
@@ -77,7 +77,7 @@ public class CourseSyncService {
                     List<CheckpointInfo> checkpointList = checkpointApiService.getCheckpoints(gpxKeyPoints, item.durunubiCourseId());
                     String s3CheckpointGpxPath = checkpointS3.upload(checkpointList, item.courseName());
 
-                    Course course = Course.from(item, gpxKeyPoints, s3GpxPath, s3CheckpointGpxPath);
+                    Course course = Course.from(item, gpxKeyPoints, s3GpxPath, s3CheckpointGpxPath, checkpointList.size());
 
                     courseRepository.save(course);
 

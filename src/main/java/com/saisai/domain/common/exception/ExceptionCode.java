@@ -30,7 +30,7 @@ public enum ExceptionCode {
     COURSE_API_CALL_FAIL(HttpStatus.INTERNAL_SERVER_ERROR, "CR_ER_01", "코스 API 호출에 실패했습니다."),
     COURSE_NAME_REQUIRED(HttpStatus.BAD_REQUEST, "CR_ER_02", "코스명이 공백으로만 이루어져 있거나 비어있습니다."),
     COURSE_NOT_FOUND(HttpStatus.NOT_FOUND, "CR_ER_03", "코스를 찾을 수 없습니다."),
-    COURSE_DISTANCE_INVALID(HttpStatus.BAD_REQUEST, "CR_ER_04", "코스 거리 정보가 유효하지 않습니다."),
+    COURSE_CHECKPOINT_INVALID(HttpStatus.BAD_REQUEST, "CR_ER_04", "코스 체크포인트 정보가 유효하지 않습니다."),
     INVALID_SORT_OPTION_FOR_COURSE_TYPE(HttpStatus.BAD_REQUEST, "CR_ER_05", "일반 코스에서는 종료일 기준으로 정렬할 수 없습니다."),
     COURSE_TYPE_NOT_FOUND(HttpStatus.NOT_FOUND, "CR_ER_06", "해당 코스 타입을 찾을 수 없습니다."),
     COURSE_CHECKPOINT_API_CALL_FAIL(HttpStatus.INTERNAL_SERVER_ERROR, "CR_ER_07", "코스 체크포인트 API 호출에 실패했습니다."),
@@ -53,6 +53,8 @@ public enum ExceptionCode {
     RIDE_NOT_IN_PROGRESS(HttpStatus.CONFLICT, "RD_ER_04", "현재 진행 중인 라이딩이 아닙니다."),
     RIDE_UNAUTHORIZED_ACCESS(HttpStatus.FORBIDDEN, "RD_ER_05", "해당 라이딩에 대한 접근 권한이 없습니다."),
     RIDE_NOT_PAUSED(HttpStatus.CONFLICT, "RD_ER_06", "중단했던 라이딩이 아닙니다."),
+    CHECKPOINT_INDEX_OUT_OF_RANGE(HttpStatus.BAD_REQUEST, "RD_ER_07", "요청한 체크포인트 인덱스가 범위를 벗어났습니다."),
+    INSUFFICIENT_CHECKPOINT_COUNT(HttpStatus.BAD_REQUEST, "RD_ER_08", "체크포인트 수가 부족합니다."),
 
     // reward_event
     REWARD_EVENT_CHALLENGE_CONFLICT(HttpStatus.CONFLICT, "RE_ER_01", "이미 다른 이벤트로 등록된 챌린지입니다."),

@@ -56,6 +56,9 @@ public class Course extends BaseEntity {
     @Column(name = "durunubi_course_id") // 두루누비API 제공 코스 고유번호 (구분하기 위해 추가)
     private String durunubiCourseId;
 
+    @Column(name = "checkpoint_count")
+    private Integer checkpointCount;
+
     @Column(name = "image")
     private String image;
 
@@ -87,7 +90,7 @@ public class Course extends BaseEntity {
     public Course(String name, String summary, Integer level, Double distance,
         Double estimatedTime, String sigun, String gpxPath, String checkpointGpxPath, String mergeGpxPath,
         String durunubiCourseId, String image, Double startLat, Double startLon,
-        Double minLat, Double minLon, Double maxLat, Double maxLon
+        Double minLat, Double minLon, Double maxLat, Double maxLon, Integer checkpointCount
     ) {
         this.name = name;
         this.summary = summary;
@@ -98,6 +101,7 @@ public class Course extends BaseEntity {
         this.gpxPath = gpxPath;
         this.checkpointGpxPath = checkpointGpxPath;
         this.mergeGpxPath = mergeGpxPath;
+        this.checkpointCount = checkpointCount;
         this.durunubiCourseId = durunubiCourseId;
         this.image = image;
         this.startLat = startLat;
@@ -109,7 +113,7 @@ public class Course extends BaseEntity {
         this.isDeleted = false;
     }
 
-    public static Course from (CourseItem courseItem, GpxKeyPoints gpxKeyPoints, String gpxPath, String checkpointGpxPath) {
+    public static Course from (CourseItem courseItem, GpxKeyPoints gpxKeyPoints, String gpxPath, String checkpointGpxPath, int checkpointCount) {
         return Course.builder()
             .name(courseItem.courseName())
             .summary(courseItem.convertSummary())
@@ -119,6 +123,7 @@ public class Course extends BaseEntity {
             .sigun(courseItem.sigun())
             .gpxPath(gpxPath)
             .checkpointGpxPath(checkpointGpxPath)
+            .checkpointCount(checkpointCount)
             .durunubiCourseId(courseItem.durunubiCourseId())
             .startLat(gpxKeyPoints.startLat())
             .startLon(gpxKeyPoints.startLon())
