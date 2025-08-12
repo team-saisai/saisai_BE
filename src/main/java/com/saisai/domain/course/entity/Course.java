@@ -50,6 +50,9 @@ public class Course extends BaseEntity {
     @Column(name = "checkpoint_gpx_path", length = 255)
     private String checkpointGpxPath;
 
+    @Column(name = "merge_gpx_path", length = 255)
+    private String mergeGpxPath;
+
     @Column(name = "durunubi_course_id") // 두루누비API 제공 코스 고유번호 (구분하기 위해 추가)
     private String durunubiCourseId;
 
@@ -82,7 +85,7 @@ public class Course extends BaseEntity {
 
     @Builder
     public Course(String name, String summary, Integer level, Double distance,
-        Double estimatedTime, String sigun, String gpxPath, String checkpointGpxPath,
+        Double estimatedTime, String sigun, String gpxPath, String checkpointGpxPath, String mergeGpxPath,
         String durunubiCourseId, String image, Double startLat, Double startLon,
         Double minLat, Double minLon, Double maxLat, Double maxLon
     ) {
@@ -94,6 +97,7 @@ public class Course extends BaseEntity {
         this.sigun = sigun;
         this.gpxPath = gpxPath;
         this.checkpointGpxPath = checkpointGpxPath;
+        this.mergeGpxPath = mergeGpxPath;
         this.durunubiCourseId = durunubiCourseId;
         this.image = image;
         this.startLat = startLat;
@@ -123,5 +127,9 @@ public class Course extends BaseEntity {
             .maxLat(gpxKeyPoints.maxLat())
             .maxLon(gpxKeyPoints.maxLon())
             .build();
+    }
+
+    public void updateMergeGpxPath(String mergeGpxPath) {
+        this.mergeGpxPath = mergeGpxPath;
     }
 }
