@@ -1,22 +1,22 @@
 package com.saisai.domain.badge.dto.response;
 
 import com.saisai.domain.badge.entity.Badge;
-import com.saisai.domain.badge.entity.UserBadge;
-import java.time.LocalDate;
 
 public record BadgeDetailRes(
-    String badgeName,
-    String badgeDescription,
-    String badgeImage,
-    LocalDate acquiredAt
+    Long id,
+    String name,
+    String image,
+    String description,
+    String condition
 ) {
 
-    public static BadgeDetailRes from(Badge badge, UserBadge userBadge, String badgeImage) {
+    public static BadgeDetailRes from(Badge badge, String badgeImage) {
         return new BadgeDetailRes(
+            badge.getId(),
             badge.getName(),
-            badge.getDescription(),
             badgeImage,
-            userBadge.getCreatedAt().toLocalDate()
+            badge.getDescription(),
+            badge.getCondition()
         );
     }
 }

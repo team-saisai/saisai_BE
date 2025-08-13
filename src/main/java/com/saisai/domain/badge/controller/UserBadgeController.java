@@ -3,12 +3,13 @@ package com.saisai.domain.badge.controller;
 import static com.saisai.domain.common.response.SuccessCode.MY_BADGE_LIST_GET_SUCCESS;
 
 import com.saisai.config.jwt.AuthUserDetails;
-import com.saisai.domain.badge.dto.response.UserBadgeRes;
+import com.saisai.domain.badge.dto.response.BadgeDetailRes;
 import com.saisai.domain.badge.service.BadgeService;
 import com.saisai.domain.common.annotation.Auth;
 import com.saisai.domain.common.response.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -26,7 +27,7 @@ public class UserBadgeController {
 
     @GetMapping("/me")
     @Operation(summary = "사용자가 소유한 뱃지 목록 조회")
-    public ResponseEntity<ApiResponse<UserBadgeRes>> getMyBadgeList(
+    public ResponseEntity<ApiResponse<List<BadgeDetailRes>>> getMyBadgeList(
         @Auth AuthUserDetails authUserDetails
     ) {
         return ResponseEntity.status(HttpStatus.OK)

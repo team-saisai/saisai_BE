@@ -1,23 +1,15 @@
 package com.saisai.domain.badge.service;
 
 import static com.saisai.domain.common.exception.ExceptionCode.BADGE_NAME_DUPLICATE;
-import static com.saisai.domain.common.exception.ExceptionCode.BADGE_NOT_FOUND;
-import static com.saisai.domain.common.exception.ExceptionCode.USER_BADGE_NOT_FOUND;
-import static com.saisai.domain.common.exception.ExceptionCode.USER_NOT_FOUND;
 
 import com.saisai.config.jwt.AuthUserDetails;
 import com.saisai.domain.badge.dto.request.BadgeRegisterReq;
 import com.saisai.domain.badge.dto.response.BadgeDetailRes;
 import com.saisai.domain.badge.dto.response.BadgeRegisterRes;
-import com.saisai.domain.badge.dto.response.UserBadgeRes;
 import com.saisai.domain.badge.entity.Badge;
-import com.saisai.domain.badge.entity.UserBadge;
 import com.saisai.domain.badge.repository.BadgeRepository;
-import com.saisai.domain.badge.repository.UserBadgeRepository;
 import com.saisai.domain.common.exception.CustomException;
 import com.saisai.infra.aws.s3.ImageUtil;
-import com.saisai.domain.user.entity.User;
-import com.saisai.domain.user.repository.UserRepository;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -29,8 +21,6 @@ import org.springframework.transaction.annotation.Transactional;
 public class BadgeService {
 
     private final BadgeRepository badgeRepository;
-    private final UserBadgeRepository userBadgeRepository;
-    private final UserRepository userRepository;
     private final ImageUtil imageUtil;
 
     @Transactional
@@ -55,23 +45,22 @@ public class BadgeService {
         return BadgeRegisterRes.from(saveBadge);
     }
 
-    public UserBadgeRes getMyBadgeList(AuthUserDetails authUserDetails) {
+    public List<BadgeDetailRes> getMyBadgeList(AuthUserDetails authUserDetails) {
 
-        List<Long> badgeIds = userBadgeRepository.findBadgeByUserId(authUserDetails.userId());
+        List<BadgeDetailRes> badgeDetails = badgeRepository.findAllBadgesWithUser(authUserDetails.userId());
 
-        return UserBadgeRes.of(badgeIds);
+        return badgeDetails.stream()
+            .map(dto -> {
+                String imageUrl = imageUtil.getImageUrl(dto.image());
+                return new BadgeDetailRes(
+                    dto.id(),
+                    dto.name(),
+                    imageUrl,
+                    dto.description(),
+                    dto.condition()
+                );
+            })
+            .toList();
     }
 
-    public BadgeDetailRes getBadgeInfo(AuthUserDetails authUserDetails, Long userBadgeId) {
-        User user = userRepository.findById(authUserDetails.userId())
-            .orElseThrow(() -> new CustomException(USER_NOT_FOUND));
-
-        UserBadge userBadge = userBadgeRepository.findByUserAndId(user, userBadgeId)
-            .orElseThrow(() -> new CustomException(USER_BADGE_NOT_FOUND));
-
-        Badge badge = badgeRepository.findById(userBadge.getBadge().getId())
-            .orElseThrow(() -> new CustomException(BADGE_NOT_FOUND));
-
-        return BadgeDetailRes.from(badge, userBadge, imageUtil.getImageUrl(badge.getImage()));
-    }
 }
