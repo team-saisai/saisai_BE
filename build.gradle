@@ -78,6 +78,10 @@ dependencies {
     // redis
     implementation 'org.springframework.boot:spring-boot-starter-data-redis'
 
+    // google
+    implementation 'com.google.api-client:google-api-client:2.7.2'
+    implementation 'com.google.http-client:google-http-client-gson:1.47.0'
+
 }
 
 tasks.named('test') {

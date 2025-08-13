@@ -63,3 +63,10 @@ springdoc:
 
 durunubi:
   secret: ${DURUNUBI_SECRET_KEY}
+
+oauth2:
+  google:
+      android:
+        client-id: ${GOOGLE_AND_CLIENT_ID}
+      ios:
+        client-id: ${GOOGLE_IOS_CLIENT_ID}
