@@ -1,5 +1,7 @@
 package com.saisai.domain.user.entity;
 
+import com.saisai.domain.auth.constant.ProviderType;
+import com.saisai.domain.auth.oauth.UserInfo;
 import com.saisai.domain.common.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -32,7 +34,7 @@ public class User extends BaseEntity {
     @Column(name = "email", nullable = false, unique = true, length = 30)
     private String email;
 
-    @Column(name = "password", nullable = false, length = 64)
+    @Column(name = "password", length = 64)
     private String password;
 
     @Column(name = "name", nullable = false, length = 10)
@@ -42,6 +44,13 @@ public class User extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private UserRole role;
 
+    @Column(name = "provider", length = 255)
+    @Enumerated(EnumType.STRING)
+    private ProviderType provider;
+
+    @Column(name = "provider_id", length = 255)
+    private String providerId;
+
     @Column(name = "is_deleted", nullable = false)
     private boolean isDeleted = false;
 
@@ -49,10 +58,25 @@ public class User extends BaseEntity {
     private LocalDateTime deletedAt;
 
     @Builder
-    public User(String email, String password, String nickname, UserRole role) {
+    private User(String email, String password, String nickname, UserRole role,
+        String image, ProviderType provider, String providerId) {
         this.email = email;
         this.password = password;
         this.nickname = nickname;
         this.role = role;
+        this.image = image;
+        this.provider = provider;
+        this.providerId = providerId;
+    }
+
+    public static User of (UserInfo userInfo, ProviderType provider) {
+        return User.builder()
+            .role(UserRole.USER)
+            .email(userInfo.email())
+            .image(userInfo.imageUrl())
+            .nickname(userInfo.name())
+            .provider(provider)
+            .providerId(userInfo.providerId())
+            .build();
     }
 }
