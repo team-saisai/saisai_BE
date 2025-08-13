@@ -5,7 +5,7 @@ import com.saisai.domain.user.entity.User;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface UserBadgeRepository extends JpaRepository<UserBadge, Long>, UserBadgeRepositoryCustom{
+public interface UserBadgeRepository extends JpaRepository<UserBadge, Long> {
 
     Optional<UserBadge> findByUserAndId(User user, Long id);
 }
