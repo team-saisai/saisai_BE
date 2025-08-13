@@ -14,6 +14,9 @@ public enum ExceptionCode {
     ADMIN_REQUIRED(HttpStatus.FORBIDDEN, "AUTH_ER_03", "관리자 권한이 필요한 요청입니다. 접근 권한이 없습니다."),
     USER_NOT_AUTHENTICATED(HttpStatus.UNAUTHORIZED, "AUTH_ER_04", "인증되지 않았습니다."),
     INVALID_PROVIDER_TYPE(HttpStatus.NOT_FOUND, "AUTH_ER_05", "유효하지 않은 소셜 로그인 타입입니다."),
+    INVALID_GOOGLE_ID_TOKEN(HttpStatus.BAD_REQUEST, "AUTH_ER_06", "유효하지 않은 Google ID 토큰입니다."),
+    GOOGLE_ID_TOKEN_VERIFICATION_FAILED(HttpStatus.BAD_REQUEST, "AUTH_ER_07", "Google ID 토큰 검증에 실패했습니다."),
+
 
     // jwt
     JWT_TOKEN_REQUIRED(HttpStatus.BAD_REQUEST, "JWT_ER_01", "JWT 토큰이 필요합니다."),

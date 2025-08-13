@@ -37,4 +37,26 @@ public class AuthController {
             .body(ApiResponse.success(LOGIN_SUCCESS, authService.kakaoLogion(oauthLoginReq)));
     }
 
+    @PostMapping("/google/android")
+    @SecurityRequirements(value = {})
+    @Operation(summary = "구글 소셜 로그인 (안드로이드)")
+    public ResponseEntity<ApiResponse<TokenRes>> loginGoogleAndroid(
+        @Valid @RequestBody OauthLoginReq oauthLoginReq
+    ) {
+
+        return ResponseEntity.status(HttpStatus.OK)
+            .body(ApiResponse.success(LOGIN_SUCCESS, authService.googleLoginAndroid(oauthLoginReq)));
+    }
+
+    @PostMapping("/google/ios")
+    @SecurityRequirements(value = {})
+    @Operation(summary = "구글 소셜 로그인 (IOS)")
+    public ResponseEntity<ApiResponse<TokenRes>> loginGoogleIos(
+        @Valid @RequestBody OauthLoginReq oauthLoginReq
+    ) {
+
+        return ResponseEntity.status(HttpStatus.OK)
+            .body(ApiResponse.success(LOGIN_SUCCESS, authService.googleLoginIos(oauthLoginReq)));
+    }
+
 }
