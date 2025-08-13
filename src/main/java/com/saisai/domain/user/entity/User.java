@@ -68,4 +68,15 @@ public class User extends BaseEntity {
         this.provider = provider;
         this.providerId = providerId;
     }
+
+    public static User of (UserInfo userInfo, ProviderType provider) {
+        return User.builder()
+            .role(UserRole.USER)
+            .email(userInfo.email())
+            .image(userInfo.imageUrl())
+            .nickname(userInfo.name())
+            .provider(provider)
+            .providerId(userInfo.providerId())
+            .build();
+    }
 }
