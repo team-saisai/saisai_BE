@@ -39,13 +39,15 @@ public class BadgeService {
             throw new CustomException(BADGE_NAME_DUPLICATE);
         }
 
-        String image = imageUtil.upload(badgeRegisterReq.imageFile(), "badge");
+        String colorImage = imageUtil.upload(badgeRegisterReq.colorImageFile(), "badge");
+        String blackImage = imageUtil.upload(badgeRegisterReq.blackImageFile(), "badge");
 
         Badge badge = Badge.builder()
             .name(badgeRegisterReq.name())
             .description(badgeRegisterReq.description())
-            .image(image)
-            .unlockCondition(badgeRegisterReq.unlockCondition())
+            .colorImage(colorImage)
+            .blackImage(blackImage)
+            .condition(badgeRegisterReq.condition())
             .build();
 
         Badge saveBadge = badgeRepository.save(badge);
