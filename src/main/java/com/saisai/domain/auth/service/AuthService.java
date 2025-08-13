@@ -1,11 +1,14 @@
 package com.saisai.domain.auth.service;
 
+import static com.saisai.domain.auth.constant.ProviderType.GOOGLE;
 import static com.saisai.domain.auth.constant.ProviderType.KAKAO;
 
 import com.saisai.config.jwt.JwtProvider;
 import com.saisai.domain.auth.dto.request.OauthLoginReq;
 import com.saisai.domain.auth.dto.response.TokenRes;
 import com.saisai.domain.auth.oauth.UserInfo;
+import com.saisai.domain.auth.oauth.google.client.GoogleAndroidClient;
+import com.saisai.domain.auth.oauth.google.client.GoogleIosClient;
 import com.saisai.domain.auth.oauth.kakao.client.KakaoClient;
 import com.saisai.domain.user.entity.User;
 import com.saisai.domain.user.repository.UserRepository;
@@ -21,6 +24,8 @@ public class AuthService {
     private final UserRepository userRepository;
     private final RefreshTokenRedisService refreshTokenRedisService;
     private final KakaoClient kakaoClient;
+    private final GoogleAndroidClient googleAndroidClient;
+    private final GoogleIosClient googleIosClient;
 
     @Transactional
     public TokenRes kakaoLogion(OauthLoginReq oauthLoginReq) {
@@ -29,6 +34,32 @@ public class AuthService {
         User user = userRepository.findByProviderId(userInfo.providerId())
             .orElseGet(() -> {
                 User newUser = User.of(userInfo, KAKAO);
+                return userRepository.save(newUser);
+            });
+
+        return issueAndSaveTokens(user);
+    }
+
+    @Transactional
+    public TokenRes googleLoginAndroid (OauthLoginReq oauthLoginReq) {
+        UserInfo userInfo = googleAndroidClient.verifyAndGetUserInfo(oauthLoginReq.token());
+
+        User user = userRepository.findByProviderId(userInfo.providerId())
+            .orElseGet(() -> {
+                User newUser = User.of(userInfo, GOOGLE);
+                return userRepository.save(newUser);
+            });
+
+        return issueAndSaveTokens(user);
+    }
+
+    @Transactional
+    public TokenRes googleLoginIos (OauthLoginReq oauthLoginReq) {
+        UserInfo userInfo = googleIosClient.verifyAndGetUserInfo(oauthLoginReq.token());
+
+        User user = userRepository.findByProviderId(userInfo.providerId())
+            .orElseGet(() -> {
+                User newUser = User.of(userInfo, GOOGLE);
                 return userRepository.save(newUser);
             });
 
