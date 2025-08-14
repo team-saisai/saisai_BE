@@ -122,18 +122,10 @@ jobs:
           CONTAINER_NAME=saisai-server
           HOST_PORT=${{ secrets.HOST_PORT }}
 
-          # 컨테이너 상태 확인
-          echo "컨테이너 상태 확인..."
-          sudo docker ps | grep $CONTAINER_NAME
-
-          # 환경변수 확인
-          echo "환경변수 전달 확인..."
-          sudo docker exec $CONTAINER_NAME env | sort
-
           # 애플리케이션 헬스체크
           for i in {1..120}; do
-            health_check=$(curl -sf http://localhost:$HOST_PORT/actuator/health || echo "")
-            api_docs=$(curl -sf http://localhost:$HOST_PORT/v3/api-docs || echo "")
+            health_check=$(curl -sf https://localhost:$HOST_PORT/actuator/health || echo "")
+            api_docs=$(curl -sf https://localhost:$HOST_PORT/v3/api-docs || echo "")
 
             if [[ "$health_check" == *"UP"* ]] || [[ "$api_docs" == *"openapi"* ]]; then
               echo "🎉 애플리케이션 정상 실행 확인!"
