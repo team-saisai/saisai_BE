@@ -29,6 +29,7 @@ public enum ExceptionCode {
     // user
     USER_NOT_FOUND(HttpStatus.NOT_FOUND, "USER_ER_01", "사용자를 찾을 수 없습니다."),
     EMAIL_DUPLICATE(HttpStatus.BAD_REQUEST, "USER_ER_02", "이메일이 중복됩니다."),
+    NICKNAME_DUPLICATE(HttpStatus.BAD_REQUEST, "USER_ER_03", "닉네임이 중복됩니다."),
 
     // course
     COURSE_API_CALL_FAIL(HttpStatus.INTERNAL_SERVER_ERROR, "CR_ER_01", "코스 API 호출에 실패했습니다."),

@@ -44,4 +44,16 @@ public class UserMyController {
             .body(ApiResponse.success(MYPAGE_INFO_GET_SUCCESS, userService.getMypageInfo(authUserDetails)));
     }
 
+    @Operation(summary = "닉네임 중복 확인")
+    @GetMapping("profile/nickname/check")
+    public ResponseEntity<ApiResponse<UserNicknameRes>> checkNicknameDuplica(
+        @RequestParam
+        @ValidNickname
+        String nickname
+    ) {
+
+        return ResponseEntity.status(HttpStatus.OK)
+            .body(ApiResponse.success(NICKNAME_DUPLICA_CHECK, userService.checkNicknameDuplica(nickname)));
+    }
+
 }
