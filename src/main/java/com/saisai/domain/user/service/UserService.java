@@ -9,6 +9,7 @@ import com.saisai.domain.common.exception.ExceptionCode;
 import com.saisai.domain.user.dto.request.UserNicknameReq;
 import com.saisai.domain.user.dto.response.MypageRes;
 import com.saisai.domain.user.dto.response.UserGreetingRes;
+import com.saisai.domain.user.dto.response.UserNicknameRes;
 import com.saisai.domain.user.entity.User;
 import com.saisai.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;

@@ -1,21 +1,30 @@
 package com.saisai.domain.user.controller;
 
 import static com.saisai.domain.common.response.SuccessCode.MYPAGE_INFO_GET_SUCCESS;
+import static com.saisai.domain.common.response.SuccessCode.NICKNAME_DUPLICA_CHECK;
 import static com.saisai.domain.common.response.SuccessCode.USER_GREETING_INFO_GET_SUCCESS;
+import static com.saisai.domain.common.response.SuccessCode.USER_NICKNAME_UPDATE_SUCCESS;
 
 import com.saisai.config.jwt.AuthUserDetails;
 import com.saisai.domain.common.annotation.Auth;
 import com.saisai.domain.common.response.ApiResponse;
+import com.saisai.domain.user.annotation.ValidNickname;
+import com.saisai.domain.user.dto.request.UserNicknameReq;
 import com.saisai.domain.user.dto.response.MypageRes;
 import com.saisai.domain.user.dto.response.UserGreetingRes;
+import com.saisai.domain.user.dto.response.UserNicknameRes;
 import com.saisai.domain.user.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @Tag(name = "유저 API")
@@ -54,6 +63,16 @@ public class UserMyController {
 
         return ResponseEntity.status(HttpStatus.OK)
             .body(ApiResponse.success(NICKNAME_DUPLICA_CHECK, userService.checkNicknameDuplica(nickname)));
+    }
+
+    @Operation(summary = "닉네임 변경")
+    @PatchMapping("profile/nickname")
+    public ResponseEntity<ApiResponse<UserNicknameRes>> updateNickname(
+        @Valid @RequestBody UserNicknameReq userNicknameReq,
+        @Auth AuthUserDetails authUserDetails
+    ) {
+        return ResponseEntity.status(HttpStatus.OK)
+            .body(ApiResponse.success(USER_NICKNAME_UPDATE_SUCCESS, userService.updateNickname(userNicknameReq, authUserDetails)));
     }
 
 }

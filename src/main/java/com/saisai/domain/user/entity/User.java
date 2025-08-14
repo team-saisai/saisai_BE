@@ -79,4 +79,8 @@ public class User extends BaseEntity {
             .providerId(userInfo.providerId())
             .build();
     }
+
+    public void updateNickname(String nickname) {
+        this.nickname = nickname;
+    }
 }
