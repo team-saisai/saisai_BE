@@ -6,12 +6,15 @@ import static com.saisai.domain.common.exception.ExceptionCode.USER_NOT_FOUND;
 import com.saisai.config.jwt.AuthUserDetails;
 import com.saisai.domain.common.exception.CustomException;
 import com.saisai.domain.common.exception.ExceptionCode;
+import com.saisai.domain.user.dto.request.ProfileImageUpdateReq;
 import com.saisai.domain.user.dto.request.UserNicknameReq;
 import com.saisai.domain.user.dto.response.MypageRes;
+import com.saisai.domain.user.dto.response.ProfileImageRes;
 import com.saisai.domain.user.dto.response.UserGreetingRes;
 import com.saisai.domain.user.dto.response.UserNicknameRes;
 import com.saisai.domain.user.entity.User;
 import com.saisai.domain.user.repository.UserRepository;
+import com.saisai.infra.aws.s3.ImageUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,6 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class UserService {
 
     private final UserRepository userRepository;
+    private final ImageUtil imageUtil;
 
     // 유저 정보 조회 (홈화면)
     public UserGreetingRes getUserGreetingInfo(AuthUserDetails authUserDetails) {
@@ -55,5 +59,17 @@ public class UserService {
         user.updateNickname(req.nickname());
 
         return new UserNicknameRes(user.getNickname());
+    }
+
+    @Transactional
+    public ProfileImageRes updateProfileImage(ProfileImageUpdateReq req, AuthUserDetails authUserDetails) {
+        User user = userRepository.findById(authUserDetails.userId())
+            .orElseThrow(() -> new CustomException(USER_NOT_FOUND));
+
+        String imageKey = imageUtil.upload(req.image(), "user");
+
+        user.updateImage(imageKey);
+
+        return new ProfileImageRes(imageUtil.getImageUrl(imageKey));
     }
 }
