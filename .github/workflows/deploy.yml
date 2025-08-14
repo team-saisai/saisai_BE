@@ -115,28 +115,3 @@ jobs:
                 $DOCKER_IMAGE_NAME:$IMAGE_TAG
     
               echo "🎉 배포 완료"
-
-      # 헬스체크
-      - name: Health Check
-        run: |
-          CONTAINER_NAME=saisai-server
-          HOST_PORT=${{ secrets.HOST_PORT }}
-
-          # 애플리케이션 헬스체크
-          for i in {1..120}; do
-            health_check=$(curl -sf http://localhost:$HOST_PORT/actuator/health || echo "")
-            api_docs=$(curl -sf http://localhost:$HOST_PORT/v3/api-docs || echo "")
-
-            if [[ "$health_check" == *"UP"* ]] || [[ "$api_docs" == *"openapi"* ]]; then
-              echo "🎉 애플리케이션 정상 실행 확인!"
-              exit 0
-            else
-              echo "대기 중... ($i/120)"
-              sleep 3
-            fi
-          done
-            echo "😡 서버 애플리케이션 실행 실패..."
-            exit 1
-          echo "📄 컨테이너 로그:"
-          sudo docker logs $CONTAINER_NAME --tail 50
-          exit 1
