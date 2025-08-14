@@ -61,6 +61,13 @@ springdoc:
     default-models-expand-depth: -1
     path: /api-docs
 
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+
+
 durunubi:
   secret: ${DURUNUBI_SECRET_KEY}
 

@@ -124,8 +124,8 @@ jobs:
 
           # 애플리케이션 헬스체크
           for i in {1..120}; do
-            health_check=$(curl -sf https://localhost:$HOST_PORT/actuator/health || echo "")
-            api_docs=$(curl -sf https://localhost:$HOST_PORT/v3/api-docs || echo "")
+            health_check=$(curl -sf http://localhost:$HOST_PORT/actuator/health || echo "")
+            api_docs=$(curl -sf http://localhost:$HOST_PORT/v3/api-docs || echo "")
 
             if [[ "$health_check" == *"UP"* ]] || [[ "$api_docs" == *"openapi"* ]]; then
               echo "🎉 애플리케이션 정상 실행 확인!"
