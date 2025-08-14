@@ -31,7 +31,7 @@ public class MyRideController {
 
     @Operation(summary = "최근 라이딩 한 코스 조회",
         description = "코스ID, 코스명, 시군, 코스 이미지, 최근 주행일, 총 거리(km), 완주율 반환")
-    @GetMapping
+    @GetMapping("/recent")
     public ResponseEntity<ApiResponse<RecentRideInfoRes>> getRecentRideInfo(
         @Auth AuthUserDetails authUserDetails
     ) {
