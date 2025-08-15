@@ -38,6 +38,7 @@ spring:
           min-idle: 2
           max-wait: 5000ms
       database: 0
+      password: ${REDIS_PASSWORD}
 
 server:
   error:
