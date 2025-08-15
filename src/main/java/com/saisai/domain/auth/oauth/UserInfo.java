@@ -12,7 +12,7 @@ public record UserInfo(
     public static UserInfo from (KakaoUser kakaoUser) {
         return new UserInfo(
             String.valueOf(kakaoUser.id()),
-            kakaoUser.kakaoAccount().name(),
+            kakaoUser.kakaoAccount().profile().nickname(),
             kakaoUser.kakaoAccount().email(),
             kakaoUser.kakaoAccount().profile().profileImageUrl()
         );
