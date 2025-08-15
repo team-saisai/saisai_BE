@@ -17,7 +17,7 @@ public enum SuccessCode {
     USER_GREETING_INFO_GET_SUCCESS(HttpStatus.OK, "USER_01", "사용자 정보 조회에 성공했습니다."),
     MYPAGE_INFO_GET_SUCCESS(HttpStatus.OK, "USER_02", "마이페이지 조회에 성공했습니다."),
     USER_NICKNAME_UPDATE_SUCCESS(HttpStatus.OK, "USER_03", "닉네임 변경에 성공했습니다."),
-    NICKNAME_DUPLICA_CHECK(HttpStatus.OK,"USER_04", "닉네임 중복 확인에 성공했습니다."),
+    NICKNAME_DUPLICA_CHECK(HttpStatus.OK,"USER_04", "중복되는 닉네임이 없습니다."),
     PROFILE_IMAGE_UPDATE_SUCCESS(HttpStatus.OK,"USER_05", "프로필 사진 변경에 성공했습니다."),
 
     // Course
