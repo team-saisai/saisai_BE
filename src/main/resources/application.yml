@@ -28,9 +28,9 @@ spring:
     redis:
       repositories:
         enabled: false
-      host: localhost
+      host: ${REDIS_HOST}
       timeout: 6000ms
-      port: 6379
+      port: ${REDIS_PORT}
       lettuce:
         pool:
           max-active: 8
