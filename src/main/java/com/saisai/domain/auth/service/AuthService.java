@@ -1,5 +1,6 @@
 package com.saisai.domain.auth.service;
 
+import static com.saisai.domain.auth.constant.ProviderType.APPLE;
 import static com.saisai.domain.auth.constant.ProviderType.GOOGLE;
 import static com.saisai.domain.auth.constant.ProviderType.KAKAO;
 
@@ -7,6 +8,7 @@ import com.saisai.config.jwt.JwtProvider;
 import com.saisai.domain.auth.dto.request.OauthLoginReq;
 import com.saisai.domain.auth.dto.response.TokenRes;
 import com.saisai.domain.auth.oauth.UserInfo;
+import com.saisai.domain.auth.oauth.apple.client.AppleClient;
 import com.saisai.domain.auth.oauth.google.client.GoogleAndroidClient;
 import com.saisai.domain.auth.oauth.google.client.GoogleIosClient;
 import com.saisai.domain.auth.oauth.kakao.client.KakaoClient;
@@ -26,6 +28,7 @@ public class AuthService {
     private final KakaoClient kakaoClient;
     private final GoogleAndroidClient googleAndroidClient;
     private final GoogleIosClient googleIosClient;
+    private final AppleClient appleClient;
 
     @Transactional
     public TokenRes kakaoLogion(OauthLoginReq oauthLoginReq) {
@@ -60,6 +63,20 @@ public class AuthService {
         User user = userRepository.findByProviderId(userInfo.providerId())
             .orElseGet(() -> {
                 User newUser = User.of(userInfo, GOOGLE);
+                return userRepository.save(newUser);
+            });
+
+        return issueAndSaveTokens(user);
+    }
+
+    @Transactional
+    public TokenRes appleLogin(OauthLoginReq oauthLoginReq) {
+
+        UserInfo userInfo = appleClient.verifyAndGetUserInfo(oauthLoginReq.token());
+
+        User user = userRepository.findByProviderId(userInfo.providerId())
+            .orElseGet(() -> {
+                User newUser = User.of(userInfo, APPLE);
                 return userRepository.save(newUser);
             });
 
