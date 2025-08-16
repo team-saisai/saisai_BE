@@ -20,8 +20,6 @@ public enum ExceptionCode {
     INVALID_APPLE_PUBLIC_KEY(HttpStatus.INTERNAL_SERVER_ERROR, "AUTH_ER_08", "Apple 공개키가 유효하지 않습니다."),
     JWK_PROCESSING_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "AUTH_ER_09", "Apple JWK 처리 중 오류가 발생했습니다."),
 
-
-
     // jwt
     JWT_TOKEN_REQUIRED(HttpStatus.BAD_REQUEST, "JWT_ER_01", "JWT 토큰이 필요합니다."),
     INVALID_JWT_SIGNATURE(HttpStatus.UNAUTHORIZED, "JWT_ER_02", "유효하지 않는 JWT 서명입니다."),
@@ -30,6 +28,7 @@ public enum ExceptionCode {
     INVALID_REFRESH_TOKEN(HttpStatus.UNAUTHORIZED, "JWT_ER_05", "유효하지 않은 Refresh 토큰입니다."),
     MALFORMED_JWT_TOKEN(HttpStatus.BAD_REQUEST, "JWT_ER_06", "올바르지 않는 형식의 JWT 토큰입니다."),
     JWT_VERIFICATION_FAILED(HttpStatus.BAD_REQUEST, "JWT_ER_07", "클레임 검증에 실패했습니다."),
+    BLACKLISTED_JWT_TOKEN(HttpStatus.UNAUTHORIZED, "JWT_ER_08", "로그아웃 처리된 JWT 토큰입니다."),
 
     // user
     USER_NOT_FOUND(HttpStatus.NOT_FOUND, "USER_ER_01", "사용자를 찾을 수 없습니다."),

@@ -1,13 +1,16 @@
 package com.saisai.domain.auth.controller.basic;
 
 import static com.saisai.domain.common.response.SuccessCode.LOGIN_SUCCESS;
+import static com.saisai.domain.common.response.SuccessCode.LOGOUT_SUCCESS;
 import static com.saisai.domain.common.response.SuccessCode.REGISTER_SUCCESS;
 import static com.saisai.domain.common.response.SuccessCode.REISSUE_SUCCESS;
 
+import com.saisai.config.jwt.AuthUserDetails;
 import com.saisai.domain.auth.dto.request.LoginReq;
 import com.saisai.domain.auth.dto.request.RegisterReq;
 import com.saisai.domain.auth.dto.response.TokenRes;
 import com.saisai.domain.auth.service.BasicAuthService;
+import com.saisai.domain.common.annotation.Auth;
 import com.saisai.domain.common.response.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirements;
@@ -16,6 +19,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -65,5 +69,18 @@ public class BasicAuthController {
     ) {
         return ResponseEntity.status(HttpStatus.OK)
             .body(ApiResponse.success(REISSUE_SUCCESS, basicAuthService.reissue(refreshTokenHeader)));
+    }
+
+    @DeleteMapping("/logout")
+    @Operation(summary = "로그아웃")
+    public ResponseEntity<ApiResponse<Void>> logout(
+        @RequestHeader("Authorization") String header,
+        @Auth AuthUserDetails authUserDetails
+    ) {
+        String accessToken = header.substring(7);
+        basicAuthService.deleteToken(authUserDetails, accessToken);
+
+        return ResponseEntity.status(HttpStatus.OK)
+            .body(ApiResponse.success(LOGOUT_SUCCESS));
     }
 }

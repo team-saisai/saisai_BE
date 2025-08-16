@@ -5,6 +5,7 @@ import static com.saisai.domain.common.exception.ExceptionCode.EMAIL_DUPLICATE;
 import static com.saisai.domain.common.exception.ExceptionCode.INVALID_REFRESH_TOKEN;
 import static com.saisai.domain.common.exception.ExceptionCode.USER_NOT_FOUND;
 
+import com.saisai.config.jwt.AuthUserDetails;
 import com.saisai.config.jwt.JwtProvider;
 import com.saisai.domain.auth.dto.request.LoginReq;
 import com.saisai.domain.auth.dto.request.RegisterReq;
@@ -89,5 +90,11 @@ public class BasicAuthService {
         refreshTokenRedisService.saveRefreshToken(user.getId(), jwtProvider.substringToken(newRefreshToken));
 
         return TokenRes.from(newAccessToken, newRefreshToken);
+    }
+
+    public void deleteToken(AuthUserDetails authUserDetails, String accessToken) {
+        refreshTokenRedisService.deleteRefreshToken(authUserDetails.userId());
+
+        jwtProvider.addTokenToBlacklist(accessToken);
     }
 }
