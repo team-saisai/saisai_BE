@@ -1,5 +1,6 @@
 package com.saisai.config.jwt;
 
+import static com.saisai.domain.common.exception.ExceptionCode.BLACKLISTED_JWT_TOKEN;
 import static com.saisai.domain.common.exception.ExceptionCode.EXPIRED_JWT_TOKEN;
 import static com.saisai.domain.common.exception.ExceptionCode.INTERNAL_SERVER_ERROR;
 import static com.saisai.domain.common.exception.ExceptionCode.INVALID_JWT_SIGNATURE;
@@ -22,11 +23,14 @@ import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
 import java.security.Key;
 import java.time.Duration;
+import java.time.Instant;
 import java.util.Base64;
 import java.util.Date;
+import java.util.concurrent.TimeUnit;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -38,6 +42,8 @@ public class JwtProvider {
     private static final String BEARER_PREFIX = "Bearer ";
     public static final Duration REFRESH_TOKEN_TIME = Duration.ofDays(30);
     private static final Duration ACCESS_TOKEN_TIME = Duration.ofHours(1);
+    private final StringRedisTemplate stringRedisTemplate;
+    private static final String ACCESS_TOKEN_BLACK_LIST_KEY = "accessTokenBlacklist:";
 
     @Value("${jwt.secret.key}")
     private String secretKey;
@@ -118,6 +124,10 @@ public class JwtProvider {
                 .build()
                 .parseClaimsJws(token);
 
+            if (isTokenBlacklisted(token)) {
+                throw new CustomException(BLACKLISTED_JWT_TOKEN);
+            }
+
             return true;
         } catch (SecurityException e) {
             log.error("Invalid JWT signature, 유효하지 않는 JWT 서명 입니다.", e);
@@ -134,6 +144,37 @@ public class JwtProvider {
         }catch (Exception e) {
             log.error("Internal server error", e);
             throw new JwtAuthenticationException(INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    // Access Token이 블랙리스트에 있는지 확인하는 메서드
+    private boolean isTokenBlacklisted(String token) {
+        String redisKey = ACCESS_TOKEN_BLACK_LIST_KEY + token;
+        return stringRedisTemplate.hasKey(redisKey);
+    }
+
+    // 로그아웃 시 토큰을 블랙리스트에 추가하는 메서드
+    public void addTokenToBlacklist(String token) {
+        long remainingTime = getRemainingExpirationTime(token);
+
+        if (remainingTime > 0) {
+            String redisKey = ACCESS_TOKEN_BLACK_LIST_KEY + token;
+            stringRedisTemplate.opsForValue().set(redisKey, "blacklisted", remainingTime, TimeUnit.MILLISECONDS);
+        }
+
+    }
+
+    // Access Token의 남은 유효 시간을 계산하는 메서드
+    private Long getRemainingExpirationTime(String token) {
+        try {
+            Claims claims = getClaims(token);
+
+            long now = Instant.now().toEpochMilli();
+            long expirationTime = claims.getExpiration().getTime();
+
+            return expirationTime - now;
+        } catch (Exception e) {
+            return 0L;
         }
     }
 
