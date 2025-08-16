@@ -1,5 +1,6 @@
 package com.saisai.config.jwt;
 
+import com.saisai.domain.auth.constant.ProviderType;
 import com.saisai.domain.user.entity.User;
 import com.saisai.domain.user.entity.UserRole;
 import java.util.Collection;
@@ -11,7 +12,8 @@ import org.springframework.security.core.userdetails.UserDetails;
 public record AuthUserDetails(
     Long userId,
     String email,
-    UserRole userRole
+    UserRole userRole,
+    ProviderType provider
 ) implements UserDetails
 {
     public Collection<? extends GrantedAuthority> getAuthorities() {
@@ -33,11 +35,12 @@ public record AuthUserDetails(
     @Override public boolean isCredentialsNonExpired() { return true; }
     @Override public boolean isEnabled() { return true; }
 
-    public static AuthUserDetails from(Long userId, String email, UserRole userRole) {
+    public static AuthUserDetails of (Long userId, String email, UserRole userRole, ProviderType provider) {
         return new AuthUserDetails(
             userId,
             email,
-            userRole
+            userRole,
+            provider
         );
     }
 
@@ -45,7 +48,8 @@ public record AuthUserDetails(
         return new AuthUserDetails(
             user.getId(),
             user.getEmail(),
-            user.getRole()
+            user.getRole(),
+            user.getProvider()
         );
     }
 }
