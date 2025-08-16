@@ -78,3 +78,9 @@ oauth2:
         client-id: ${GOOGLE_AND_CLIENT_ID}
       ios:
         client-id: ${GOOGLE_IOS_CLIENT_ID}
+  apple:
+    key: ${APPLE_KEY_ID}
+    team-id: ${APPLE_TEAM_ID}
+    client-id: ${APPLE_CLIENT_ID}
+    private-key: ${APPLE_PRIVATE_KEY}
+

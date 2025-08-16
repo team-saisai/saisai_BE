@@ -59,4 +59,15 @@ public class AuthController {
             .body(ApiResponse.success(LOGIN_SUCCESS, authService.googleLoginIos(oauthLoginReq)));
     }
 
+    @PostMapping("/apple")
+    @SecurityRequirements(value = {})
+    @Operation(summary = "애플 소셜 로그인")
+    public ResponseEntity<ApiResponse<TokenRes>> loginApple(
+        @Valid @RequestBody OauthLoginReq oauthLoginReq
+    ) {
+
+        return ResponseEntity.status(HttpStatus.OK)
+            .body(ApiResponse.success(LOGIN_SUCCESS, authService.appleLogin(oauthLoginReq)));
+    }
+
 }
