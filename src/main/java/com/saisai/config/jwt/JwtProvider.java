@@ -60,13 +60,15 @@ public class JwtProvider {
     public String generateAccessToken(User user) {
         Date date = new Date();
 
+        log.info("토큰 생성 {}", user.getProvider());
+
         return BEARER_PREFIX +
             Jwts.builder()
                 .setHeaderParam(Header.TYPE, Header.JWT_TYPE)
                 .setSubject(String.valueOf(user.getId()))
                 .claim("email", user.getEmail())
                 .claim("userRole", user.getRole())
-                .claim("provider", user.getProvider())
+                .claim("provider", user.getProvider().toString())
                 .setExpiration(new Date(date.getTime() + ACCESS_TOKEN_TIME.toMillis()))
                 .setIssuedAt(date)
                 .signWith(key, signatureAlgorithm)
@@ -103,11 +105,14 @@ public class JwtProvider {
     public AuthUserDetails getAuthentication(String token){
         Claims claims = getClaims(token);
 
+        log.info("토큰에서 추출 {}", claims.get("provider", String.class));
+
         Long userId = Long.parseLong(claims.getSubject());
         String email = claims.get("email", String.class);
         UserRole userRole = UserRole.of(claims.get("userRole", String.class));
         ProviderType provider = ProviderType.of(claims.get("provider", String.class));
 
+        log.info("provider {}", provider);
         return AuthUserDetails.of(userId, email, userRole, provider );
     }
 
