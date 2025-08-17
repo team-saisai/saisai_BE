@@ -88,4 +88,8 @@ public class User extends BaseEntity {
     public void updateImage(String image) {
         this.image = image;
     }
+
+    public void delete() {
+        this.isDeleted = true;
+    }
 }

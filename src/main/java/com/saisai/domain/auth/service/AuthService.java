@@ -92,4 +92,42 @@ public class AuthService {
 
         return TokenRes.from(newAccessToken, newRefreshToken);
     }
+
+    @Transactional
+    public WithdrawRes deleteUser(AuthUserDetails authUserDetails, String accessToken, WithdrawReq withdrawReq) {
+        refreshTokenRedisService.deleteRefreshToken(authUserDetails.userId());
+
+        jwtProvider.addTokenToBlacklist(accessToken);
+
+        User user = userRepository.findById(authUserDetails.userId())
+            .orElseThrow(() -> new CustomException(USER_NOT_FOUND));
+
+        switch (user.getProvider()) {
+            case APPLE:
+                String appleRefreshToken = refreshTokenService.getRefreshToken(
+                    user.getProviderId());
+                String decryptedToken = tokenEncryptor.decrypt(appleRefreshToken);
+                appleClient.revoke(decryptedToken);
+                refreshTokenService.deleteRefreshToken(user.getProviderId());
+                break;
+            case KAKAO:
+                try {
+                    kakaoClient.unlink(withdrawReq.socialAccessToken());
+                    log.info("카카오 연동 해제 성공. providerId: {}", user.getProviderId());
+                } catch (CustomException e) {
+                    log.warn("카카오 연동 해제 기본 로직 실패. 어드민 키로 재시도. providerId: {}", user.getProviderId(),
+                        e);
+                    kakaoClient.unlinkWithAdminKey(user.getProviderId());
+                    log.info("어드민 키로 카카오 연동 해제 성공. providerId: {}", user.getProviderId());
+                }
+                break;
+            case GOOGLE:
+                googleClient.revoke(withdrawReq.socialAccessToken());
+                break;
+        }
+
+        user.delete();
+
+        return new WithdrawRes(user.getProvider());
+    }
 }

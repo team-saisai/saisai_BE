@@ -13,6 +13,7 @@ public enum SuccessCode {
     LOGIN_SUCCESS(HttpStatus.OK, "AUTH_02", "로그인에 성공했습니다."),
     REISSUE_SUCCESS(HttpStatus.OK, "AUTH_03", "토큰 재발급에 성공했습니다."),
     LOGOUT_SUCCESS(HttpStatus.OK, "AUTH_04", "로그아웃에 성공했습니다."),
+    WITHDRAW_SUCCESS(HttpStatus.OK, "AUTH_05", "회원탈퇴에 성공했습니다."),
 
     // User
     USER_GREETING_INFO_GET_SUCCESS(HttpStatus.OK, "USER_01", "사용자 정보 조회에 성공했습니다."),

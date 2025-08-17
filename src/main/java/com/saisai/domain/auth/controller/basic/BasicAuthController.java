@@ -4,11 +4,15 @@ import static com.saisai.domain.common.response.SuccessCode.LOGIN_SUCCESS;
 import static com.saisai.domain.common.response.SuccessCode.LOGOUT_SUCCESS;
 import static com.saisai.domain.common.response.SuccessCode.REGISTER_SUCCESS;
 import static com.saisai.domain.common.response.SuccessCode.REISSUE_SUCCESS;
+import static com.saisai.domain.common.response.SuccessCode.WITHDRAW_SUCCESS;
 
 import com.saisai.config.jwt.AuthUserDetails;
 import com.saisai.domain.auth.dto.request.LoginReq;
 import com.saisai.domain.auth.dto.request.RegisterReq;
+import com.saisai.domain.auth.dto.request.WithdrawReq;
 import com.saisai.domain.auth.dto.response.TokenRes;
+import com.saisai.domain.auth.dto.response.WithdrawRes;
+import com.saisai.domain.auth.service.AuthService;
 import com.saisai.domain.auth.service.BasicAuthService;
 import com.saisai.domain.common.annotation.Auth;
 import com.saisai.domain.common.response.ApiResponse;
@@ -33,6 +37,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class BasicAuthController {
 
     private final BasicAuthService basicAuthService;
+    private final AuthService authService;
 
     @PostMapping("/register")
     @SecurityRequirements(value = {})
@@ -71,7 +76,7 @@ public class BasicAuthController {
             .body(ApiResponse.success(REISSUE_SUCCESS, basicAuthService.reissue(refreshTokenHeader)));
     }
 
-    @DeleteMapping("/logout")
+    @PostMapping("/logout")
     @Operation(summary = "로그아웃")
     public ResponseEntity<ApiResponse<Void>> logout(
         @RequestHeader("Authorization") String header,
@@ -82,5 +87,19 @@ public class BasicAuthController {
 
         return ResponseEntity.status(HttpStatus.OK)
             .body(ApiResponse.success(LOGOUT_SUCCESS));
+    }
+
+    @DeleteMapping("/withdraw")
+    @Operation(summary = "회원탈퇴")
+    public ResponseEntity<ApiResponse<WithdrawRes>> withdraw(
+        @RequestHeader("Authorization") String header,
+        @Auth AuthUserDetails authUserDetails,
+        @RequestBody WithdrawReq withdrawReq
+    ) {
+        String accessToken = header.substring(7);
+        WithdrawRes response = authService.deleteUser(authUserDetails, accessToken, withdrawReq);
+
+        return ResponseEntity.status(HttpStatus.OK)
+            .body(ApiResponse.success(WITHDRAW_SUCCESS, response));
     }
 }
