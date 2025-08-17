@@ -7,6 +7,7 @@ import static com.saisai.domain.common.exception.ExceptionCode.USER_NOT_FOUND;
 
 import com.saisai.config.jwt.AuthUserDetails;
 import com.saisai.config.jwt.JwtProvider;
+import com.saisai.domain.auth.constant.ProviderType;
 import com.saisai.domain.auth.dto.request.OauthLoginReq;
 import com.saisai.domain.auth.dto.request.WithdrawReq;
 import com.saisai.domain.auth.dto.response.LoginRes;
@@ -53,7 +54,7 @@ public class AuthService {
         log.info("로그인 요청. Provider: {}, ProviderId: {}, Email: {}",
             KAKAO, userInfo.providerId(), userInfo.email());
 
-        Optional<User> optionalUser = userRepository.findByProviderId(userInfo.providerId());
+        Optional<User> optionalUser = userRepository.findByProviderIdAndDeletedAtIsNull(userInfo.providerId());
 
         boolean isNewUser = optionalUser.isEmpty();
         User user = optionalUser.orElseGet(() -> {
@@ -73,7 +74,7 @@ public class AuthService {
         log.info("로그인 요청. Provider: {}, ProviderId: {}, Email: {}",
             GOOGLE, userInfo.providerId(), userInfo.email());
 
-        Optional<User> optionalUser = userRepository.findByProviderId(userInfo.providerId());
+        Optional<User> optionalUser = userRepository.findByProviderIdAndDeletedAtIsNull(userInfo.providerId());
 
         boolean isNewUser = optionalUser.isEmpty();
         User user = optionalUser.orElseGet(() -> {
@@ -93,7 +94,7 @@ public class AuthService {
         log.info("로그인 요청. Provider: {}, ProviderId: {}, Email: {}",
             GOOGLE, userInfo.providerId(), userInfo.email());
 
-        Optional<User> optionalUser = userRepository.findByProviderId(userInfo.providerId());
+        Optional<User> optionalUser = userRepository.findByProviderIdAndDeletedAtIsNull(userInfo.providerId());
 
         boolean isNewUser = optionalUser.isEmpty();
         User user = optionalUser.orElseGet(() -> {
@@ -115,7 +116,7 @@ public class AuthService {
         log.info("로그인 요청. Provider: {}, ProviderId: {}, Email: {}",
             APPLE, userInfo.providerId(), userInfo.email());
 
-        Optional<User> optionalUser = userRepository.findByProviderId(userInfo.providerId());
+        Optional<User> optionalUser = userRepository.findByProviderIdAndDeletedAtIsNull(userInfo.providerId());
 
         boolean isNewUser = optionalUser.isEmpty();
         User user = optionalUser.orElseGet(() -> {
@@ -151,7 +152,9 @@ public class AuthService {
         User user = userRepository.findById(authUserDetails.userId())
             .orElseThrow(() -> new CustomException(USER_NOT_FOUND));
 
-        switch (user.getProvider()) {
+        ProviderType provider = user.getProvider();
+
+        switch (provider) {
             case APPLE:
                 String appleRefreshToken = refreshTokenService.getRefreshToken(
                     user.getProviderId());
@@ -177,6 +180,6 @@ public class AuthService {
 
         user.delete();
 
-        return new WithdrawRes(user.getProvider());
+        return new WithdrawRes(provider);
     }
 }
