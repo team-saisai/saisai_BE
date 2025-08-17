@@ -1,5 +1,9 @@
 package com.saisai.domain.auth.oauth.apple.client;
 
+import static com.saisai.domain.common.exception.ExceptionCode.APPLE_AUTH_API_COMMUNICATION_FAILED;
+import static com.saisai.domain.common.exception.ExceptionCode.APPLE_CLIENT_SECRET_GENERATION_FAILED;
+import static com.saisai.domain.common.exception.ExceptionCode.APPLE_TOKEN_EXCHANGE_FAILED;
+import static com.saisai.domain.common.exception.ExceptionCode.APPLE_TOKEN_REVOCATION_FAILED;
 import static com.saisai.domain.common.exception.ExceptionCode.EXPIRED_JWT_TOKEN;
 import static com.saisai.domain.common.exception.ExceptionCode.INVALID_APPLE_PUBLIC_KEY;
 import static com.saisai.domain.common.exception.ExceptionCode.INVALID_JWT_SIGNATURE;
@@ -21,53 +25,137 @@ import com.auth0.jwt.exceptions.SignatureVerificationException;
 import com.auth0.jwt.exceptions.TokenExpiredException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.saisai.domain.auth.oauth.UserInfo;
+import com.saisai.domain.auth.oauth.apple.response.AppleLoginRes;
+import com.saisai.domain.auth.oauth.apple.response.AppleTokenRes;
 import com.saisai.domain.common.exception.CustomException;
+import jakarta.annotation.PostConstruct;
+import java.nio.charset.StandardCharsets;
+import java.security.KeyFactory;
+import java.security.PrivateKey;
 import java.security.PublicKey;
+import java.security.interfaces.ECPrivateKey;
 import java.security.interfaces.RSAPublicKey;
+import java.security.spec.PKCS8EncodedKeySpec;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.Base64;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatusCode;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.RestClient;
 
 @Slf4j
 @Component
 public class AppleClient {
 
     @Value("${oauth2.apple.client-id}")
-    private final String clientId;
-    private final JwkProvider jwkProvider;
-    private final Random random;
+    private String clientId;
+    @Value("${oauth2.apple.key}")
+    private String keyId;
+    @Value("${oauth2.apple.team-id}")
+    private String teamId;
+    @Value("${oauth2.apple.private-key}")
+    private String privateKey;
 
-    @Autowired
-    public AppleClient(@Value("${oauth2.apple.client-id}") String clientId) {
-        this.random = new Random();
-        this.clientId = clientId;
+    private JwkProvider jwkProvider;
+    private final Random random = new Random();
+
+    @PostConstruct
+    public void init() {
         this.jwkProvider = new JwkProviderBuilder("https://appleid.apple.com/auth/keys")
             .cached(10, 24, TimeUnit.HOURS)
             .rateLimited(10, 1, TimeUnit.MINUTES)
             .build();
     }
 
-    public UserInfo verifyAndGetUserInfo(String idToken) {
-        DecodedJWT verifiedJwt = verifyToken(idToken);
-        return extractUserInfo(verifiedJwt);
+    /**
+     * authorizationCode로 애플 서버와 통신하여 유저 정보와 refreshToken을 모두 가져옴.
+     */
+    public AppleLoginRes exchangeCodeForUserInfoAndToken(String authorizationCode) {
+        String clientSecret = generateClientSecret();
+        AppleTokenRes tokens = requestTokens(clientSecret, authorizationCode);
+
+        DecodedJWT verifiedJwt = verifyIdToken(tokens.idToken());
+        UserInfo userInfo = extractUserInfo(verifiedJwt);
+
+        return new AppleLoginRes(tokens.refreshToken(), userInfo);
     }
 
-    // 토큰 검증
-    private DecodedJWT verifyToken(String idToken) {
+    // client_secret JWT 생성
+    private String generateClientSecret() {
         try {
-            // JWt 토큰 디코딩
-            DecodedJWT jwt = JWT.decode(idToken);
+            Date issuedAt = new Date();
+            Date expirationDate = Date.from(
+                LocalDateTime.now().plusHours(1).atZone(ZoneId.systemDefault()).toInstant()
+            );
 
-            // Apple 공개키 확인 및 알고리즘 생성
+            byte[] privateKeyBytes = Base64.getDecoder().decode(privateKey);
+            PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(privateKeyBytes);
+            PrivateKey privateKeyObject = KeyFactory.getInstance("EC").generatePrivate(keySpec);
+
+            Algorithm algorithm = Algorithm.ECDSA256(null, (ECPrivateKey) privateKeyObject);
+
+            Map<String, Object> headers = new HashMap<>();
+            headers.put("kid", keyId);
+
+            return JWT.create()
+                .withHeader(headers)
+                .withIssuer(teamId)
+                .withAudience("https://appleid.apple.com")
+                .withSubject(clientId)
+                .withIssuedAt(issuedAt)
+                .withExpiresAt(expirationDate)
+                .sign(algorithm);
+        } catch (Exception e) {
+            throw new CustomException(APPLE_CLIENT_SECRET_GENERATION_FAILED, e);
+        }
+    }
+
+    // 애플 서버에 authorizationCode로 토큰 교환 요청
+    private AppleTokenRes requestTokens(String clientSecret, String authorizationCode) {
+        MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
+        params.add("client_id", clientId);
+        params.add("client_secret", clientSecret);
+        params.add("code", authorizationCode);
+        params.add("grant_type", "authorization_code");
+
+        try {
+            return RestClient.create()
+                .post()
+                .uri("https://appleid.apple.com/auth/oauth2/v2/token")
+                .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                .body(params)
+                .retrieve()
+                .onStatus(HttpStatusCode::is4xxClientError, (req, res) -> {
+                    String errorMessage = new String(res.getBody().readAllBytes(), StandardCharsets.UTF_8);
+                    log.warn("Apple RefreshToken 요청 실패: statusCode={}, body={}", res.getStatusCode(), errorMessage);
+                    throw new CustomException(APPLE_TOKEN_EXCHANGE_FAILED);
+                })
+                .body(AppleTokenRes.class);
+        } catch (Exception e) {
+            log.error("Apple RefreshToken 요청 중 예기치 않은 오류 발생: {}", e.getMessage(), e);
+            throw new CustomException(APPLE_AUTH_API_COMMUNICATION_FAILED, e);
+        }
+    }
+
+    // idToken 검증
+    private DecodedJWT verifyIdToken(String idToken) {
+        try {
+            DecodedJWT jwt = JWT.decode(idToken);
             String kid = jwt.getKeyId();
             Jwk jwk = jwkProvider.get(kid);
             PublicKey publicKey = jwk.getPublicKey();
             Algorithm algorithm = Algorithm.RSA256((RSAPublicKey) publicKey, null);
 
-            // IdToken 검증
             JWTVerifier verifier = JWT.require(algorithm)
                 .withIssuer("https://appleid.apple.com")
                 .withAudience(clientId)
@@ -88,7 +176,7 @@ public class AppleClient {
         }
     }
 
-    // 유저 정보 추출
+    // idToken에서 유저 정보 추출
     private UserInfo extractUserInfo(DecodedJWT verifiedJwt) {
         String providerId = verifiedJwt.getSubject();
         String email = verifiedJwt.getClaim("email").asString();
@@ -100,7 +188,6 @@ public class AppleClient {
                 name = tempName;
             }
         }
-
         return new UserInfo(providerId, name, email, null);
     }
 
