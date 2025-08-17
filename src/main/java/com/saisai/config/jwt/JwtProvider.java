@@ -60,8 +60,6 @@ public class JwtProvider {
     public String generateAccessToken(User user) {
         Date date = new Date();
 
-        log.info("토큰 생성 {}", user.getProvider());
-
         return BEARER_PREFIX +
             Jwts.builder()
                 .setHeaderParam(Header.TYPE, Header.JWT_TYPE)
@@ -104,8 +102,6 @@ public class JwtProvider {
     // 토큰 기반으로 사용자 인증 정보 가져오는 메서드
     public AuthUserDetails getAuthentication(String token){
         Claims claims = getClaims(token);
-
-        log.info("토큰에서 추출 {}", claims.get("provider", String.class));
 
         Long userId = Long.parseLong(claims.getSubject());
         String email = claims.get("email", String.class);

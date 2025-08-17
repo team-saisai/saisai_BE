@@ -23,12 +23,12 @@ public class TokenEncryptor {
     private final Key key;
 
     public TokenEncryptor(@Value("${encrypt.key}") String keyString) {
-        this.key = new SecretKeySpec(keyString.getBytes(StandardCharsets.UTF_8), ALGORITHM);
+        byte[] decodedKey = Base64.getDecoder().decode(keyString);
+        this.key = new SecretKeySpec(decodedKey, ALGORITHM);
     }
 
     public String encrypt(String token) {
         try {
-            // 매번 새로운 IV를 생성
             SecureRandom random = new SecureRandom();
             byte[] ivBytes = new byte[16];
             random.nextBytes(ivBytes);
