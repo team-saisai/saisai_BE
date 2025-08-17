@@ -3,21 +3,34 @@ package com.saisai.domain.auth.service;
 import static com.saisai.domain.auth.constant.ProviderType.APPLE;
 import static com.saisai.domain.auth.constant.ProviderType.GOOGLE;
 import static com.saisai.domain.auth.constant.ProviderType.KAKAO;
+import static com.saisai.domain.common.exception.ExceptionCode.USER_NOT_FOUND;
 
+import com.saisai.config.jwt.AuthUserDetails;
 import com.saisai.config.jwt.JwtProvider;
 import com.saisai.domain.auth.dto.request.OauthLoginReq;
+import com.saisai.domain.auth.dto.request.WithdrawReq;
+import com.saisai.domain.auth.dto.response.LoginRes;
 import com.saisai.domain.auth.dto.response.TokenRes;
+import com.saisai.domain.auth.dto.response.WithdrawRes;
 import com.saisai.domain.auth.oauth.UserInfo;
 import com.saisai.domain.auth.oauth.apple.client.AppleClient;
+import com.saisai.domain.auth.oauth.apple.response.AppleLoginRes;
 import com.saisai.domain.auth.oauth.google.client.GoogleAndroidClient;
+import com.saisai.domain.auth.oauth.google.client.GoogleClient;
 import com.saisai.domain.auth.oauth.google.client.GoogleIosClient;
 import com.saisai.domain.auth.oauth.kakao.client.KakaoClient;
+import com.saisai.domain.common.exception.CustomException;
+import com.saisai.domain.common.utils.TokenEncryptor;
 import com.saisai.domain.user.entity.User;
 import com.saisai.domain.user.repository.UserRepository;
+import com.saisai.domain.user.service.RefreshTokenService;
 import jakarta.transaction.Transactional;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class AuthService {
@@ -29,58 +42,94 @@ public class AuthService {
     private final GoogleAndroidClient googleAndroidClient;
     private final GoogleIosClient googleIosClient;
     private final AppleClient appleClient;
+    private final RefreshTokenService refreshTokenService;
+    private final GoogleClient googleClient;
+    private final TokenEncryptor tokenEncryptor;
 
     @Transactional
-    public TokenRes kakaoLogion(OauthLoginReq oauthLoginReq) {
+    public LoginRes kakaoLogion(OauthLoginReq oauthLoginReq) {
         UserInfo userInfo = kakaoClient.getUserInfo(oauthLoginReq.token());
 
-        User user = userRepository.findByProviderId(userInfo.providerId())
-            .orElseGet(() -> {
-                User newUser = User.of(userInfo, KAKAO);
-                return userRepository.save(newUser);
-            });
+        log.info("로그인 요청. Provider: {}, ProviderId: {}, Email: {}",
+            KAKAO, userInfo.providerId(), userInfo.email());
 
-        return issueAndSaveTokens(user);
+        Optional<User> optionalUser = userRepository.findByProviderId(userInfo.providerId());
+
+        boolean isNewUser = optionalUser.isEmpty();
+        User user = optionalUser.orElseGet(() -> {
+            User newUser = User.of(userInfo, KAKAO);
+            return userRepository.save(newUser);
+        });
+
+        TokenRes tokenRes = issueAndSaveTokens(user);
+
+        return LoginRes.of(tokenRes, isNewUser);
     }
 
     @Transactional
-    public TokenRes googleLoginAndroid (OauthLoginReq oauthLoginReq) {
+    public LoginRes googleLoginAndroid (OauthLoginReq oauthLoginReq) {
         UserInfo userInfo = googleAndroidClient.verifyAndGetUserInfo(oauthLoginReq.token());
 
-        User user = userRepository.findByProviderId(userInfo.providerId())
-            .orElseGet(() -> {
-                User newUser = User.of(userInfo, GOOGLE);
-                return userRepository.save(newUser);
-            });
+        log.info("로그인 요청. Provider: {}, ProviderId: {}, Email: {}",
+            GOOGLE, userInfo.providerId(), userInfo.email());
 
-        return issueAndSaveTokens(user);
+        Optional<User> optionalUser = userRepository.findByProviderId(userInfo.providerId());
+
+        boolean isNewUser = optionalUser.isEmpty();
+        User user = optionalUser.orElseGet(() -> {
+            User newUser = User.of(userInfo, GOOGLE);
+            return userRepository.save(newUser);
+        });
+
+        TokenRes tokenRes = issueAndSaveTokens(user);
+
+        return LoginRes.of(tokenRes, isNewUser);
     }
 
     @Transactional
-    public TokenRes googleLoginIos (OauthLoginReq oauthLoginReq) {
+    public LoginRes googleLoginIos (OauthLoginReq oauthLoginReq) {
         UserInfo userInfo = googleIosClient.verifyAndGetUserInfo(oauthLoginReq.token());
 
-        User user = userRepository.findByProviderId(userInfo.providerId())
-            .orElseGet(() -> {
-                User newUser = User.of(userInfo, GOOGLE);
-                return userRepository.save(newUser);
-            });
+        log.info("로그인 요청. Provider: {}, ProviderId: {}, Email: {}",
+            GOOGLE, userInfo.providerId(), userInfo.email());
 
-        return issueAndSaveTokens(user);
+        Optional<User> optionalUser = userRepository.findByProviderId(userInfo.providerId());
+
+        boolean isNewUser = optionalUser.isEmpty();
+        User user = optionalUser.orElseGet(() -> {
+            User newUser = User.of(userInfo, GOOGLE);
+            return userRepository.save(newUser);
+        });
+
+        TokenRes tokenRes = issueAndSaveTokens(user);
+
+        return LoginRes.of(tokenRes, isNewUser);
     }
 
     @Transactional
-    public TokenRes appleLogin(OauthLoginReq oauthLoginReq) {
+    public LoginRes appleLogin(OauthLoginReq oauthLoginReq) {
 
-        UserInfo userInfo = appleClient.verifyAndGetUserInfo(oauthLoginReq.token());
+        AppleLoginRes authResponse = appleClient.exchangeCodeForUserInfoAndToken(oauthLoginReq.token());
+        UserInfo userInfo = authResponse.userInfo();
 
-        User user = userRepository.findByProviderId(userInfo.providerId())
-            .orElseGet(() -> {
-                User newUser = User.of(userInfo, APPLE);
-                return userRepository.save(newUser);
-            });
+        log.info("로그인 요청. Provider: {}, ProviderId: {}, Email: {}",
+            APPLE, userInfo.providerId(), userInfo.email());
 
-        return issueAndSaveTokens(user);
+        Optional<User> optionalUser = userRepository.findByProviderId(userInfo.providerId());
+
+        boolean isNewUser = optionalUser.isEmpty();
+        User user = optionalUser.orElseGet(() -> {
+            User newUser = User.of(userInfo, APPLE);
+            return userRepository.save(newUser);
+        });
+
+        String encryptedToken = tokenEncryptor.encrypt(authResponse.refreshToken());
+        refreshTokenService.saveRefreshToken(user.getProviderId(), user.getProvider(),
+            encryptedToken);
+
+        TokenRes tokenRes = issueAndSaveTokens(user);
+
+        return LoginRes.of(tokenRes, isNewUser);
     }
 
     // 액세스 토큰, 리프레시 토큰 발급하고 리프레시 토큰을 저장하는 메서드
