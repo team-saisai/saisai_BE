@@ -61,6 +61,7 @@ public class ChallengeRepositoryImpl implements ChallengeRepositoryCustom {
                         rideSub.course.id.eq(course.id)
                             .and(rideSub.user.id.eq(userId))
                             .and(rideSub.status.eq(RideStatus.COMPLETED))
+                            .and(rideSub.isDeleted.isFalse())
                     )
                     .exists(),
                 challenge.status,
@@ -74,7 +75,8 @@ public class ChallengeRepositoryImpl implements ChallengeRepositoryCustom {
             ))
             .from(challenge)
             .innerJoin(challenge.course, course)
-            .leftJoin(ride).on(ride.course.id.eq(course.id))
+            .leftJoin(ride).on(ride.course.id.eq(course.id)
+                .and(ride.isDeleted.isFalse()))
             .leftJoin(rewardEvent).on(
                 rewardEvent.challenge.id.eq(challenge.id)
                     .and(rewardEvent.status.eq(EventStatus.ACTIVE)))
@@ -94,7 +96,8 @@ public class ChallengeRepositoryImpl implements ChallengeRepositoryCustom {
             .select(course.countDistinct())
             .from(challenge)
             .innerJoin(challenge.course, course)
-            .leftJoin(ride).on(ride.course.id.eq(course.id))
+            .leftJoin(ride).on(ride.course.id.eq(course.id)
+                .and(ride.isDeleted.isFalse()))
             .leftJoin(rewardEvent).on(
                 rewardEvent.challenge.id.eq(challenge.id)
                     .and(rewardEvent.status.eq(EventStatus.ACTIVE))
@@ -135,6 +138,7 @@ public class ChallengeRepositoryImpl implements ChallengeRepositoryCustom {
                         rideSub.course.id.eq(course.id)
                             .and(rideSub.user.id.eq(userId))
                             .and(rideSub.status.eq(RideStatus.COMPLETED))
+                            .and(rideSub.isDeleted.isFalse())
                     )
                     .exists(),
                 challenge.status,
@@ -148,7 +152,8 @@ public class ChallengeRepositoryImpl implements ChallengeRepositoryCustom {
             ))
             .from(challenge)
             .innerJoin(challenge.course, course)
-            .leftJoin(ride).on(ride.course.id.eq(course.id))
+            .leftJoin(ride).on(ride.course.id.eq(course.id)
+                .and(ride.isDeleted.isFalse()))
             .leftJoin(rewardEvent).on(
                 rewardEvent.challenge.id.eq(challenge.id)
                     .and(rewardEvent.status.eq(EventStatus.ACTIVE)))

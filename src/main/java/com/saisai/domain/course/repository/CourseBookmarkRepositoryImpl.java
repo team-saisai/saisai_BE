@@ -53,6 +53,7 @@ public class CourseBookmarkRepositoryImpl implements CourseBookmarkRepositoryCus
                         rideSub.course.id.eq(course.id)
                             .and(rideSub.user.id.eq(userId))
                             .and(rideSub.status.eq(RideStatus.COMPLETED))
+                            .and(rideSub.isDeleted.isFalse())
                     )
                     .exists(),
                 challenge.status,
@@ -68,7 +69,8 @@ public class CourseBookmarkRepositoryImpl implements CourseBookmarkRepositoryCus
             .leftJoin(course).on(courseBookmark.course.id.eq(course.id))
             .leftJoin(challenge).on(challenge.course.id.eq(course.id)
                 .and(challenge.status.eq(ChallengeStatus.ONGOING)))
-            .leftJoin(ride).on(ride.course.id.eq(course.id))
+            .leftJoin(ride).on(ride.course.id.eq(course.id)
+                .and(ride.isDeleted.isFalse()))
             .leftJoin(rewardEvent).on(
                 rewardEvent.challenge.id.eq(challenge.id)
                     .and(rewardEvent.status.eq(EventStatus.ACTIVE)))
