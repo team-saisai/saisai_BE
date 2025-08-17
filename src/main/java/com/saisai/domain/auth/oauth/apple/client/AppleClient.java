@@ -196,4 +196,33 @@ public class AppleClient {
         int randomNumber = 1000 + this.random.nextInt(9000);
         return String.valueOf(randomNumber);
     }
+
+    // 계정 연결 해제
+    public void revoke(String refreshToken) {
+        String clientSecret = generateClientSecret();
+
+        MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
+        params.add("client_id", clientId);
+        params.add("client_secret", clientSecret);
+        params.add("token", refreshToken);
+        params.add("token_type_hint", "refresh_token");
+
+        try {
+            RestClient.create()
+                .post()
+                .uri("https://appleid.apple.com/auth/oauth2/v2/revoke")
+                .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                .body(params)
+                .retrieve()
+                .onStatus(HttpStatusCode::is4xxClientError, (req, res) -> {
+                    String errorMessage = new String(res.getBody().readAllBytes(), StandardCharsets.UTF_8);
+                    log.warn("Apple Revoke 요청 실패: statusCode={}, body={}", res.getStatusCode(), errorMessage);
+                    throw new CustomException(APPLE_TOKEN_REVOCATION_FAILED);
+                })
+                .toBodilessEntity();
+        } catch (Exception e) {
+            log.error("Apple Revoke 요청 중 예기치 않은 오류 발생: {}", e.getMessage(), e);
+            throw new CustomException(APPLE_AUTH_API_COMMUNICATION_FAILED, e);
+        }
+    }
 }
