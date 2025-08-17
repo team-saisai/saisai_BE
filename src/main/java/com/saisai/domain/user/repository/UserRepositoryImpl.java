@@ -28,7 +28,7 @@ public class UserRepositoryImpl implements UserRepositoryCustom {
                 user.email,
                 JPAExpressions.select(ride.count().coalesce(0L).intValue())
                     .from(ride)
-                    .where(ride.user.id.eq(userId)),
+                    .where(ride.user.id.eq(userId), ride.isDeleted.eq(false)),
                 JPAExpressions.select(courseBookmark.count().coalesce(0L).intValue())
                     .from(courseBookmark)
                     .where(courseBookmark.user.id.eq(userId)),

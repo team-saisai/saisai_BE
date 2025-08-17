@@ -54,8 +54,6 @@ public class RideRepositoryImpl implements RideRepositoryCustom {
 
         if (notCompletedOnly) {
             whereClause = whereClause.and(ride.status.eq(RideStatus.COMPLETED));
-        } else {
-            whereClause = whereClause.and(ride.status.ne(RideStatus.COMPLETED));
         }
 
         List<RideRecordRes> content = jpaQueryFactory

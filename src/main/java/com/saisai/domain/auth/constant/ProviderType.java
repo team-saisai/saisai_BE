@@ -9,6 +9,7 @@ public enum ProviderType {
     GOOGLE,
     KAKAO,
     APPLE,
+    GENERAL,
 
     ;
 

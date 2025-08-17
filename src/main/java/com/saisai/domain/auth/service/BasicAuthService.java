@@ -7,6 +7,7 @@ import static com.saisai.domain.common.exception.ExceptionCode.USER_NOT_FOUND;
 
 import com.saisai.config.jwt.AuthUserDetails;
 import com.saisai.config.jwt.JwtProvider;
+import com.saisai.domain.auth.constant.ProviderType;
 import com.saisai.domain.auth.dto.request.LoginReq;
 import com.saisai.domain.auth.dto.request.RegisterReq;
 import com.saisai.domain.auth.dto.response.TokenRes;
@@ -42,6 +43,7 @@ public class BasicAuthService {
                 .nickname(registerReq.nickname())
                 .password(encodedPassword)
                 .role(UserRole.of(registerReq.role()))
+                .provider(ProviderType.GENERAL)
                 .build()
         );
 

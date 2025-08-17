@@ -11,6 +11,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import java.time.LocalDateTime;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -18,7 +19,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "users")
+@Table(name = "users", uniqueConstraints = {@UniqueConstraint(columnNames = {"provider_id", "provider"})})
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class User extends BaseEntity {
@@ -44,7 +45,7 @@ public class User extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private UserRole role;
 
-    @Column(name = "provider", length = 255)
+    @Column(name = "provider", nullable = false, length = 255)
     @Enumerated(EnumType.STRING)
     private ProviderType provider;
 
@@ -86,5 +87,9 @@ public class User extends BaseEntity {
 
     public void updateImage(String image) {
         this.image = image;
+    }
+
+    public void delete() {
+        this.isDeleted = true;
     }
 }

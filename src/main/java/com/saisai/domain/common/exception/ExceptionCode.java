@@ -19,6 +19,16 @@ public enum ExceptionCode {
 
     INVALID_APPLE_PUBLIC_KEY(HttpStatus.INTERNAL_SERVER_ERROR, "AUTH_ER_08", "Apple 공개키가 유효하지 않습니다."),
     JWK_PROCESSING_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "AUTH_ER_09", "Apple JWK 처리 중 오류가 발생했습니다."),
+    APPLE_CLIENT_SECRET_GENERATION_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "AUTH_ER_10", "Apple client_secret 생성에 실패했습니다."),
+    APPLE_TOKEN_EXCHANGE_FAILED(HttpStatus.BAD_REQUEST, "AUTH_ER_11", "Apple 토큰 교환에 실패했습니다. 유효하지 않은 요청입니다."),
+    APPLE_AUTH_API_COMMUNICATION_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "AUTH_ER_12", "Apple 인증 API 통신 중 오류가 발생했습니다."),
+    APPLE_TOKEN_REVOCATION_FAILED(HttpStatus.BAD_REQUEST, "AUTH_ER_13", "Apple 토큰 해제에 실패했습니다. 유효하지 않은 토큰입니다."),
+
+    KAKAO_UNLINK_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "AUTH_ER_14","카카오 연동 해제에 실패했습니다."),
+    KAKAO_AUTH_API_COMMUNICATION_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "AUTH_ER_15","카카오 인증 API 통신에 실패했습니다."),
+
+    GOOGLE_UNLINK_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "AUTH_ER_16", "구글 연동 해제에 실패했습니다."),
+    GOOGLE_AUTH_API_COMMUNICATION_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "AUTH_ER_17", "구글 인증 API 통신에 실패했습니다."),
 
     // jwt
     JWT_TOKEN_REQUIRED(HttpStatus.BAD_REQUEST, "JWT_ER_01", "JWT 토큰이 필요합니다."),
@@ -105,6 +115,9 @@ public enum ExceptionCode {
     INVALID_PAGE_NUMBER(HttpStatus.BAD_REQUEST, "ETC_ER_01", "요청하신 페이지 번호가 유효 범위를 초과했습니다."),
     INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "ETC_ER_02", "서버가 응답할 수 없습니다."),
     INVALID_SORT_OPTION(HttpStatus.BAD_REQUEST, "ETC_ER_03", "유효하지 않는 정렬 조건입니다."),
+    TOKEN_ENCRYPTION_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "ETC_ER_04", "토큰 암호화에 실패했습니다."),
+    TOKEN_DECRYPTION_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "ETC_ER_05", "토큰 복호화에 실패했습니다."),
+
     ;
 
     private final HttpStatus httpStatus;

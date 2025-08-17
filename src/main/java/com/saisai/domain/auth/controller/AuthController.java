@@ -3,7 +3,7 @@ package com.saisai.domain.auth.controller;
 import static com.saisai.domain.common.response.SuccessCode.LOGIN_SUCCESS;
 
 import com.saisai.domain.auth.dto.request.OauthLoginReq;
-import com.saisai.domain.auth.dto.response.TokenRes;
+import com.saisai.domain.auth.dto.response.LoginRes;
 import com.saisai.domain.auth.service.AuthService;
 import com.saisai.domain.common.response.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
@@ -29,7 +29,7 @@ public class AuthController {
     @PostMapping("/kakao")
     @SecurityRequirements(value = {})
     @Operation(summary = "카카오 소셜 로그인")
-    public ResponseEntity<ApiResponse<TokenRes>> kakaoLogin(
+    public ResponseEntity<ApiResponse<LoginRes>> kakaoLogin(
         @Valid @RequestBody OauthLoginReq oauthLoginReq
     ) {
 
@@ -40,7 +40,7 @@ public class AuthController {
     @PostMapping("/google/android")
     @SecurityRequirements(value = {})
     @Operation(summary = "구글 소셜 로그인 (안드로이드)")
-    public ResponseEntity<ApiResponse<TokenRes>> loginGoogleAndroid(
+    public ResponseEntity<ApiResponse<LoginRes>> loginGoogleAndroid(
         @Valid @RequestBody OauthLoginReq oauthLoginReq
     ) {
 
@@ -51,7 +51,7 @@ public class AuthController {
     @PostMapping("/google/ios")
     @SecurityRequirements(value = {})
     @Operation(summary = "구글 소셜 로그인 (IOS)")
-    public ResponseEntity<ApiResponse<TokenRes>> loginGoogleIos(
+    public ResponseEntity<ApiResponse<LoginRes>> loginGoogleIos(
         @Valid @RequestBody OauthLoginReq oauthLoginReq
     ) {
 
@@ -62,12 +62,11 @@ public class AuthController {
     @PostMapping("/apple")
     @SecurityRequirements(value = {})
     @Operation(summary = "애플 소셜 로그인")
-    public ResponseEntity<ApiResponse<TokenRes>> loginApple(
+    public ResponseEntity<ApiResponse<LoginRes>> loginApple(
         @Valid @RequestBody OauthLoginReq oauthLoginReq
     ) {
 
         return ResponseEntity.status(HttpStatus.OK)
             .body(ApiResponse.success(LOGIN_SUCCESS, authService.appleLogin(oauthLoginReq)));
     }
-
 }

@@ -71,7 +71,8 @@ public class CourseRepositoryImpl implements CourseRepositoryCustom {
                 challenge.course.id.eq(course.id)
                     .and(challenge.status.eq(ChallengeStatus.ONGOING))
             )
-            .leftJoin(ride).on(ride.course.id.eq(course.id))
+            .leftJoin(ride).on(ride.course.id.eq(course.id)
+                .and(ride.isDeleted.isFalse()))
             .where(course.isDeleted.eq(false)
                 .and(challenge.id.isNull()))
             .groupBy(course.id, course.name, course.level, course.distance,
@@ -89,7 +90,8 @@ public class CourseRepositoryImpl implements CourseRepositoryCustom {
                 challenge.course.id.eq(course.id)
                     .and(challenge.status.eq(ChallengeStatus.ONGOING))
             )
-            .leftJoin(ride).on(ride.course.id.eq(course.id))
+            .leftJoin(ride).on(ride.course.id.eq(course.id)
+                .and(ride.isDeleted.isFalse()))
             .where(course.isDeleted.eq(false)
                 .and(challenge.id.isNull()));
 
@@ -124,6 +126,7 @@ public class CourseRepositoryImpl implements CourseRepositoryCustom {
                         rideSub.course.id.eq(course.id)
                             .and(rideSub.user.id.eq(userId))
                             .and(rideSub.status.eq(RideStatus.COMPLETED))
+                            .and(rideSub.isDeleted.isFalse())
                     )
                     .exists()
             ))
