@@ -105,6 +105,9 @@ public enum ExceptionCode {
     INVALID_PAGE_NUMBER(HttpStatus.BAD_REQUEST, "ETC_ER_01", "요청하신 페이지 번호가 유효 범위를 초과했습니다."),
     INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "ETC_ER_02", "서버가 응답할 수 없습니다."),
     INVALID_SORT_OPTION(HttpStatus.BAD_REQUEST, "ETC_ER_03", "유효하지 않는 정렬 조건입니다."),
+    TOKEN_ENCRYPTION_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "ETC_ER_04", "토큰 암호화에 실패했습니다."),
+    TOKEN_DECRYPTION_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "ETC_ER_05", "토큰 복호화에 실패했습니다."),
+
     ;
 
     private final HttpStatus httpStatus;
