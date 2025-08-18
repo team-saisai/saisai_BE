@@ -90,5 +90,3 @@ oauth2:
 encrypt:
   key: ${ENCRYPT_KEY}
   iv: ${ENCRYPT_IV}
-
-

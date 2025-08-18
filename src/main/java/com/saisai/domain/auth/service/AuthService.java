@@ -25,6 +25,7 @@ import com.saisai.domain.common.utils.TokenEncryptor;
 import com.saisai.domain.user.entity.User;
 import com.saisai.domain.user.repository.UserRepository;
 import com.saisai.domain.user.service.RefreshTokenService;
+import com.saisai.domain.user.service.UserService;
 import jakarta.transaction.Transactional;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -46,6 +47,7 @@ public class AuthService {
     private final RefreshTokenService refreshTokenService;
     private final GoogleClient googleClient;
     private final TokenEncryptor tokenEncryptor;
+    private final UserService userService;
 
     @Transactional
     public LoginRes kakaoLogion(OauthLoginReq oauthLoginReq) {
@@ -54,7 +56,7 @@ public class AuthService {
         log.info("로그인 요청. Provider: {}, ProviderId: {}, Email: {}",
             KAKAO, userInfo.providerId(), userInfo.email());
 
-        Optional<User> optionalUser = userRepository.findByProviderIdAndDeletedAtIsNull(userInfo.providerId());
+        Optional<User> optionalUser = userRepository.findByProviderId(userInfo.providerId());
 
         boolean isNewUser = optionalUser.isEmpty();
         User user = optionalUser.orElseGet(() -> {
@@ -74,7 +76,7 @@ public class AuthService {
         log.info("로그인 요청. Provider: {}, ProviderId: {}, Email: {}",
             GOOGLE, userInfo.providerId(), userInfo.email());
 
-        Optional<User> optionalUser = userRepository.findByProviderIdAndDeletedAtIsNull(userInfo.providerId());
+        Optional<User> optionalUser = userRepository.findByProviderId(userInfo.providerId());
 
         boolean isNewUser = optionalUser.isEmpty();
         User user = optionalUser.orElseGet(() -> {
@@ -94,7 +96,7 @@ public class AuthService {
         log.info("로그인 요청. Provider: {}, ProviderId: {}, Email: {}",
             GOOGLE, userInfo.providerId(), userInfo.email());
 
-        Optional<User> optionalUser = userRepository.findByProviderIdAndDeletedAtIsNull(userInfo.providerId());
+        Optional<User> optionalUser = userRepository.findByProviderId(userInfo.providerId());
 
         boolean isNewUser = optionalUser.isEmpty();
         User user = optionalUser.orElseGet(() -> {
@@ -116,7 +118,7 @@ public class AuthService {
         log.info("로그인 요청. Provider: {}, ProviderId: {}, Email: {}",
             APPLE, userInfo.providerId(), userInfo.email());
 
-        Optional<User> optionalUser = userRepository.findByProviderIdAndDeletedAtIsNull(userInfo.providerId());
+        Optional<User> optionalUser = userRepository.findByProviderId(userInfo.providerId());
 
         boolean isNewUser = optionalUser.isEmpty();
         User user = optionalUser.orElseGet(() -> {
@@ -178,7 +180,7 @@ public class AuthService {
                 break;
         }
 
-        user.delete();
+        userService.delete(user);
 
         return new WithdrawRes(provider);
     }

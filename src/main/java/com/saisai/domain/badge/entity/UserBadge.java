@@ -12,10 +12,13 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
+import java.time.LocalDateTime;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.Filter;
+import org.hibernate.annotations.SQLDelete;
 
 @Getter
 @Entity
@@ -26,6 +29,8 @@ import lombok.NoArgsConstructor;
     )
 )
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@SQLDelete(sql = "UPDATE user_badge SET is_deleted = true, deleted_at = NOW() WHERE id = ?")
+@Filter(name = "notDeleted", condition = "is_deleted = :isDeleted")
 public class UserBadge extends BaseEntity {
 
     @Id
@@ -41,9 +46,20 @@ public class UserBadge extends BaseEntity {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
+    @Column(name = "is_deleted", nullable = false)
+    private boolean isDeleted = false;
+
+    @Column(name = "deleted_at")
+    private LocalDateTime deletedAt;
+
     @Builder
     public UserBadge(Badge badge, User user) {
         this.badge = badge;
         this.user = user;
+    }
+
+    public void delete() {
+        this.isDeleted = true;
+        this.deletedAt = LocalDateTime.now();
     }
 }

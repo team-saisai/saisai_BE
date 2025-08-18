@@ -37,7 +37,8 @@ public class UserRepositoryImpl implements UserRepositoryCustom {
                     .where(userReward.user.id.eq(userId)),
                 JPAExpressions.select(userBadge.count().coalesce(0L).intValue())
                     .from(userBadge)
-                    .where(userBadge.user.id.eq(userId))
+                    .where(userBadge.user.id.eq(userId)),
+                user.provider
             ))
             .from(user)
             .where(user.id.eq(userId).and(user.isDeleted.eq(false)))

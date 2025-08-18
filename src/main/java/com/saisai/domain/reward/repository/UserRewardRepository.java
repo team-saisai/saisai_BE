@@ -1,6 +1,7 @@
 package com.saisai.domain.reward.repository;
 
 import com.saisai.domain.reward.entity.UserReward;
+import com.saisai.domain.user.entity.User;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -20,4 +21,6 @@ public interface UserRewardRepository extends JpaRepository<UserReward, Long> {
         + "FROM UserReward ur "
         + "WHERE ur.user.id = :userId")
     Optional<Long> sumRewardByUserId(@Param("userId") Long aLong);
+
+    void deleteAllByUser(User user);
 }

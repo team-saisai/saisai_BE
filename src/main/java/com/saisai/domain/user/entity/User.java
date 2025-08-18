@@ -17,11 +17,15 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.Filter;
+import org.hibernate.annotations.SQLDelete;
 
 @Entity
 @Table(name = "users", uniqueConstraints = {@UniqueConstraint(columnNames = {"provider_id", "provider", "deleted_at"})})
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@SQLDelete(sql = "UPDATE users SET is_deleted = true, deleted_at = NOW() WHERE id = ?")
+@Filter(name = "notDeleted", condition = "is_deleted = :isDeleted")
 public class User extends BaseEntity {
 
     @Id
@@ -91,5 +95,6 @@ public class User extends BaseEntity {
 
     public void delete() {
         this.isDeleted = true;
+        this.deletedAt = LocalDateTime.now();
     }
 }

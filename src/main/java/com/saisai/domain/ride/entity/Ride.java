@@ -24,11 +24,15 @@ import java.time.LocalDateTime;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.Filter;
+import org.hibernate.annotations.SQLDelete;
 
 @Entity
 @Table(name = "rides")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@SQLDelete(sql = "UPDATE rides SET is_deleted = true, deleted_at = NOW() WHERE id = ?")
+@Filter(name = "notDeleted", condition = "is_deleted = :isDeleted")
 public class Ride extends BaseEntity {
 
     @Id

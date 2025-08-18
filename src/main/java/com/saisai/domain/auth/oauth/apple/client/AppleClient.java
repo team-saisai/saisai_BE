@@ -137,7 +137,7 @@ public class AppleClient {
                 .retrieve()
                 .onStatus(HttpStatusCode::is4xxClientError, (req, res) -> {
                     String errorMessage = new String(res.getBody().readAllBytes(), StandardCharsets.UTF_8);
-                    log.warn("Apple RefreshToken 요청 실패: statusCode={}, body={}", res.getStatusCode(), errorMessage);
+                    log.error("Apple RefreshToken 요청 실패: statusCode={}, body={}", res.getStatusCode(), errorMessage);
                     throw new CustomException(APPLE_TOKEN_EXCHANGE_FAILED);
                 })
                 .body(AppleTokenRes.class);

@@ -4,8 +4,11 @@ import static com.saisai.domain.common.exception.ExceptionCode.NICKNAME_DUPLICAT
 import static com.saisai.domain.common.exception.ExceptionCode.USER_NOT_FOUND;
 
 import com.saisai.config.jwt.AuthUserDetails;
+import com.saisai.domain.badge.repository.UserBadgeRepository;
 import com.saisai.domain.common.exception.CustomException;
 import com.saisai.domain.common.exception.ExceptionCode;
+import com.saisai.domain.reward.repository.UserRewardRepository;
+import com.saisai.domain.ride.repository.RideRepository;
 import com.saisai.domain.user.dto.request.ProfileImageUpdateReq;
 import com.saisai.domain.user.dto.request.UserNicknameReq;
 import com.saisai.domain.user.dto.response.MypageRes;
@@ -26,6 +29,9 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final ImageUtil imageUtil;
+    private final UserBadgeRepository userBadgeRepository;
+    private final RideRepository rideRepository;
+    private final UserRewardRepository userRewardRepository;
 
     // 유저 정보 조회 (홈화면)
     public UserGreetingRes getUserGreetingInfo(AuthUserDetails authUserDetails) {
@@ -71,5 +77,15 @@ public class UserService {
         user.updateImage(imageKey);
 
         return new ProfileImageRes(imageUtil.getImageUrl(imageKey));
+    }
+
+    @Transactional
+    public void delete(User user) {
+        userBadgeRepository.deleteAll(userBadgeRepository.findAllByUser(user));
+        rideRepository.deleteAll(rideRepository.findAllByUser(user));
+
+        userRewardRepository.deleteAllByUser(user);
+
+        userRepository.delete(user);
     }
 }
