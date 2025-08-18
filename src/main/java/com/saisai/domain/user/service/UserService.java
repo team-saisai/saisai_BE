@@ -19,9 +19,11 @@ import com.saisai.domain.user.entity.User;
 import com.saisai.domain.user.repository.UserRepository;
 import com.saisai.infra.aws.s3.ImageUtil;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -87,5 +89,7 @@ public class UserService {
         userRewardRepository.deleteAllByUser(user);
 
         userRepository.delete(user);
+
+        log.info("회원 탈퇴 성공 id = {} provider = {} email = {}", user.getId(), user.getProvider(), user.getEmail());
     }
 }

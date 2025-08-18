@@ -25,7 +25,6 @@ import com.auth0.jwt.exceptions.SignatureVerificationException;
 import com.auth0.jwt.exceptions.TokenExpiredException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.saisai.domain.auth.oauth.UserInfo;
-import com.saisai.domain.auth.oauth.apple.response.AppleLoginRes;
 import com.saisai.domain.auth.oauth.apple.response.AppleTokenRes;
 import com.saisai.domain.common.exception.CustomException;
 import jakarta.annotation.PostConstruct;
@@ -77,10 +76,16 @@ public class AppleClient {
             .build();
     }
 
+    public UserInfo getUserInfo(String idToken) {
+        DecodedJWT verifiedJwt = verifyIdToken(idToken);
+
+        return extractUserInfo(verifiedJwt);
+    }
+
     /**
      * authorizationCode로 애플 서버와 통신하여 유저 정보와 refreshToken을 모두 가져옴.
      */
-    public AppleLoginRes exchangeCodeForUserInfoAndToken(String authorizationCode) {
+    /*public AppleLoginRes exchangeCodeForUserInfoAndToken(String authorizationCode) {
         String clientSecret = generateClientSecret();
         AppleTokenRes tokens = requestTokens(clientSecret, authorizationCode);
 
@@ -88,7 +93,7 @@ public class AppleClient {
         UserInfo userInfo = extractUserInfo(verifiedJwt);
 
         return new AppleLoginRes(tokens.refreshToken(), userInfo);
-    }
+    }*/
 
     // client_secret JWT 생성
     private String generateClientSecret() {
@@ -121,7 +126,7 @@ public class AppleClient {
     }
 
     // 애플 서버에 authorizationCode로 토큰 교환 요청
-    private AppleTokenRes requestTokens(String clientSecret, String authorizationCode) {
+    private String requestTokens(String clientSecret, String authorizationCode) {
         MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
         params.add("client_id", clientId);
         params.add("client_secret", clientSecret);
@@ -129,7 +134,7 @@ public class AppleClient {
         params.add("grant_type", "authorization_code");
 
         try {
-            return RestClient.create()
+            AppleTokenRes appleTokenRes = RestClient.create()
                 .post()
                 .uri("https://appleid.apple.com/auth/oauth2/v2/token")
                 .contentType(MediaType.APPLICATION_FORM_URLENCODED)
@@ -141,6 +146,8 @@ public class AppleClient {
                     throw new CustomException(APPLE_TOKEN_EXCHANGE_FAILED);
                 })
                 .body(AppleTokenRes.class);
+
+            return appleTokenRes.refreshToken();
         } catch (Exception e) {
             log.error("Apple RefreshToken 요청 중 예기치 않은 오류 발생: {}", e.getMessage(), e);
             throw new CustomException(APPLE_AUTH_API_COMMUNICATION_FAILED, e);
@@ -198,8 +205,9 @@ public class AppleClient {
     }
 
     // 계정 연결 해제
-    public void revoke(String refreshToken) {
+    public void revoke(String authorizationCode) {
         String clientSecret = generateClientSecret();
+        String refreshToken = requestTokens(clientSecret, authorizationCode);
 
         MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
         params.add("client_id", clientId);

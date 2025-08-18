@@ -21,6 +21,7 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirements;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -30,6 +31,7 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+@Slf4j
 @Tag(name = "로그인/회원가입 API")
 @RestController
 @RequestMapping("/api/auth")
@@ -99,6 +101,7 @@ public class BasicAuthController {
         String accessToken = header.substring(7);
         WithdrawRes response = authService.deleteUser(authUserDetails, accessToken, withdrawReq);
 
+        log.info("token {}", withdrawReq.socialAccessToken());
         return ResponseEntity.status(HttpStatus.OK)
             .body(ApiResponse.success(WITHDRAW_SUCCESS, response));
     }

@@ -15,7 +15,6 @@ import com.saisai.domain.auth.dto.response.TokenRes;
 import com.saisai.domain.auth.dto.response.WithdrawRes;
 import com.saisai.domain.auth.oauth.UserInfo;
 import com.saisai.domain.auth.oauth.apple.client.AppleClient;
-import com.saisai.domain.auth.oauth.apple.response.AppleLoginRes;
 import com.saisai.domain.auth.oauth.google.client.GoogleAndroidClient;
 import com.saisai.domain.auth.oauth.google.client.GoogleClient;
 import com.saisai.domain.auth.oauth.google.client.GoogleIosClient;
@@ -112,8 +111,9 @@ public class AuthService {
     @Transactional
     public LoginRes appleLogin(OauthLoginReq oauthLoginReq) {
 
-        AppleLoginRes authResponse = appleClient.exchangeCodeForUserInfoAndToken(oauthLoginReq.token());
-        UserInfo userInfo = authResponse.userInfo();
+        UserInfo userInfo = appleClient.getUserInfo(oauthLoginReq.token());
+        /*AppleLoginRes authResponse = appleClient.exchangeCodeForUserInfoAndToken(oauthLoginReq.token());
+        UserInfo userInfo = authResponse.userInfo();*/
 
         log.info("로그인 요청. Provider: {}, ProviderId: {}, Email: {}",
             APPLE, userInfo.providerId(), userInfo.email());
@@ -126,9 +126,9 @@ public class AuthService {
             return userRepository.save(newUser);
         });
 
-        String encryptedToken = tokenEncryptor.encrypt(authResponse.refreshToken());
+        /*String encryptedToken = tokenEncryptor.encrypt(authResponse.refreshToken());
         refreshTokenService.saveRefreshToken(user.getProviderId(), user.getProvider(),
-            encryptedToken);
+            encryptedToken);*/
 
         TokenRes tokenRes = issueAndSaveTokens(user);
 
@@ -158,11 +158,9 @@ public class AuthService {
 
         switch (provider) {
             case APPLE:
-                String appleRefreshToken = refreshTokenService.getRefreshToken(
-                    user.getProviderId());
-                String decryptedToken = tokenEncryptor.decrypt(appleRefreshToken);
-                appleClient.revoke(decryptedToken);
-                refreshTokenService.deleteRefreshToken(user.getProviderId());
+                //String decryptedToken = tokenEncryptor.decrypt(appleRefreshToken);
+                appleClient.revoke(withdrawReq.socialAccessToken());
+                //refreshTokenService.deleteRefreshToken(user.getProviderId());
                 break;
             case KAKAO:
                 try {

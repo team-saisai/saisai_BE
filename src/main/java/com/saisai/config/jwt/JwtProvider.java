@@ -108,7 +108,6 @@ public class JwtProvider {
         UserRole userRole = UserRole.of(claims.get("userRole", String.class));
         ProviderType provider = ProviderType.of(claims.get("provider", String.class));
 
-        log.info("provider {}", provider);
         return AuthUserDetails.of(userId, email, userRole, provider );
     }
 
