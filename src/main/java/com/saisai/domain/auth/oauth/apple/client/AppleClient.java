@@ -4,7 +4,7 @@ import static com.saisai.domain.common.exception.ExceptionCode.APPLE_AUTH_API_CO
 import static com.saisai.domain.common.exception.ExceptionCode.APPLE_CLIENT_SECRET_GENERATION_FAILED;
 import static com.saisai.domain.common.exception.ExceptionCode.APPLE_TOKEN_EXCHANGE_FAILED;
 import static com.saisai.domain.common.exception.ExceptionCode.APPLE_TOKEN_REVOCATION_FAILED;
-import static com.saisai.domain.common.exception.ExceptionCode.EXPIRED_JWT_TOKEN;
+import static com.saisai.domain.common.exception.ExceptionCode.EXPIRED_APPLE_ID_TOKEN;
 import static com.saisai.domain.common.exception.ExceptionCode.INVALID_APPLE_PUBLIC_KEY;
 import static com.saisai.domain.common.exception.ExceptionCode.INVALID_JWT_SIGNATURE;
 import static com.saisai.domain.common.exception.ExceptionCode.JWK_PROCESSING_ERROR;
@@ -169,7 +169,7 @@ public class AppleClient {
                 .build();
             return verifier.verify(idToken);
         } catch (TokenExpiredException e) {
-            throw new CustomException(EXPIRED_JWT_TOKEN, e);
+            throw new CustomException(EXPIRED_APPLE_ID_TOKEN, e);
         } catch (SignatureVerificationException e) {
             throw new CustomException(INVALID_JWT_SIGNATURE, e);
         } catch (JWTDecodeException e) {

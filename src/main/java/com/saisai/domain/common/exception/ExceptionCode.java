@@ -23,6 +23,7 @@ public enum ExceptionCode {
     APPLE_TOKEN_EXCHANGE_FAILED(HttpStatus.BAD_REQUEST, "AUTH_ER_11", "Apple 토큰 교환에 실패했습니다. 유효하지 않은 요청입니다."),
     APPLE_AUTH_API_COMMUNICATION_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "AUTH_ER_12", "Apple 인증 API 통신 중 오류가 발생했습니다."),
     APPLE_TOKEN_REVOCATION_FAILED(HttpStatus.BAD_REQUEST, "AUTH_ER_13", "Apple 토큰 해제에 실패했습니다. 유효하지 않은 토큰입니다."),
+    EXPIRED_APPLE_ID_TOKEN(HttpStatus.BAD_REQUEST, "AUTH_ER_18", "만료된 Apple Id Token입니다."),
 
     KAKAO_UNLINK_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "AUTH_ER_14","카카오 연동 해제에 실패했습니다."),
     KAKAO_AUTH_API_COMMUNICATION_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "AUTH_ER_15","카카오 인증 API 통신에 실패했습니다."),
