@@ -20,10 +20,8 @@ import com.saisai.domain.auth.oauth.google.client.GoogleClient;
 import com.saisai.domain.auth.oauth.google.client.GoogleIosClient;
 import com.saisai.domain.auth.oauth.kakao.client.KakaoClient;
 import com.saisai.domain.common.exception.CustomException;
-import com.saisai.domain.common.utils.TokenEncryptor;
 import com.saisai.domain.user.entity.User;
 import com.saisai.domain.user.repository.UserRepository;
-import com.saisai.domain.user.service.RefreshTokenService;
 import com.saisai.domain.user.service.UserService;
 import jakarta.transaction.Transactional;
 import java.util.Optional;
@@ -43,9 +41,7 @@ public class AuthService {
     private final GoogleAndroidClient googleAndroidClient;
     private final GoogleIosClient googleIosClient;
     private final AppleClient appleClient;
-    private final RefreshTokenService refreshTokenService;
     private final GoogleClient googleClient;
-    private final TokenEncryptor tokenEncryptor;
     private final UserService userService;
 
     @Transactional

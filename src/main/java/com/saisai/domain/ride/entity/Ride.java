@@ -1,7 +1,6 @@
 package com.saisai.domain.ride.entity;
 
 import static com.saisai.domain.common.exception.ExceptionCode.RIDE_NOT_IN_PROGRESS;
-import static com.saisai.domain.common.exception.ExceptionCode.RIDE_NOT_PAUSED;
 
 import com.saisai.domain.common.BaseEntity;
 import com.saisai.domain.common.exception.CustomException;
@@ -94,9 +93,9 @@ public class Ride extends BaseEntity {
     }
 
     public void resume() {
-        if (this.status != RideStatus.PAUSED) {
+/*        if (this.status != RideStatus.PAUSED) {
             throw new CustomException(RIDE_NOT_PAUSED);
-        }
+        }*/
 
         this.status = RideStatus.IN_PROGRESS;
     }

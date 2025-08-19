@@ -27,7 +27,7 @@ public interface RideRepository extends JpaRepository<Ride, Long>, RideRepositor
     """)
     RideCountRes countRideByCourseId(@Param("courseId") Long courseId);
 
-    Boolean existsByUserAndStatus(User user, RideStatus status);
+    Boolean existsByUserIdAndStatus(Long userId, RideStatus status);
 
     @Query(""" 
         SELECT r.id FROM Ride r

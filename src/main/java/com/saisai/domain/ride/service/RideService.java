@@ -59,7 +59,7 @@ public class RideService {
         User user = userRepository.findById(authUserDetails.userId())
             .orElseThrow(() -> new CustomException(USER_NOT_FOUND));
 
-        validateUserNotRiding(user);
+        validateUserNotRiding(user.getId());
 
         Ride ride = findOrCreateOrResumeRide(user, course);
 
@@ -97,6 +97,7 @@ public class RideService {
             .orElseThrow(() -> new CustomException(RIDE_NOT_FOUND));
 
         validateRideAccess(ride, authUserDetails.userId());
+        validateUserNotRiding(authUserDetails.userId());
 
         ride.resume();
 
@@ -156,10 +157,10 @@ public class RideService {
     }
 
     // 라이딩 중인 코스가 있는지 검사
-    private void validateUserNotRiding(User user) {
+    private void validateUserNotRiding(Long userId) {
 
-        if (isAdminUser(user.getId())) return;
-        Boolean isRiding = rideRepository.existsByUserAndStatus(user, RideStatus.IN_PROGRESS);
+        if (isAdminUser(userId)) return;
+        Boolean isRiding = rideRepository.existsByUserIdAndStatus(userId, RideStatus.IN_PROGRESS);
         if (TRUE.equals(isRiding)) {
             throw new CustomException(RIDE_ALREADY_IN_PROGRESS);
         }
