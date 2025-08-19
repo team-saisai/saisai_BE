@@ -147,6 +147,9 @@ public class AuthService {
 
     @Transactional
     public WithdrawRes deleteUser(AuthUserDetails authUserDetails, String accessToken, WithdrawReq withdrawReq) {
+
+        log.info("회원탈퇴 요청 token = {}, provider = {}, email = {}", withdrawReq.socialAccessToken(), authUserDetails.provider(), authUserDetails.email());
+
         refreshTokenRedisService.deleteRefreshToken(authUserDetails.userId());
 
         jwtProvider.addTokenToBlacklist(accessToken);

@@ -101,7 +101,6 @@ public class BasicAuthController {
         String accessToken = header.substring(7);
         WithdrawRes response = authService.deleteUser(authUserDetails, accessToken, withdrawReq);
 
-        log.info("token {}", withdrawReq.socialAccessToken());
         return ResponseEntity.status(HttpStatus.OK)
             .body(ApiResponse.success(WITHDRAW_SUCCESS, response));
     }
