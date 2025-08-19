@@ -218,7 +218,7 @@ public class AppleClient {
         try {
             RestClient.create()
                 .post()
-                .uri("https://appleid.apple.com/auth/oauth2/v2/revoke")
+                .uri("https://appleid.apple.com/auth/revoke")
                 .contentType(MediaType.APPLICATION_FORM_URLENCODED)
                 .body(params)
                 .retrieve()
