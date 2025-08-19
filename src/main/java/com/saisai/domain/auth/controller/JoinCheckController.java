@@ -7,6 +7,7 @@ import com.saisai.domain.auth.dto.response.JoinCheckRes;
 import com.saisai.domain.auth.service.JoinCheckService;
 import com.saisai.domain.common.response.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirements;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -26,6 +27,7 @@ public class JoinCheckController {
     private final JoinCheckService joinCheckService;
 
     @PostMapping("/kakao/isJoin")
+    @SecurityRequirements(value = {})
     @Operation(summary = "새로운 유저인지 확인")
     public ResponseEntity<ApiResponse<JoinCheckRes>> checkJoinforKakao(
         @Valid @RequestBody JoinCheckReq joinCheckReq
@@ -36,6 +38,7 @@ public class JoinCheckController {
     }
 
     @PostMapping("/google/android/isJoin")
+    @SecurityRequirements(value = {})
     @Operation(summary = "새로운 유저인지 확인")
     public ResponseEntity<ApiResponse<JoinCheckRes>> checkJoinforGoogleAndroid(
         @Valid @RequestBody JoinCheckReq joinCheckReq
@@ -46,6 +49,7 @@ public class JoinCheckController {
     }
 
     @PostMapping("/google/ios/isJoin")
+    @SecurityRequirements(value = {})
     @Operation(summary = "새로운 유저인지 확인")
     public ResponseEntity<ApiResponse<JoinCheckRes>> checkJoinforGoogleIos(
         @Valid @RequestBody JoinCheckReq joinCheckReq
@@ -56,6 +60,7 @@ public class JoinCheckController {
     }
 
     @PostMapping("/google/apple/isJoin")
+    @SecurityRequirements(value = {})
     @Operation(summary = "새로운 유저인지 확인")
     public ResponseEntity<ApiResponse<JoinCheckRes>> checkJoinforApple(
         @Valid @RequestBody JoinCheckReq joinCheckReq
