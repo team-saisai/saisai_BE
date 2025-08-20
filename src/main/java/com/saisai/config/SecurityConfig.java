@@ -38,7 +38,10 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers(
                     "/",
-                    "/api/**/isJoin",
+                    "/api/kakao/isJoin",
+                    "/api/google/android/isJoin",
+                    "/api/google/ios/isJoin",
+                    "/api/apple/isJoin",
                     "/api/auth/register",
                     "/api/auth/login",
                     "/api/auth/login/**",
