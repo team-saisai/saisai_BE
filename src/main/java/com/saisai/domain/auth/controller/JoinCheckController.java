@@ -59,7 +59,7 @@ public class JoinCheckController {
             .body(ApiResponse.success(JOIN_CHECK_SUCCESS, response));
     }
 
-    @PostMapping("/google/apple/isJoin")
+    @PostMapping("/apple/isJoin")
     @SecurityRequirements(value = {})
     @Operation(summary = "새로운 유저인지 확인")
     public ResponseEntity<ApiResponse<JoinCheckRes>> checkJoinforApple(
