@@ -4,6 +4,7 @@ import com.saisai.domain.challenge.dto.projection.ChallengeCourseProjection;
 import com.saisai.domain.challenge.entity.Challenge;
 import com.saisai.domain.course.constant.CourseSortOption;
 import com.saisai.domain.course.entity.Course;
+import java.time.LocalDate;
 import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -18,4 +19,7 @@ public interface ChallengeRepositoryCustom {
 
     List<Challenge> findExistingChallengesByCourse(List<Course> courses);
 
+    List<Challenge> findChallengesStartingOn(LocalDate date);
+
+    List<Challenge> findChallengesEndingOn(LocalDate now);
 }

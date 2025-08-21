@@ -19,6 +19,9 @@ import com.saisai.domain.reward.dto.projection.QRewardEventProjection;
 import com.saisai.domain.reward.entity.EventStatus;
 import com.saisai.domain.ride.entity.QRide;
 import com.saisai.domain.ride.entity.RideStatus;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -177,6 +180,32 @@ public class ChallengeRepositoryImpl implements ChallengeRepositoryCustom {
             .selectFrom(challenge)
             .where(challenge.course.in(courses)
                 .and(challenge.status.in(statuses)))
+            .fetch();
+    }
+
+    @Override
+    public List<Challenge> findChallengesStartingOn(LocalDate date) {
+        LocalDateTime startOfDay = date.atStartOfDay();
+        LocalDateTime endOfDay = date.atTime(LocalTime.MAX);
+
+        return queryFactory
+            .selectFrom(challenge)
+            .where(challenge.startedAt.goe(startOfDay)
+                .and(challenge.startedAt.loe(endOfDay))
+                .and(challenge.status.eq(ChallengeStatus.UPCOMING)))
+            .fetch();
+    }
+
+    @Override
+    public List<Challenge> findChallengesEndingOn(LocalDate date) {
+        LocalDateTime startOfDay = date.atStartOfDay();
+        LocalDateTime endOfDay = date.atTime(LocalTime.MAX);
+
+        return queryFactory
+            .selectFrom(challenge)
+            .where(challenge.endedAt.goe(startOfDay)
+                .and(challenge.endedAt.loe(endOfDay))
+                .and(challenge.status.eq(ChallengeStatus.ONGOING)))
             .fetch();
     }
 }
