@@ -29,11 +29,11 @@ public class AdminChallengeService {
 
         // 모든 코스가 이미 챌린지 진행 중일 경우
         if (coursesToCreate.isEmpty()) {
-            return CreateChallengeRes.of(List.of(), request.startedAt(), request.closedAt(), request.courseIds());
+            return CreateChallengeRes.of(List.of(), request.startTime(), request.endTime(), request.courseIds());
         }
 
         List<Challenge> newChallenges = coursesToCreate.stream()
-            .map(course -> Challenge.create(course, request.startedAt(), request.closedAt()))
+            .map(course -> Challenge.create(course, request.startTime(), request.endTime()))
             .toList();
         challengeRepository.saveAll(newChallenges);
 
@@ -42,7 +42,7 @@ public class AdminChallengeService {
             .filter(id -> !createdIds.contains(id))
             .collect(Collectors.toSet());
 
-        return CreateChallengeRes.of(createdIds, request.startedAt(), request.closedAt(), existingIds);
+        return CreateChallengeRes.of(createdIds, request.startTime(), request.endTime(), existingIds);
     }
 
     private List<Course> getCreatableCourses(Set<Long> requestCourseIds) {
