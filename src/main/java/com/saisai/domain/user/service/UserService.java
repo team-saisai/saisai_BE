@@ -1,6 +1,5 @@
 package com.saisai.domain.user.service;
 
-import static com.saisai.domain.common.exception.ExceptionCode.NICKNAME_DUPLICATE;
 import static com.saisai.domain.common.exception.ExceptionCode.USER_NOT_FOUND;
 
 import com.saisai.config.jwt.AuthUserDetails;
@@ -48,18 +47,8 @@ public class UserService {
         return userRepository.findUserInfoById(authUserDetails.userId());
     }
 
-    public UserNicknameRes checkNicknameDuplica(String nickname) {
-        if (userRepository.existsByNickname(nickname)) {
-            throw new CustomException(NICKNAME_DUPLICATE);
-        }
-
-        return new UserNicknameRes(nickname);
-    }
-
     @Transactional
     public UserNicknameRes updateNickname(UserNicknameReq req, AuthUserDetails authUserDetails) {
-
-        checkNicknameDuplica(req.nickname());
 
         User user = userRepository.findById(authUserDetails.userId())
             .orElseThrow(() -> new CustomException(USER_NOT_FOUND));
