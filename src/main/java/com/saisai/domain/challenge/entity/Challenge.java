@@ -20,12 +20,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "challenge"/*, uniqueConstraints = {
-    @UniqueConstraint(
-        name = "COURSE_REWARD_UNIQUE",
-        columnNames = {"course_id","reward_id"}
-    )
-}*/)
+@Table(name = "challenge")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Challenge extends BaseEntity {
@@ -38,10 +33,6 @@ public class Challenge extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "course_id")
     private Course course;
-
-    /*@ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "reward_id", nullable = false)
-    private Reward reward;*/
 
     @Column(name = "status", nullable = false, length = 15)
     @Enumerated(EnumType.STRING)
@@ -57,7 +48,6 @@ public class Challenge extends BaseEntity {
     public Challenge(Course course, ChallengeStatus status, LocalDateTime endedAt,
         LocalDateTime startedAt) {
         this.course = course;
-        //this.reward = reward;
         this.status = status;
         this.endedAt = endedAt;
         this.startedAt = startedAt;
