@@ -32,7 +32,8 @@ public class ChallengeScheduler {
         startChallenges.forEach(Challenge::start);
         challengeRepository.saveAll(startChallenges);
         log.info("{}개의 챌린지가 시작 되었습니다. (IDs: {})",
-            startChallenges.size()
+            startChallenges.size(),
+            startChallenges.stream().map(Challenge::getId).toList()
         );
 
     }
@@ -51,8 +52,9 @@ public class ChallengeScheduler {
 
         endChallenges.forEach(Challenge::end);
         challengeRepository.saveAll(endChallenges);
-        log.info("{}개의 챌린지가 종료 되었습니다. (IDs: {})",
-            endChallenges.size()
+        log.info("{}개의 챌린지가 종료 되었습니다.",
+            endChallenges.size(),
+            endChallenges.stream().map(Challenge::getId).toList()
         );
     }
 
