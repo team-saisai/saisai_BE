@@ -7,7 +7,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-public interface RewardEventRepository extends JpaRepository<RewardEvent, Long> {
+public interface RewardEventRepository extends JpaRepository<RewardEvent, Long>, RewardEventCustomRepository {
 
     // 이벤트 겹치는 코스ID 조회
     @Query("SELECT re.challenge.id FROM RewardEvent re " +
