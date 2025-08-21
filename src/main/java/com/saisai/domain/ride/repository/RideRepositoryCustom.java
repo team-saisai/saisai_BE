@@ -11,4 +11,8 @@ public interface RideRepositoryCustom {
     long markRideAsDeleted(Long userId, Set<Long> rideIds);
 
     Page<RideRecordRes> findMyRideRecords(Pageable pageable, RideSortOption sortOption, Boolean inProgressOnly, Long userId);
+
+    long countCompletedRides(Long userId);
+    long countDistinctSigunsByUserId(Long userId);
+    long countCompletedHardCoursesByUserId(Long userId);
 }

@@ -12,7 +12,9 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -56,6 +58,12 @@ public class User extends BaseEntity {
     @Column(name = "provider_id", length = 255)
     private String providerId;
 
+    @Column
+    private LocalDate lastRidingDate;
+
+    @Column
+    private Integer consecutiveDays;
+
     @Column(name = "is_deleted", nullable = false)
     private boolean isDeleted = false;
 
@@ -72,6 +80,7 @@ public class User extends BaseEntity {
         this.image = image;
         this.provider = provider;
         this.providerId = providerId;
+        this.consecutiveDays = 0;
     }
 
     public static User of (UserInfo userInfo, ProviderType provider) {
@@ -96,5 +105,20 @@ public class User extends BaseEntity {
     public void delete() {
         this.isDeleted = true;
         this.deletedAt = LocalDateTime.now();
+    }
+
+    public void updateRidingStatus() {
+        LocalDate today = LocalDate.now();
+        LocalDate lastDate = this.lastRidingDate;
+
+        // 마지막 라이딩 기록이 없거나, 연속성이 끊겼을 때
+        if (lastDate == null || ChronoUnit.DAYS.between(lastDate, today) > 1) {
+            this.consecutiveDays = 1;
+        } else if (ChronoUnit.DAYS.between(lastDate, today) == 1) {
+            // 연속 라이딩이 이어질 때
+            this.consecutiveDays += 1;
+        }
+
+        this.lastRidingDate = today;
     }
 }
