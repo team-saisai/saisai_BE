@@ -60,4 +60,12 @@ public class Challenge extends BaseEntity {
             .endedAt(endedAt)
             .build();
     }
+
+    public void start () {
+        this.status = ChallengeStatus.ONGOING;
+    }
+
+    public void end () {
+        this.status = ChallengeStatus.ENDED;
+    }
 }
