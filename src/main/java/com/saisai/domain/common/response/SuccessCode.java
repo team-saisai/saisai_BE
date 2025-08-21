@@ -58,6 +58,9 @@ public enum SuccessCode {
     // User_reward
     MY_REWARD_LIST_GET_SUCCESS(HttpStatus.OK, "REWARD_01", "획득 리워드 목록 조회에 성공했습니다."),
 
+    // Admin
+    CHALLENGE_CREATE_SUCCESS(HttpStatus.CREATED, "ADMIN_01", "챌린지 등록에 성공했습니다."),
+
     ;
 
     private final HttpStatus httpStatus;
