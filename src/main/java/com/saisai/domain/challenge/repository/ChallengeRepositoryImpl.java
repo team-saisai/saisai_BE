@@ -10,8 +10,10 @@ import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.saisai.domain.challenge.dto.projection.ChallengeCourseProjection;
 import com.saisai.domain.challenge.dto.projection.QChallengeCourseProjection;
+import com.saisai.domain.challenge.entity.Challenge;
 import com.saisai.domain.challenge.entity.ChallengeStatus;
 import com.saisai.domain.course.constant.CourseSortOption;
+import com.saisai.domain.course.entity.Course;
 import com.saisai.domain.course.entity.QCourseBookmark;
 import com.saisai.domain.reward.dto.projection.QRewardEventProjection;
 import com.saisai.domain.reward.entity.EventStatus;
@@ -165,6 +167,16 @@ public class ChallengeRepositoryImpl implements ChallengeRepositoryCustom {
                 rewardEvent.id, rewardEvent.status, rewardEvent.type, rewardEvent.value)
             .orderBy(ride.count().coalesce(0L).desc())
             .limit(10)
+            .fetch();
+    }
+
+    @Override
+    public List<Challenge> findExistingChallengesByCourse(List<Course> courses) {
+        List<ChallengeStatus> statuses = List.of(ChallengeStatus.UPCOMING, ChallengeStatus.ONGOING);
+        return queryFactory
+            .selectFrom(challenge)
+            .where(challenge.course.in(courses)
+                .and(challenge.status.in(statuses)))
             .fetch();
     }
 }
