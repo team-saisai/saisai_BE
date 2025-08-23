@@ -48,13 +48,13 @@ public class RideRepositoryImpl implements RideRepositoryCustom {
 
     @Override
     public Page<RideRecordRes> findMyRideRecords(Pageable pageable, RideSortOption sortOption,
-        Boolean notCompletedOnly, Long userId) {
+        Boolean ridingCourseOnly, Long userId) {
 
         BooleanExpression whereClause = ride.user.id.eq(userId)
             .and(ride.isDeleted.isFalse());
 
-        if (notCompletedOnly) {
-            whereClause = whereClause.and(ride.status.eq(RideStatus.COMPLETED));
+        if (ridingCourseOnly) {
+            whereClause = whereClause.and(ride.status.eq(RideStatus.IN_PROGRESS));
         }
 
         List<RideRecordRes> content = jpaQueryFactory

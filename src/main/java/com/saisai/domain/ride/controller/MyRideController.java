@@ -65,8 +65,8 @@ public class MyRideController {
         @RequestParam(defaultValue = "1") int page,
         @Parameter(description = "newest(최신순), ordest(오래된 순)")
         @RequestParam(defaultValue = "newest") String sort,
-        @Parameter(description = "완주하지 않은 코스만 보기(true/false)")
-        @RequestParam(defaultValue = "false") Boolean notCompletedOnly,
+        @Parameter(description = "주행 중인 코스만 보기(true/false)")
+        @RequestParam(defaultValue = "false") Boolean ridingCourseOnly,
         @Auth AuthUserDetails authUserDetails
     ) {
         RideSortOption sortOption = RideSortOption.from(sort);
@@ -78,7 +78,7 @@ public class MyRideController {
         );
 
         Page<RideRecordRes> dto = myRideService.getMyRideRecords(pageable, sortOption,
-            notCompletedOnly, authUserDetails);
+            ridingCourseOnly, authUserDetails);
 
         return ResponseEntity.status(HttpStatus.OK)
             .body(ApiResponse.success(MY_RIDE_RECORD_GET_SUCCESS, dto));

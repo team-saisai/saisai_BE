@@ -10,7 +10,7 @@ public interface RideRepositoryCustom {
 
     long markRideAsDeleted(Long userId, Set<Long> rideIds);
 
-    Page<RideRecordRes> findMyRideRecords(Pageable pageable, RideSortOption sortOption, Boolean inProgressOnly, Long userId);
+    Page<RideRecordRes> findMyRideRecords(Pageable pageable, RideSortOption sortOption, Boolean ridingCourseOnly, Long userId);
 
     long countCompletedRides(Long userId);
     long countDistinctSigunsByUserId(Long userId);

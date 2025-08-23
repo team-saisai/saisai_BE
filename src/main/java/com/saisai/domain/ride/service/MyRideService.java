@@ -66,9 +66,10 @@ public class MyRideService {
 
     @Transactional(readOnly = true)
     public Page<RideRecordRes> getMyRideRecords(Pageable pageable, RideSortOption sortOption,
-                                                Boolean notCompletedOnly, AuthUserDetails authUserDetails)
+                                                Boolean ridingCourseOnly, AuthUserDetails authUserDetails)
     {
-        Page<RideRecordRes> page = rideRepository.findMyRideRecords(pageable, sortOption, notCompletedOnly, authUserDetails.userId());
+        Page<RideRecordRes> page = rideRepository.findMyRideRecords(pageable, sortOption,
+            ridingCourseOnly, authUserDetails.userId());
 
         List<RideRecordRes> result = page.getContent().stream()
             .map(dto -> {
