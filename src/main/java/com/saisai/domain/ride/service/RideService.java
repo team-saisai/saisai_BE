@@ -181,14 +181,18 @@ public class RideService {
 
     // 완주율(주행률) 계산
     private int calculateProgressRate(RideRecordReq rideRecordReq, Ride ride) {
+        if (rideRecordReq.checkpointIdx() < 0) {
+            return 0;
+        }
+
         Integer courseCheckpointCount = ride.getCourse().getCheckpointCount();
         Integer currentCheckpointCount = rideRecordReq.checkpointIdx();
 
-        if (courseCheckpointCount == null || courseCheckpointCount <= 0) {
+        if (courseCheckpointCount == null) {
             throw new CustomException(COURSE_CHECKPOINT_INVALID);
         }
 
-        if (currentCheckpointCount == null || currentCheckpointCount < 0) {
+        if (currentCheckpointCount == null) {
             throw new CustomException(COURSE_CHECKPOINT_INVALID);
         }
 
