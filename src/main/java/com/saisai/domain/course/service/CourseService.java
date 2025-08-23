@@ -22,6 +22,7 @@ import com.saisai.domain.gpx.service.GpxCacheService;
 import com.saisai.domain.reward.dto.projection.RewardEventProjection;
 import com.saisai.domain.reward.util.RewardUtils;
 import com.saisai.domain.ride.dto.response.RideCountRes;
+import com.saisai.domain.ride.dto.response.RideResumeRes;
 import com.saisai.domain.ride.repository.RideRepository;
 import com.saisai.infra.aws.s3.ImageUtil;
 import java.util.List;
@@ -95,7 +96,7 @@ public class CourseService {
         CourseDetailsProjection course = courseRepository.findCourseDetailsProjection(courseId, authUserDetails.userId())
             .orElseThrow(() -> new CustomException(COURSE_NOT_FOUND));
 
-        Long rideId = rideRepository.findActiveRideIdByUserIdAndCourseId(authUserDetails.userId(), courseId);
+        Optional<RideResumeRes> rideResumeRes = rideRepository.findActiveRideIdByUserIdAndCourseId(authUserDetails.userId(), courseId);
 
         RideCountRes rideCountRes = rideRepository.countRideByCourseId(courseId);
 
@@ -105,7 +106,7 @@ public class CourseService {
         List<GpxPoint> mergedGpxPoints = gpxCacheService.getMergedGpxPoints(courseId, checkpoint);
 
         return CourseDetailsRes.from(course, imageUtil.getImageUrl(course.imageUrl()), rideCountRes, mergedGpxPoints,
-            checkpoint, rideId);
+            checkpoint, rideResumeRes);
     }
 
     // 이벤트 활성화 확인
