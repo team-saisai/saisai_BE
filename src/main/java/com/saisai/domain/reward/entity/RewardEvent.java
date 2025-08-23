@@ -70,4 +70,12 @@ public class RewardEvent extends BaseEntity {
         this.type = type;
         this.challenge = challenge;
     }
+
+    public void start() {
+        this.status = EventStatus.ACTIVE;
+    }
+
+    public void end() {
+        this.status = EventStatus.EXPIRED;
+    }
 }

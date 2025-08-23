@@ -1,5 +1,6 @@
 package com.saisai.domain.ride.repository;
 
+import static com.saisai.domain.badge.constant.BadgeConstants.HARD_COURSE_LEVEL;
 import static com.saisai.domain.challenge.entity.QChallenge.challenge;
 import static com.saisai.domain.course.entity.QCourse.course;
 import static com.saisai.domain.reward.entity.QRewardEvent.rewardEvent;
@@ -47,13 +48,13 @@ public class RideRepositoryImpl implements RideRepositoryCustom {
 
     @Override
     public Page<RideRecordRes> findMyRideRecords(Pageable pageable, RideSortOption sortOption,
-        Boolean notCompletedOnly, Long userId) {
+        Boolean ridingCourseOnly, Long userId) {
 
         BooleanExpression whereClause = ride.user.id.eq(userId)
             .and(ride.isDeleted.isFalse());
 
-        if (notCompletedOnly) {
-            whereClause = whereClause.and(ride.status.eq(RideStatus.COMPLETED));
+        if (ridingCourseOnly) {
+            whereClause = whereClause.and(ride.status.eq(RideStatus.IN_PROGRESS));
         }
 
         List<RideRecordRes> content = jpaQueryFactory
@@ -105,5 +106,46 @@ public class RideRepositoryImpl implements RideRepositoryCustom {
             .where(whereClause);
 
         return PageableExecutionUtils.getPage(content, pageable, total::fetchOne);
+    }
+
+    @Override
+    public long countCompletedRides(Long userId) {
+        Long count = jpaQueryFactory
+            .select(ride.count())
+            .from(ride)
+            .where(
+                ride.user.id.eq(userId)
+                    .and(ride.status.eq(RideStatus.COMPLETED))
+            )
+            .fetchOne();
+
+        return count != null ? count : 0L;
+    }
+
+    @Override
+    public long countDistinctSigunsByUserId(Long userId) {
+        Long count = jpaQueryFactory
+            .select(ride.course.sigun.countDistinct())
+            .from(ride)
+            .where(ride.user.id.eq(userId)
+                .and(ride.status.eq(RideStatus.COMPLETED))
+            )
+            .fetchOne();
+
+        return count != null ? count : 0L;
+    }
+
+    @Override
+    public long countCompletedHardCoursesByUserId(Long userId) {
+        Long count = jpaQueryFactory
+            .select(ride.count())
+            .from(ride)
+            .where(ride.user.id.eq(userId)
+                .and(ride.status.eq(RideStatus.COMPLETED))
+                .and(ride.course.level.eq(HARD_COURSE_LEVEL))
+            )
+            .fetchOne();
+
+        return count != null ? count : 0L;
     }
 }

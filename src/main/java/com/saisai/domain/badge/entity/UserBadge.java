@@ -52,10 +52,17 @@ public class UserBadge extends BaseEntity {
     @Column(name = "deleted_at")
     private LocalDateTime deletedAt;
 
-    @Builder
-    public UserBadge(Badge badge, User user) {
+    @Builder(access = AccessLevel.PRIVATE)
+    private UserBadge(Badge badge, User user) {
         this.badge = badge;
         this.user = user;
+    }
+
+    public static UserBadge create(Badge badge, User user) {
+        return UserBadge.builder()
+            .badge(badge)
+            .user(user)
+            .build();
     }
 
     public void delete() {

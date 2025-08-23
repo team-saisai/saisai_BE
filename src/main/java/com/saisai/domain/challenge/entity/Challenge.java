@@ -20,12 +20,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "challenge"/*, uniqueConstraints = {
-    @UniqueConstraint(
-        name = "COURSE_REWARD_UNIQUE",
-        columnNames = {"course_id","reward_id"}
-    )
-}*/)
+@Table(name = "challenge")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Challenge extends BaseEntity {
@@ -39,10 +34,6 @@ public class Challenge extends BaseEntity {
     @JoinColumn(name = "course_id")
     private Course course;
 
-    /*@ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "reward_id", nullable = false)
-    private Reward reward;*/
-
     @Column(name = "status", nullable = false, length = 15)
     @Enumerated(EnumType.STRING)
     private ChallengeStatus status;
@@ -50,16 +41,31 @@ public class Challenge extends BaseEntity {
     @Column(name = "started_at", nullable = false)
     private LocalDateTime startedAt;
 
-    @Column(name = "closed_at", nullable = false)
+    @Column(name = "ended_at", nullable = false)
     private LocalDateTime endedAt;
 
-    @Builder
-    public Challenge(Course course, ChallengeStatus status, LocalDateTime endedAt,
+    @Builder(access = AccessLevel.PRIVATE)
+    private Challenge(Course course, LocalDateTime endedAt,
         LocalDateTime startedAt) {
         this.course = course;
-        //this.reward = reward;
-        this.status = status;
+        this.status = ChallengeStatus.UPCOMING;
         this.endedAt = endedAt;
         this.startedAt = startedAt;
+    }
+
+    public static Challenge create (Course course, LocalDateTime startedAt, LocalDateTime endedAt) {
+        return Challenge.builder()
+            .course(course)
+            .startedAt(startedAt)
+            .endedAt(endedAt)
+            .build();
+    }
+
+    public void start () {
+        this.status = ChallengeStatus.ONGOING;
+    }
+
+    public void end () {
+        this.status = ChallengeStatus.ENDED;
     }
 }

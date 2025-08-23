@@ -1,7 +1,10 @@
 package com.saisai.domain.challenge.repository;
 
-import com.saisai.domain.course.constant.CourseSortOption;
 import com.saisai.domain.challenge.dto.projection.ChallengeCourseProjection;
+import com.saisai.domain.challenge.entity.Challenge;
+import com.saisai.domain.course.constant.CourseSortOption;
+import com.saisai.domain.course.entity.Course;
+import java.time.LocalDate;
 import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -14,4 +17,9 @@ public interface ChallengeRepositoryCustom {
     // 챌린지 진행 중인 코스 중에서 참가자가 많은 순으로 정렬 후 반환하는 메서드
     List<ChallengeCourseProjection> findTop10CoursesByOngoingChallengeRides(Long userId);
 
+    List<Challenge> findExistingChallengesByCourse(List<Course> courses);
+
+    List<Challenge> findChallengesStartingOn(LocalDate date);
+
+    List<Challenge> findChallengesEndingOn(LocalDate now);
 }

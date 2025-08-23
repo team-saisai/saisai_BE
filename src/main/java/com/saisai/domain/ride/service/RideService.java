@@ -20,6 +20,7 @@ import com.saisai.domain.course.entity.Course;
 import com.saisai.domain.course.repository.CourseRepository;
 import com.saisai.domain.gpx.dto.GpxPoint;
 import com.saisai.domain.gpx.service.GpxCacheService;
+import com.saisai.domain.mission.service.MissionService;
 import com.saisai.domain.ride.dto.request.RideCompleteReq;
 import com.saisai.domain.ride.dto.request.RideRecordReq;
 import com.saisai.domain.ride.dto.response.RidePausedRes;
@@ -47,6 +48,7 @@ public class RideService {
     private final CheckpointS3 checkpointS3;
     private final CheckpointJsonParser checkpointJsonParser;
     private final GpxCacheService gpxCacheService;
+    private final MissionService missionService;
 
     private static final Set<Long> ADMIN_USER_IDS = Set.of(1L, 2L, 53L, 54L);
 
@@ -126,6 +128,9 @@ public class RideService {
         }
 
         ride.complete(rideCompleteReq);
+        ride.getUser().updateRidingStatus();
+
+        missionService.checkAndGrantAllMissions(ride.getUser());
     }
 
     // 기록 동기화

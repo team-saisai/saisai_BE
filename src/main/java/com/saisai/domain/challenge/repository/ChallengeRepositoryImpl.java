@@ -10,13 +10,18 @@ import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.saisai.domain.challenge.dto.projection.ChallengeCourseProjection;
 import com.saisai.domain.challenge.dto.projection.QChallengeCourseProjection;
+import com.saisai.domain.challenge.entity.Challenge;
 import com.saisai.domain.challenge.entity.ChallengeStatus;
 import com.saisai.domain.course.constant.CourseSortOption;
+import com.saisai.domain.course.entity.Course;
 import com.saisai.domain.course.entity.QCourseBookmark;
 import com.saisai.domain.reward.dto.projection.QRewardEventProjection;
 import com.saisai.domain.reward.entity.EventStatus;
 import com.saisai.domain.ride.entity.QRide;
 import com.saisai.domain.ride.entity.RideStatus;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -165,6 +170,42 @@ public class ChallengeRepositoryImpl implements ChallengeRepositoryCustom {
                 rewardEvent.id, rewardEvent.status, rewardEvent.type, rewardEvent.value)
             .orderBy(ride.count().coalesce(0L).desc())
             .limit(10)
+            .fetch();
+    }
+
+    @Override
+    public List<Challenge> findExistingChallengesByCourse(List<Course> courses) {
+        List<ChallengeStatus> statuses = List.of(ChallengeStatus.UPCOMING, ChallengeStatus.ONGOING);
+        return queryFactory
+            .selectFrom(challenge)
+            .where(challenge.course.in(courses)
+                .and(challenge.status.in(statuses)))
+            .fetch();
+    }
+
+    @Override
+    public List<Challenge> findChallengesStartingOn(LocalDate date) {
+        LocalDateTime startOfDay = date.atStartOfDay();
+        LocalDateTime endOfDay = date.atTime(LocalTime.MAX);
+
+        return queryFactory
+            .selectFrom(challenge)
+            .where(challenge.startedAt.goe(startOfDay)
+                .and(challenge.startedAt.loe(endOfDay))
+                .and(challenge.status.eq(ChallengeStatus.UPCOMING)))
+            .fetch();
+    }
+
+    @Override
+    public List<Challenge> findChallengesEndingOn(LocalDate date) {
+        LocalDateTime startOfDay = date.atStartOfDay();
+        LocalDateTime endOfDay = date.atTime(LocalTime.MAX);
+
+        return queryFactory
+            .selectFrom(challenge)
+            .where(challenge.endedAt.goe(startOfDay)
+                .and(challenge.endedAt.loe(endOfDay))
+                .and(challenge.status.eq(ChallengeStatus.ONGOING)))
             .fetch();
     }
 }
