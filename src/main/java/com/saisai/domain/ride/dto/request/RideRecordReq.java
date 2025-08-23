@@ -8,6 +8,7 @@ public record RideRecordReq(
     @NotNull(message = "소요시간(초)은 필수 입력값입니다.")
     Long duration,
 
+    @Min(value = -1)
     @NotNull(message = "체크포인트 인덱스는 필수 입력값입니다.")
     Integer checkpointIdx
 ) {

@@ -1,6 +1,7 @@
 package com.saisai.domain.ride.repository;
 
 import com.saisai.domain.ride.dto.response.RideCountRes;
+import com.saisai.domain.ride.dto.response.RideResumeRes;
 import com.saisai.domain.ride.entity.Ride;
 import com.saisai.domain.ride.entity.RideStatus;
 import com.saisai.domain.user.entity.User;
@@ -30,7 +31,12 @@ public interface RideRepository extends JpaRepository<Ride, Long>, RideRepositor
     Boolean existsByUserIdAndStatus(Long userId, RideStatus status);
 
     @Query(""" 
-        SELECT r.id FROM Ride r
+        SELECT NEW com.saisai.domain.ride.dto.response.RideResumeRes(
+            r.id,
+            r.durationSecond,
+            r.checkpointIdx
+        )
+        FROM Ride r
         WHERE r.user.id = :userId
         AND r.course.id = :courseId
         AND r.status NOT IN ('COMPLETED')
@@ -38,7 +44,7 @@ public interface RideRepository extends JpaRepository<Ride, Long>, RideRepositor
         ORDER BY r.modifiedAt DESC
         LIMIT 1
     """)
-    Long findActiveRideIdByUserIdAndCourseId(@Param("userId") Long userId,
+    Optional<RideResumeRes> findActiveRideIdByUserIdAndCourseId(@Param("userId") Long userId,
         @Param("courseId") Long courseId);
 
     Optional<Ride> findByUserIdAndCourseIdAndStatus(Long userId, Long courseId, RideStatus rideStatus);
