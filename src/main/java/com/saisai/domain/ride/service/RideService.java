@@ -99,7 +99,9 @@ public class RideService {
             .orElseThrow(() -> new CustomException(RIDE_NOT_FOUND));
 
         validateRideAccess(ride, authUserDetails.userId());
-        validateUserNotRiding(authUserDetails.userId());
+        if (!ride.getStatus().equals(RideStatus.IN_PROGRESS)) {
+            validateUserNotRiding(authUserDetails.userId());
+        }
 
         ride.resume();
 
