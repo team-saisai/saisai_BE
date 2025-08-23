@@ -66,7 +66,7 @@ public class RideRepositoryImpl implements RideRepositoryCustom {
                 course.level,
                 ride.modifiedAt,
                 course.distance,
-                course.estimatedTime,
+                ride.durationSecond,
                 ride.progressRate,
                 course.image,
                 ride.status.eq(RideStatus.COMPLETED),
