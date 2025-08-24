@@ -21,6 +21,9 @@ import com.saisai.domain.course.repository.CourseRepository;
 import com.saisai.domain.gpx.dto.GpxPoint;
 import com.saisai.domain.gpx.service.GpxCacheService;
 import com.saisai.domain.mission.service.MissionService;
+import com.saisai.domain.reward.dto.projection.RewardInfo;
+import com.saisai.domain.reward.repository.RewardEventRepository;
+import com.saisai.domain.reward.service.UserRewardService;
 import com.saisai.domain.ride.dto.request.RideCompleteReq;
 import com.saisai.domain.ride.dto.request.RideRecordReq;
 import com.saisai.domain.ride.dto.response.RidePausedRes;
@@ -49,6 +52,9 @@ public class RideService {
     private final CheckpointJsonParser checkpointJsonParser;
     private final GpxCacheService gpxCacheService;
     private final MissionService missionService;
+    private final UserRewardService userRewardService;
+    private final RewardEventRepository rewardEventRepository;
+
 
     private static final Set<Long> ADMIN_USER_IDS = Set.of(1L, 2L, 53L, 54L);
 
@@ -132,6 +138,11 @@ public class RideService {
         ride.complete(rideCompleteReq);
         ride.getUser().updateRidingStatus();
 
+        Optional<RewardInfo> rewardInfoOptional = getRewardInfo(rideId);
+
+        if (rewardInfoOptional.isPresent()) {
+            userRewardService.earnReward(authUserDetails.userId(), rewardInfoOptional.get());
+        }
         missionService.checkAndGrantAllMissions(ride.getUser());
     }
 
@@ -216,5 +227,9 @@ public class RideService {
             Ride newRide = Ride.start(user, course);
             return rideRepository.save(newRide); // 새로운 Ride 생성 및 저장
         }
+    }
+
+    private Optional<RewardInfo> getRewardInfo (Long rideId) {
+        return rewardEventRepository.findRewardInfoByRideId(rideId);
     }
 }
