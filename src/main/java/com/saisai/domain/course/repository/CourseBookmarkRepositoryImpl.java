@@ -75,7 +75,8 @@ public class CourseBookmarkRepositoryImpl implements CourseBookmarkRepositoryCus
                 rewardEvent.challenge.id.eq(challenge.id)
                     .and(rewardEvent.status.eq(EventStatus.ACTIVE)))
             .where(courseBookmark.user.id.eq(userId)
-                .and(course.isDeleted.eq(false)))
+                .and(course.isDeleted.eq(false))
+                .and(course.isVisible.isTrue()))
             .groupBy(course.id, course.name, course.level, course.distance,
                 course.estimatedTime, course.sigun, course.image,
                 challenge.status, challenge.endedAt,
@@ -91,7 +92,8 @@ public class CourseBookmarkRepositoryImpl implements CourseBookmarkRepositoryCus
             .from(courseBookmark)
             .leftJoin(courseBookmark.course, course)
             .where(courseBookmark.user.id.eq(userId)
-                .and(course.isDeleted.eq(false)));
+                .and(course.isDeleted.eq(false))
+                .and(course.isVisible.isTrue()));
 
         return PageableExecutionUtils.getPage(content, pageable, total::fetchOne);
     }

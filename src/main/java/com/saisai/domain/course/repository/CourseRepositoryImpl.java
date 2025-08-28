@@ -73,7 +73,8 @@ public class CourseRepositoryImpl implements CourseRepositoryCustom {
             )
             .leftJoin(ride).on(ride.course.id.eq(course.id)
                 .and(ride.isDeleted.isFalse()))
-            .where(course.isDeleted.eq(false)
+            .where(course.isVisible.isTrue()
+                .and(course.isDeleted.eq(false))
                 .and(challenge.id.isNull()))
             .groupBy(course.id, course.name, course.level, course.distance,
                 course.estimatedTime, course.sigun, course.image)
@@ -93,7 +94,8 @@ public class CourseRepositoryImpl implements CourseRepositoryCustom {
             .leftJoin(ride).on(ride.course.id.eq(course.id)
                 .and(ride.isDeleted.isFalse()))
             .where(course.isDeleted.eq(false)
-                .and(challenge.id.isNull()));
+                .and(challenge.id.isNull())
+                .and(course.isVisible.isTrue()));
 
         return PageableExecutionUtils.getPage(content, pageable, total::fetchOne);
     }
@@ -135,7 +137,8 @@ public class CourseRepositoryImpl implements CourseRepositoryCustom {
                 .and(challenge.status.eq(ChallengeStatus.ONGOING)))
             .leftJoin(rewardEvent).on(rewardEvent.challenge.eq(challenge)
                 .and(rewardEvent.status.eq(EventStatus.ACTIVE)))
-            .where(course.id.eq(courseId))
+            .where(course.id.eq(courseId)
+                .and(course.isVisible.isTrue()))
             .fetchOne();
 
         return Optional.ofNullable(result);

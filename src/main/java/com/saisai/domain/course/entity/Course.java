@@ -81,6 +81,9 @@ public class Course extends BaseEntity {
     @Column(name = "max_lon")
     private Double maxLon;
 
+    @Column(name = "is_visible", nullable = false)
+    private Boolean isVisible;
+
     @Column(name = "is_deleted")
     private Boolean isDeleted;
 
@@ -112,6 +115,7 @@ public class Course extends BaseEntity {
         this.maxLat = maxLat;
         this.maxLon = maxLon;
         this.isDeleted = false;
+        this.isVisible = false;
     }
 
     public static Course from (CourseItem courseItem, GpxKeyPoints gpxKeyPoints, String gpxPath, String checkpointGpxPath, int checkpointCount) {

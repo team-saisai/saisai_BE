@@ -86,6 +86,7 @@ public class ChallengeRepositoryImpl implements ChallengeRepositoryCustom {
                 rewardEvent.challenge.id.eq(challenge.id)
                     .and(rewardEvent.status.eq(EventStatus.ACTIVE)))
             .where(course.isDeleted.eq(false)
+                .and(course.isVisible.isTrue())
                 .and(challenge.status.eq(ChallengeStatus.ONGOING)))
             .groupBy(course.id, course.name, course.level, course.distance,
                 course.estimatedTime, course.sigun, course.image,
@@ -108,6 +109,7 @@ public class ChallengeRepositoryImpl implements ChallengeRepositoryCustom {
                     .and(rewardEvent.status.eq(EventStatus.ACTIVE))
             )
             .where(course.isDeleted.eq(false)
+                .and(course.isVisible.isTrue())
                 .and(challenge.status.eq(ChallengeStatus.ONGOING)));
 
         return PageableExecutionUtils.getPage(content, pageable, total::fetchOne);
@@ -163,6 +165,7 @@ public class ChallengeRepositoryImpl implements ChallengeRepositoryCustom {
                 rewardEvent.challenge.id.eq(challenge.id)
                     .and(rewardEvent.status.eq(EventStatus.ACTIVE)))
             .where(course.isDeleted.eq(false)
+                .and(course.isVisible.isTrue())
                 .and(challenge.status.eq(ChallengeStatus.ONGOING)))
             .groupBy(course.id, course.name, course.level, course.distance,
                 course.estimatedTime, course.sigun, course.image,
