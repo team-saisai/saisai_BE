@@ -2,6 +2,7 @@ package com.saisai.domain.course.entity;
 
 import com.saisai.domain.common.BaseEntity;
 import com.saisai.domain.course.api.dto.CourseItem;
+import com.saisai.domain.course.dto.request.CourseCreateReq;
 import com.saisai.domain.gpx.dto.GpxKeyPoints;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -134,6 +135,19 @@ public class Course extends BaseEntity {
             .build();
     }
 
+    public static Course from (CourseCreateReq request, String gpxKey, String checkpointGpxPath, int checkpointCount) {
+        return Course.builder()
+            .name(request.name())
+            .summary(request.summary())
+            .level(request.level())
+            .distance(request.distance())
+            .estimatedTime(request.estimatedTime())
+            .sigun(request.sigun())
+            .gpxPath(gpxKey)
+            .checkpointGpxPath(checkpointGpxPath)
+            .checkpointCount(checkpointCount)
+            .build();
+    }
     public void updateMergeGpxPath(String mergeGpxPath) {
         this.mergeGpxPath = mergeGpxPath;
     }

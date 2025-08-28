@@ -85,6 +85,8 @@ public enum ExceptionCode {
     GPX_PARSING_FAILED(HttpStatus.BAD_REQUEST, "GPX_ER_03", "GPX XML 파싱에 실패했습니다."),
     GPX_UNKNOWN_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "GPX_ER_04", "GPX 파일 처리 중 예상치 못한 오류가 발생했습니다."),
     GPX_NO_FIRST_POINT(HttpStatus.NOT_FOUND, "GPX_ER_05", "첫 번쩨 GPX 좌표가 없습니다."),
+    GPX_FILE_READ_FAIL(HttpStatus.BAD_REQUEST, "GPX_ER_06", "GPX 파일 내용을 읽는 데 실패했습니다"),
+    GPX_NOT_ENOUGH_POINTS(HttpStatus.BAD_REQUEST,"GPX_ER_07", "GPX 좌표가 충분하지 않습니다."),
 
     // api
     API_CLIENT_ERROR(HttpStatus.BAD_REQUEST, "API_ER_01", "API 요청에 문제가 발생했습니다. (클라이언트 오류)"),
@@ -95,6 +97,7 @@ public enum ExceptionCode {
     // json
     JSON_DESERIALIZATION_FAILED(HttpStatus.BAD_REQUEST, "JSON_ER_01", " JSON 역직렬화에 실패했습니다."),
     JSON_UNKNOWN_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "JSON_ER_02", "JSON 파일 처리 중 예상치 못한 오류가 발생했습니다."),
+    JSON_SERIALIZATION_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "JSON_ER_03", "JSON 직렬화에 실패했습니다."),
 
     // format
     INVALID_INTEGER_FORMAT(HttpStatus.BAD_REQUEST, "FMT_ER_01", "Integer 형식 변환에 실패했습니다."),

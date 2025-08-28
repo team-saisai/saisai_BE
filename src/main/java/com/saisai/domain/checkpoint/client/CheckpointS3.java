@@ -1,9 +1,12 @@
 package com.saisai.domain.checkpoint.client;
 
+import static com.saisai.domain.common.exception.ExceptionCode.JSON_UNKNOWN_ERROR;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.saisai.infra.aws.s3.S3Service;
 import com.saisai.domain.checkpoint.dto.CheckpointInfo;
+import com.saisai.domain.common.exception.CustomException;
+import com.saisai.infra.aws.s3.S3Service;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -21,16 +24,19 @@ public class CheckpointS3 {
     private static final String CONTENT_TYPE = "application/json";
 
     // 체크포인트 정보 업로드
-    public String upload(List<CheckpointInfo> checkpoints, String courseName)
-        throws JsonProcessingException {
+    public String upload(List<CheckpointInfo> checkpoints, String courseName) {
 
-        String jsonContent = objectMapper.writeValueAsString(checkpoints);
-        String sanitizedCourseName = sanitizeFilename(courseName);
+        try {
+            String jsonContent = objectMapper.writeValueAsString(checkpoints);
+            String sanitizedCourseName = sanitizeFilename(courseName);
 
-        String filename = sanitizedCourseName + "_" +
-            UUID.randomUUID().toString().substring(0, 8) + CHECKPOINT_FILE_EXTENSION;
+            String filename = sanitizedCourseName + "_" +
+                UUID.randomUUID().toString().substring(0, 8) + CHECKPOINT_FILE_EXTENSION;
 
-        return s3Service.uploadContent(jsonContent, CHECKPOINT_DIRECTORY, filename, CONTENT_TYPE);
+            return s3Service.uploadContent(jsonContent, CHECKPOINT_DIRECTORY, filename, CONTENT_TYPE);
+        } catch (JsonProcessingException e) {
+            throw new CustomException(JSON_UNKNOWN_ERROR, e);
+        }
     }
 
     // 체크포인트 JSON 파일 가져오기

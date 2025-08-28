@@ -2,12 +2,15 @@ package com.saisai.domain.gpx.service;
 
 import static com.saisai.domain.common.exception.ExceptionCode.GPX_DOWNLOAD_FAILED;
 import static com.saisai.domain.common.exception.ExceptionCode.GPX_EMPTY;
+import static com.saisai.domain.common.exception.ExceptionCode.GPX_FILE_READ_FAIL;
+import static com.saisai.domain.common.exception.ExceptionCode.GPX_NOT_ENOUGH_POINTS;
 import static com.saisai.domain.common.exception.ExceptionCode.GPX_NO_FIRST_POINT;
 import static com.saisai.domain.common.exception.ExceptionCode.GPX_PARSING_FAILED;
 import static com.saisai.domain.common.exception.ExceptionCode.GPX_UNKNOWN_ERROR;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
+import com.saisai.domain.checkpoint.dto.CheckpointInfo;
 import com.saisai.domain.checkpoint.dto.response.Checkpoint;
 import com.saisai.domain.common.exception.CustomException;
 import com.saisai.domain.gpx.dto.GpxKeyPoints;
@@ -15,17 +18,22 @@ import com.saisai.domain.gpx.dto.GpxPoint;
 import com.saisai.domain.gpx.dto.format.Gpx;
 import com.saisai.domain.gpx.dto.format.TrackPoint;
 import com.saisai.domain.gpx.util.DistanceUtils;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Random;
+import java.util.UUID;
 import java.util.stream.Stream;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientException;
+import org.springframework.web.multipart.MultipartFile;
 
 @Slf4j
 @Component
@@ -34,6 +42,20 @@ public class GpxParser {
 
     private final RestClient restClient;
     private final XmlMapper xmlMapper;
+
+    public String convertGpxToString(MultipartFile file) {
+        try {
+            return new String(file.getBytes());
+        } catch (IOException e) {
+            throw new CustomException(GPX_FILE_READ_FAIL);
+        }
+    }
+
+    public List<GpxPoint> parseCustomGpxFile(String gpxContent) {
+        List<TrackPoint> trackPoints = parseGpxContent(gpxContent);
+
+        return convertGpxToGpxPoints(trackPoints);
+    }
 
     // 두루누비 API에서 제공하는 gpx 파일 다운로드
     public String downloadGpxContent (String gpxUrl) {
@@ -272,5 +294,68 @@ public class GpxParser {
         }
 
         return result;
+    }
+
+    // gpxTrackPoint -> List<GpxPoint> 변환 메서드
+    private List<GpxPoint> convertGpxToGpxPoints(List<TrackPoint> trackPoints) {
+        List<GpxPoint> gpxPoints = new ArrayList<>();
+
+        TrackPoint prev = trackPoints.get(0);
+        double segmentDistance = 0.0;
+        double totalDistanceKm = 0.0;
+
+        gpxPoints.add(GpxPoint.from(prev,segmentDistance, totalDistanceKm));
+
+        for (int i = 1; i < trackPoints.size(); i++) {
+            TrackPoint current = trackPoints.get(i);
+            segmentDistance = DistanceUtils.calculateDistance(
+                prev.lat(), prev.lon(),
+                current.lat(), current.lon()
+            );
+
+            totalDistanceKm += (segmentDistance / 1000.0);
+
+            gpxPoints.add(GpxPoint.from(current, segmentDistance, totalDistanceKm));
+
+            prev = current;
+        }
+
+        return gpxPoints;
+    }
+
+    public List<CheckpointInfo> extractRandomCheckpoints(String gpxContent) {
+        Gpx gpx = getGpxFromContent(gpxContent);
+        List<TrackPoint> trackPoints = validGpx(gpx);
+
+        if (trackPoints.size() < 8) {
+            throw new CustomException(GPX_NOT_ENOUGH_POINTS);
+        }
+
+        List<TrackPoint> eligiblePoints = trackPoints.subList(1, trackPoints.size() - 1);
+        int totalPoints = eligiblePoints.size();
+        int interval = totalPoints / 7;
+
+        if (interval < 1) {
+            throw new CustomException(GPX_NOT_ENOUGH_POINTS);
+        }
+
+        List<TrackPoint> checkpointCandidates = new ArrayList<>();
+        for (int i = 0; i < 7; i++) {
+            int index = interval * i;
+            if (index < totalPoints) {
+                checkpointCandidates.add(eligiblePoints.get(index));
+            }
+        }
+
+        Collections.shuffle(checkpointCandidates, new Random(System.nanoTime()));
+
+        return checkpointCandidates.stream()
+            .limit(7)
+            .map(p -> new CheckpointInfo(
+                UUID.randomUUID().toString(),
+                p.lat(),
+                p.lon()
+            ))
+            .toList();
     }
 }
