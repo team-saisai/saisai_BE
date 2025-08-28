@@ -87,7 +87,7 @@ public class RideService {
 
         validateRideAccess(ride, authUserDetails.userId());
 
-        if (ride.getCourse().getCheckpointCount() <= rideRecordReq.checkpointIdx()+1) {
+        if (ride.getCourse().getCheckpointCount() < rideRecordReq.checkpointIdx()+1) {
             throw new CustomException(CHECKPOINT_INDEX_OUT_OF_RANGE);
         }
 
