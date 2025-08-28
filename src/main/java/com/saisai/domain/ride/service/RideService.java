@@ -55,7 +55,6 @@ public class RideService {
     private final UserRewardService userRewardService;
     private final RewardEventRepository rewardEventRepository;
 
-
     private static final Set<Long> ADMIN_USER_IDS = Set.of(1L, 2L, 53L, 54L);
 
     // Ride 시작 데이터 저장
@@ -69,7 +68,8 @@ public class RideService {
 
         validateUserNotRiding(user.getId());
 
-        Ride ride = findOrCreateOrResumeRide(user, course);
+        Ride ride = Ride.start(user, course);
+        rideRepository.save(ride);
 
         List<Checkpoint> checkpoints = getCheckpoint(ride);
 
@@ -215,7 +215,7 @@ public class RideService {
         return (int) Math.round(progressRate);
     }
 
-    // ride 생성하거나 재시작 결정
+    /*// ride 생성하거나 재시작 결정
     private Ride findOrCreateOrResumeRide(User user, Course course) {
         Optional<Ride> pausedRide = rideRepository.findByUserIdAndCourseIdAndStatus(user.getId(), course.getId(), RideStatus.PAUSED);
 
@@ -227,7 +227,7 @@ public class RideService {
             Ride newRide = Ride.start(user, course);
             return rideRepository.save(newRide); // 새로운 Ride 생성 및 저장
         }
-    }
+    }*/
 
     private Optional<RewardInfo> getRewardInfo (Long rideId) {
         return rewardEventRepository.findRewardInfoByRideId(rideId);

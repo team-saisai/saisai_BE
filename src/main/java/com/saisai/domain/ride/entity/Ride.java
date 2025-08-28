@@ -75,7 +75,7 @@ public class Ride extends BaseEntity {
         this.course = course;
         this.progressRate = 0;
         this.durationSecond = 0L;
-        this.checkpointIdx = 0;
+        this.checkpointIdx = -1;
         this.isDeleted = false;
     }
 
