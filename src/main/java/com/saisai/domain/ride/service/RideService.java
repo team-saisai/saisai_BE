@@ -210,7 +210,7 @@ public class RideService {
         }
 
         // 주행률 계산 (최대 100%로 제한)
-        double progressRate = Math.min((double) currentCheckpointCount / courseCheckpointCount * 100, 100.0);
+        double progressRate = Math.min((double) (currentCheckpointCount+1) / courseCheckpointCount * 100, 100.0);
 
         return (int) Math.round(progressRate);
     }
