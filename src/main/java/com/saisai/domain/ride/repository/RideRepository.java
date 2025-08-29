@@ -20,7 +20,7 @@ public interface RideRepository extends JpaRepository<Ride, Long>, RideRepositor
     @Query("""
         SELECT NEW com.saisai.domain.ride.dto.response.RideCountRes(
             r.course.id,
-            COUNT(CASE WHEN r.status = 'IN_PROGRESS' THEN 1 END),
+            COUNT(CASE WHEN r.status IN ('IN_PROGRESS', 'PAUSED') THEN 1 END),
             COUNT(CASE WHEN r.status = 'COMPLETED' THEN 1 END)
         )
         FROM Ride r
