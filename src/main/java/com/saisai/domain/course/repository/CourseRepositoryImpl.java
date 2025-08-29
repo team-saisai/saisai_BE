@@ -109,6 +109,7 @@ public class CourseRepositoryImpl implements CourseRepositoryCustom {
         CourseDetailsProjection result = queryFactory
             .select(new QCourseDetailsProjection(
                 course.id,
+                course.durunubiCourseId,
                 course.name,
                 course.summary,
                 course.level,

@@ -6,6 +6,7 @@ import java.time.LocalDateTime;
 
 public record CourseDetailsProjection(
     Long id,
+    String durunubiId,
     String name,
     String summary,
     Integer level,

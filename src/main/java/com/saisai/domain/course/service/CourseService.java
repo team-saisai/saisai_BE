@@ -17,8 +17,10 @@ import com.saisai.domain.course.dto.projection.GeneralCourseProjection;
 import com.saisai.domain.course.dto.response.CourseDetailsRes;
 import com.saisai.domain.course.dto.response.CoursePageRes;
 import com.saisai.domain.course.repository.CourseRepository;
+import com.saisai.domain.gpx.client.GpxS3;
 import com.saisai.domain.gpx.dto.GpxPoint;
 import com.saisai.domain.gpx.service.GpxCacheService;
+import com.saisai.domain.gpx.service.GpxParser;
 import com.saisai.domain.reward.dto.projection.RewardEventProjection;
 import com.saisai.domain.reward.util.RewardUtils;
 import com.saisai.domain.ride.dto.response.RideCountRes;
@@ -48,6 +50,8 @@ public class CourseService {
     private final ImageUtil imageUtil;
     private final CheckpointS3 checkpointS3;
     private final GpxCacheService gpxCacheService;
+    private final GpxS3 gpxS3;
+    private final GpxParser gpxParser;
 
     // 코스 목록 조회 메서드
     public Page<CoursePageRes> getCourses(Pageable pageable, CourseType type, CourseSortOption sortOption, AuthUserDetails authUserDetails) {
@@ -103,7 +107,13 @@ public class CourseService {
         String checkpointContent = checkpointS3.getCheckpointContent(course.checkpointPath());
         List<Checkpoint> checkpoint = checkpointJsonParser.deserialize(checkpointContent);
 
-        List<GpxPoint> mergedGpxPoints = gpxCacheService.getMergedGpxPoints(courseId, checkpoint);
+        List<GpxPoint> mergedGpxPoints;
+        if (course.durunubiId() == null) {
+            String gpxContent = gpxS3.getGpxContent(course.gpxpath());
+            mergedGpxPoints = gpxParser.parseCustomGpxFile(gpxContent);
+        } else {
+            mergedGpxPoints = gpxCacheService.getMergedGpxPoints(courseId, checkpoint);
+        }
 
         return CourseDetailsRes.from(course, imageUtil.getImageUrl(course.imageUrl()), rideCountRes, mergedGpxPoints,
             checkpoint, rideResumeRes);

@@ -35,9 +35,7 @@ public class AdminCourseService {
     @Transactional
     public CourseCreateRes createCourse(CourseCreateReq request) {
         String gpxContents = gpxParser.convertGpxToString(request.gpxFile());
-        List<GpxPoint> gpxPoints = gpxParser.parseCustomGpxFile(gpxContents);
-        String gpxPointsJson = convertListToJson(gpxPoints);
-        String gpxKey = gpxS3.upload(gpxPointsJson, request.name());
+        String gpxKey = gpxS3.upload(gpxContents, request.name());
 
         List<CheckpointInfo> checkpointInfos = gpxParser.extractRandomCheckpoints(gpxContents);
         String checkPointKey = checkpointS3.upload(checkpointInfos, request.name());
