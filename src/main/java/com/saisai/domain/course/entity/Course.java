@@ -2,7 +2,6 @@ package com.saisai.domain.course.entity;
 
 import com.saisai.domain.common.BaseEntity;
 import com.saisai.domain.course.api.dto.CourseItem;
-import com.saisai.domain.course.constant.CourseType;
 import com.saisai.domain.course.dto.request.CourseCreateReq;
 import com.saisai.domain.gpx.dto.GpxKeyPoints;
 import jakarta.persistence.Column;
@@ -95,7 +94,7 @@ public class Course extends BaseEntity {
     public Course(String name, String summary, Integer level, Double distance,
         Double estimatedTime, String sigun, String gpxPath, String checkpointGpxPath, String mergeGpxPath,
         String durunubiCourseId, String image, Double startLat, Double startLon,
-        Double minLat, Double minLon, Double maxLat, Double maxLon, Integer checkpointCount, CourseType courseType
+        Double minLat, Double minLon, Double maxLat, Double maxLon, Integer checkpointCount, boolean isVisible
     ) {
         this.name = name;
         this.summary = summary;
@@ -116,7 +115,7 @@ public class Course extends BaseEntity {
         this.maxLat = maxLat;
         this.maxLon = maxLon;
         this.isDeleted = false;
-        this.isVisible = false;
+        this.isVisible = isVisible;
     }
 
     public static Course from (CourseItem courseItem, GpxKeyPoints gpxKeyPoints, String gpxPath, String checkpointGpxPath, int checkpointCount) {
@@ -137,6 +136,7 @@ public class Course extends BaseEntity {
             .minLon(gpxKeyPoints.minLon())
             .maxLat(gpxKeyPoints.maxLat())
             .maxLon(gpxKeyPoints.maxLon())
+            .isVisible(false)
             .build();
     }
 
@@ -151,6 +151,7 @@ public class Course extends BaseEntity {
             .gpxPath(gpxKey)
             .checkpointGpxPath(checkpointGpxPath)
             .checkpointCount(checkpointCount)
+            .isVisible(true)
             .build();
     }
     public void updateMergeGpxPath(String mergeGpxPath) {
