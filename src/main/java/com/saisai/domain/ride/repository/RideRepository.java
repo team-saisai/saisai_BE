@@ -27,7 +27,6 @@ public interface RideRepository extends JpaRepository<Ride, Long>, RideRepositor
         WHERE r.course.id = :courseId
             and r.isDeleted = false
             and r.user.isDeleted = false
-        GROUP BY r.course.id
     """)
     RideCountRes countRideByCourseId(@Param("courseId") Long courseId);
 
