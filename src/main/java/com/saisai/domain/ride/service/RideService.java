@@ -211,6 +211,10 @@ public class RideService {
             throw new CustomException(COURSE_CHECKPOINT_INVALID);
         }
 
+        if (courseCheckpointCount == currentCheckpointCount+1) {
+            return 99;
+        }
+
         // 주행률 계산 (최대 100%로 제한)
         double progressRate = Math.min((double) (currentCheckpointCount+1) / courseCheckpointCount * 100, 100.0);
 
