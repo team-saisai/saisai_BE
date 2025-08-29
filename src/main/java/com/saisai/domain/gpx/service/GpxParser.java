@@ -323,7 +323,7 @@ public class GpxParser {
         return gpxPoints;
     }
 
-    public List<CheckpointInfo> extractRandomCheckpoints(String gpxContent) {
+    public List<CheckpointInfo> extractRandomCheckpoints(String gpxContent, int checkpointCount) {
         Gpx gpx = getGpxFromContent(gpxContent);
         List<TrackPoint> trackPoints = validGpx(gpx);
 
@@ -333,14 +333,14 @@ public class GpxParser {
 
         List<TrackPoint> eligiblePoints = trackPoints.subList(1, trackPoints.size() - 1);
         int totalPoints = eligiblePoints.size();
-        int interval = totalPoints / 7;
+        int interval = totalPoints / checkpointCount;
 
-        if (interval < 1) {
+        if (interval < checkpointCount) {
             throw new CustomException(GPX_NOT_ENOUGH_POINTS);
         }
 
         List<TrackPoint> checkpointCandidates = new ArrayList<>();
-        for (int i = 0; i < 7; i++) {
+        for (int i = 0; i < checkpointCount; i++) {
             int index = interval * i;
             if (index < totalPoints) {
                 checkpointCandidates.add(eligiblePoints.get(index));
@@ -350,7 +350,7 @@ public class GpxParser {
         Collections.shuffle(checkpointCandidates, new Random(System.nanoTime()));
 
         return checkpointCandidates.stream()
-            .limit(7)
+            .limit(checkpointCount)
             .map(p -> new CheckpointInfo(
                 UUID.randomUUID().toString(),
                 p.lat(),

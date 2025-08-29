@@ -9,6 +9,7 @@ public record CourseCreateReq(
     Double estimatedTime,
     Integer level,
     String summary,
+    int checkpointCount,
     MultipartFile gpxFile
 ) {
 
