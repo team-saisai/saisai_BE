@@ -20,10 +20,10 @@ import com.saisai.domain.course.entity.Course;
 import com.saisai.domain.course.repository.CourseRepository;
 import com.saisai.domain.gpx.dto.GpxPoint;
 import com.saisai.domain.gpx.service.GpxCacheService;
-import com.saisai.domain.mission.service.MissionService;
+import com.saisai.domain.mission.event.UserBadgeEvent;
 import com.saisai.domain.reward.dto.projection.RewardInfo;
+import com.saisai.domain.reward.event.UserRewardEvent;
 import com.saisai.domain.reward.repository.RewardEventRepository;
-import com.saisai.domain.reward.service.UserRewardService;
 import com.saisai.domain.ride.dto.request.RideCompleteReq;
 import com.saisai.domain.ride.dto.request.RideRecordReq;
 import com.saisai.domain.ride.dto.response.RidePausedRes;
@@ -38,6 +38,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -51,9 +52,8 @@ public class RideService {
     private final CheckpointS3 checkpointS3;
     private final CheckpointJsonParser checkpointJsonParser;
     private final GpxCacheService gpxCacheService;
-    private final MissionService missionService;
-    private final UserRewardService userRewardService;
     private final RewardEventRepository rewardEventRepository;
+    private final ApplicationEventPublisher eventPublisher;
 
     private static final Set<Long> ADMIN_USER_IDS = Set.of(1L, 2L, 53L, 54L);
 
@@ -63,6 +63,10 @@ public class RideService {
         Course course = courseRepository.findById(courseId)
             .orElseThrow(() -> new CustomException(COURSE_NOT_FOUND));
 
+        List<Checkpoint> checkpoints = getCheckpoint(course);
+
+        List<GpxPoint> mergeGpxPoints = gpxCacheService.getMergedGpxPoints(courseId, checkpoints);
+
         User user = userRepository.findById(authUserDetails.userId())
             .orElseThrow(() -> new CustomException(USER_NOT_FOUND));
 
@@ -70,10 +74,6 @@ public class RideService {
 
         Ride ride = Ride.start(user, course);
         rideRepository.save(ride);
-
-        List<Checkpoint> checkpoints = getCheckpoint(ride);
-
-        List<GpxPoint> mergeGpxPoints = gpxCacheService.getMergedGpxPoints(courseId, checkpoints);
 
         return RideStartRes.from(ride, ride.getCourse(), mergeGpxPoints, checkpoints);
     }
@@ -141,9 +141,11 @@ public class RideService {
         Optional<RewardInfo> rewardInfoOptional = getRewardInfo(rideId);
 
         if (rewardInfoOptional.isPresent()) {
-            userRewardService.earnReward(authUserDetails.userId(), rewardInfoOptional.get());
+            UserRewardEvent rewardEvent = UserRewardEvent.of(authUserDetails.userId(), rewardInfoOptional.get());
+            eventPublisher.publishEvent(rewardEvent);
         }
-        missionService.checkAndGrantAllMissions(ride.getUser());
+        UserBadgeEvent badgeEvent = UserBadgeEvent.from(ride.getUser());
+        eventPublisher.publishEvent(badgeEvent);
     }
 
     // 기록 동기화
@@ -164,8 +166,8 @@ public class RideService {
     }
 
     // checkpoint 조회
-    private List<Checkpoint> getCheckpoint(Ride ride) {
-        String checkpointContent = checkpointS3.getCheckpointContent(ride.getCourse().getCheckpointGpxPath());
+    private List<Checkpoint> getCheckpoint(Course course) {
+        String checkpointContent = checkpointS3.getCheckpointContent(course.getCheckpointGpxPath());
         return checkpointJsonParser.deserialize(checkpointContent);
     }
 

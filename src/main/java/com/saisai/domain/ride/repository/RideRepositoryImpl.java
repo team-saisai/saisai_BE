@@ -88,7 +88,8 @@ public class RideRepositoryImpl implements RideRepositoryCustom {
                 challenge.course.eq(course)
                     .and(challenge.status.eq(ChallengeStatus.ONGOING)))
             .leftJoin(rewardEvent).on(rewardEvent.challenge.eq(challenge))
-            .where(whereClause)
+            .where(whereClause
+                .and(course.isVisible.isTrue()))
             .orderBy(sortOption.toOrderSpecifier())
             .offset(pageable.getOffset())
             .limit(pageable.getPageSize())
@@ -103,7 +104,8 @@ public class RideRepositoryImpl implements RideRepositoryCustom {
                     .and(challenge.status.eq(ChallengeStatus.ONGOING))
             )
             .leftJoin(rewardEvent).on(rewardEvent.challenge.eq(challenge))
-            .where(whereClause);
+            .where(whereClause
+                .and(course.isVisible.isTrue()));
 
         return PageableExecutionUtils.getPage(content, pageable, total::fetchOne);
     }
