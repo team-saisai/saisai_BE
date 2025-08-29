@@ -63,6 +63,7 @@ public class CourseRepositoryImpl implements CourseRepositoryCustom {
                         rideSub.course.id.eq(course.id)
                             .and(rideSub.user.id.eq(userId))
                             .and(rideSub.status.eq(RideStatus.COMPLETED))
+                            .and(rideSub.isDeleted.isFalse())
                     )
                     .exists()
             ))

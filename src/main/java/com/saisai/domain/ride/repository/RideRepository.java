@@ -24,7 +24,10 @@ public interface RideRepository extends JpaRepository<Ride, Long>, RideRepositor
             COUNT(CASE WHEN r.status = 'COMPLETED' THEN 1 END)
         )
         FROM Ride r
-        WHERE r.course.id = :courseId and r.isDeleted = false
+        WHERE r.course.id = :courseId
+            and r.isDeleted = false
+            and r.user.isDeleted = false
+        GROUP BY r.course.id
     """)
     RideCountRes countRideByCourseId(@Param("courseId") Long courseId);
 
