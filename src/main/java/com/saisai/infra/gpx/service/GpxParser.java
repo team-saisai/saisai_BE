@@ -359,4 +359,23 @@ public class GpxParser {
 
         return checkpoints;
     }
+
+    public List<Checkpoint> indexAndSortCheckpoints(
+        List<TrackPoint> trackPoints, List<Checkpoint> checkpoints) {
+
+        if (checkpoints == null || checkpoints.isEmpty()) return List.of();
+
+        int[] positions = findCheckpointInsertIndexArray(trackPoints, checkpoints);
+
+        List<Checkpoint> indexed = new ArrayList<>(checkpoints.size());
+        for (int i = 0; i < checkpoints.size(); i++) {
+            Checkpoint c = checkpoints.get(i);
+            int gpxPathIdx = positions[i];
+            indexed.add(new Checkpoint(gpxPathIdx, c.lat(), c.lon()));
+        }
+
+        // 경로 순 정렬
+        indexed.sort(Comparator.comparingInt(Checkpoint::gpxPathIdx));
+        return indexed;
+    }
 }

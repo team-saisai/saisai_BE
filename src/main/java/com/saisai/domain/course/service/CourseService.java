@@ -6,9 +6,6 @@ import static com.saisai.domain.common.exception.ExceptionCode.INVALID_SORT_OPTI
 import com.saisai.config.jwt.AuthUserDetails;
 import com.saisai.domain.challenge.dto.projection.ChallengeCourseProjection;
 import com.saisai.domain.challenge.repository.ChallengeRepository;
-import com.saisai.infra.checkpoint.client.CheckpointS3;
-import com.saisai.infra.checkpoint.dto.response.Checkpoint;
-import com.saisai.infra.checkpoint.service.CheckpointJsonParser;
 import com.saisai.domain.common.exception.CustomException;
 import com.saisai.domain.course.constant.CourseSortOption;
 import com.saisai.domain.course.constant.CourseType;
@@ -16,17 +13,22 @@ import com.saisai.domain.course.dto.projection.CourseDetailsProjection;
 import com.saisai.domain.course.dto.projection.GeneralCourseProjection;
 import com.saisai.domain.course.dto.response.CourseDetailsRes;
 import com.saisai.domain.course.dto.response.CoursePageRes;
+import com.saisai.domain.course.entity.Course;
 import com.saisai.domain.course.repository.CourseRepository;
-import com.saisai.infra.gpx.client.GpxS3;
-import com.saisai.infra.gpx.dto.GpxPoint;
-import com.saisai.infra.gpx.service.GpxCacheService;
-import com.saisai.infra.gpx.service.GpxParser;
 import com.saisai.domain.reward.dto.projection.RewardEventProjection;
 import com.saisai.domain.reward.util.RewardUtils;
 import com.saisai.domain.ride.dto.response.RideCountRes;
 import com.saisai.domain.ride.dto.response.RideResumeRes;
 import com.saisai.domain.ride.repository.RideRepository;
 import com.saisai.infra.aws.s3.ImageUtil;
+import com.saisai.infra.checkpoint.client.CheckpointS3;
+import com.saisai.infra.checkpoint.dto.response.Checkpoint;
+import com.saisai.infra.checkpoint.service.CheckpointJsonParser;
+import com.saisai.infra.gpx.client.GpxS3;
+import com.saisai.infra.gpx.dto.GpxPoint;
+import com.saisai.infra.gpx.dto.format.TrackPoint;
+import com.saisai.infra.gpx.service.GpxCacheService;
+import com.saisai.infra.gpx.service.GpxParser;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -96,27 +98,19 @@ public class CourseService {
     }
 
     // 코스 상세 조회 비즈니스 로직
+    @Transactional
     public CourseDetailsRes getCourseInfo(Long courseId, AuthUserDetails authUserDetails) {
         CourseDetailsProjection course = courseRepository.findCourseDetailsProjection(courseId, authUserDetails.userId())
             .orElseThrow(() -> new CustomException(COURSE_NOT_FOUND));
 
         Optional<RideResumeRes> rideResumeRes = rideRepository.findActiveRideIdByUserIdAndCourseId(authUserDetails.userId(), courseId);
-
         RideCountRes rideCountRes = rideRepository.countRideByCourseId(courseId);
 
-        String checkpointContent = checkpointS3.getCheckpointContent(course.checkpointPath());
-        List<Checkpoint> checkpoint = checkpointJsonParser.deserialize(checkpointContent);
-
-        List<GpxPoint> mergedGpxPoints;
-        if (course.durunubiId() == null) {
-            String gpxContent = gpxS3.getGpxContent(course.gpxpath());
-            mergedGpxPoints = gpxParser.parseCustomGpxFile(gpxContent);
-        } else {
-            mergedGpxPoints = gpxCacheService.getMergedGpxPoints(courseId, checkpoint);
-        }
+        List<Checkpoint> checkpoints = ensureIndexedCheckpoints(course);
+        List<GpxPoint> mergedGpxPoints = buildMergedGpxPoints(course, checkpoints);
 
         return CourseDetailsRes.from(course, imageUtil.getImageUrl(course.imageUrl()), rideCountRes, mergedGpxPoints,
-            checkpoint, rideResumeRes);
+            checkpoints, rideResumeRes);
     }
 
     // 이벤트 활성화 확인
@@ -134,5 +128,35 @@ public class CourseService {
                 challengeCourseProjection.rewardEventProjection().rewardEventType(),
                 challengeCourseProjection.rewardEventProjection().value()) :
             RewardUtils.calculateEventReward(challengeCourseProjection.level());
+    }
+
+    private List<Checkpoint> ensureIndexedCheckpoints(CourseDetailsProjection course) {
+        String checkpointContent = checkpointS3.getCheckpointContent(course.checkpointPath());
+        List<Checkpoint> checkpoints = checkpointJsonParser.deserialize(checkpointContent);
+
+        boolean needsIndexing = checkpoints.stream().anyMatch(c -> c.gpxPathIdx() == null);
+        if (!needsIndexing) {
+            return checkpoints;
+        }
+
+        String gpxContent = gpxS3.getGpxContent(course.gpxpath());
+        List<TrackPoint> trackPoints = gpxParser.parseGpxContent(gpxContent);
+        List<Checkpoint> indexed = gpxParser.indexAndSortCheckpoints(trackPoints, checkpoints);
+
+        String newCheckpointKey = checkpointS3.uploadCheckpoint(indexed, course.name());
+
+        Course findCourse = courseRepository.findById(course.id())
+            .orElseThrow(() -> new CustomException(COURSE_NOT_FOUND));
+        findCourse.updateCheckpointPath(newCheckpointKey);
+
+        return indexed;
+    }
+
+    private List<GpxPoint> buildMergedGpxPoints(CourseDetailsProjection course, List<Checkpoint> checkpoints) {
+        if (course.durunubiId() == null) {
+            String gpxContent = gpxS3.getGpxContent(course.gpxpath());
+            return gpxParser.parseCustomGpxFile(gpxContent);
+        }
+        return gpxCacheService.getMergedGpxPoints(course.id(), checkpoints);
     }
 }

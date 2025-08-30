@@ -40,7 +40,7 @@ public class CheckpointS3 {
         }
     }
 
-    public String uploadRequestCourse(List<Checkpoint> checkpoints, String courseName) {
+    public String uploadCheckpoint(List<Checkpoint> checkpoints, String courseName) {
         try {
             String jsonContent = objectMapper.writeValueAsString(checkpoints);
             String sanitizedCourseName = sanitizeFilename(courseName);

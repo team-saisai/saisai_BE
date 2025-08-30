@@ -157,4 +157,8 @@ public class Course extends BaseEntity {
     public void updateMergeGpxPath(String mergeGpxPath) {
         this.mergeGpxPath = mergeGpxPath;
     }
+
+    public void updateCheckpointPath(String newPath) {
+        this.checkpointGpxPath = newPath;
+    }
 }

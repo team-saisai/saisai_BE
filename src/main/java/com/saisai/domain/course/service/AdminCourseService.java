@@ -28,7 +28,7 @@ public class AdminCourseService {
         String gpxKey = gpxS3.upload(gpxContents, request.name());
 
         List<Checkpoint> checkpoint = gpxParser.extractRandomCheckpoints(gpxContents, request.checkpointCount());
-        String checkPointKey = checkpointS3.uploadRequestCourse(checkpoint, request.name());
+        String checkPointKey = checkpointS3.uploadCheckpoint(checkpoint, request.name());
 
         Course course = Course.from(request, gpxKey, checkPointKey, request.checkpointCount());
         courseRepository.save(course);
