@@ -10,9 +10,8 @@ import static com.saisai.domain.common.exception.ExceptionCode.GPX_UNKNOWN_ERROR
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
-import com.saisai.infra.checkpoint.dto.CheckpointInfo;
-import com.saisai.infra.checkpoint.dto.response.Checkpoint;
 import com.saisai.domain.common.exception.CustomException;
+import com.saisai.infra.checkpoint.dto.response.Checkpoint;
 import com.saisai.infra.gpx.dto.GpxKeyPoints;
 import com.saisai.infra.gpx.dto.GpxPoint;
 import com.saisai.infra.gpx.dto.format.Gpx;
@@ -20,13 +19,11 @@ import com.saisai.infra.gpx.dto.format.TrackPoint;
 import com.saisai.infra.gpx.util.DistanceUtils;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Random;
-import java.util.UUID;
 import java.util.stream.Stream;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -42,6 +39,8 @@ public class GpxParser {
 
     private final RestClient restClient;
     private final XmlMapper xmlMapper;
+
+    private static final double EDGE_BUFFER_RATIO = 0.10;
 
     public String convertGpxToString(MultipartFile file) {
         try {
@@ -323,39 +322,41 @@ public class GpxParser {
         return gpxPoints;
     }
 
-    public List<CheckpointInfo> extractRandomCheckpoints(String gpxContent, int checkpointCount) {
+    public List<Checkpoint> extractRandomCheckpoints(String gpxContent, int checkpointCount) {
         Gpx gpx = getGpxFromContent(gpxContent);
         List<TrackPoint> trackPoints = validGpx(gpx);
 
-        if (trackPoints.size() < 8) {
+        if (trackPoints.size() < checkpointCount + 2) {
             throw new CustomException(GPX_NOT_ENOUGH_POINTS);
         }
 
         List<TrackPoint> eligiblePoints = trackPoints.subList(1, trackPoints.size() - 1);
         int totalPoints = eligiblePoints.size();
-        int interval = totalPoints / checkpointCount;
 
-        if (interval < checkpointCount) {
+        int edgeBuffer = Math.max(1, (int) Math.floor(totalPoints * EDGE_BUFFER_RATIO));
+        int effectiveTotal = totalPoints - (edgeBuffer * 2);
+        if (effectiveTotal < checkpointCount) {
             throw new CustomException(GPX_NOT_ENOUGH_POINTS);
         }
 
-        List<TrackPoint> checkpointCandidates = new ArrayList<>();
-        for (int i = 0; i < checkpointCount; i++) {
-            int index = interval * i;
-            if (index < totalPoints) {
-                checkpointCandidates.add(eligiblePoints.get(index));
+        List<Checkpoint> checkpoints = new ArrayList<>(checkpointCount);
+        if (checkpointCount == 1) {
+            int pos = edgeBuffer + (effectiveTotal - 1) / 2;
+            TrackPoint p = eligiblePoints.get(pos);
+            int gpxPathIdx = pos + 1; // subList(1,…) 했으므로 원본 trackPoints 기준 +1
+            checkpoints.add(new Checkpoint(gpxPathIdx, p.lat(), p.lon()));
+        } else {
+            for (int i = 0; i < checkpointCount; i++) {
+                int posInEligible = edgeBuffer
+                    + (int) Math.round(i * (effectiveTotal - 1) / (double) (checkpointCount - 1));
+                TrackPoint p = eligiblePoints.get(posInEligible);
+                int gpxPathIdx = posInEligible + 1; // 원본 인덱스
+                checkpoints.add(new Checkpoint(gpxPathIdx, p.lat(), p.lon()));
             }
         }
 
-        Collections.shuffle(checkpointCandidates, new Random(System.nanoTime()));
+        checkpoints.sort(Comparator.comparingInt(Checkpoint::gpxPathIdx));
 
-        return checkpointCandidates.stream()
-            .limit(checkpointCount)
-            .map(p -> new CheckpointInfo(
-                UUID.randomUUID().toString(),
-                p.lat(),
-                p.lon()
-            ))
-            .toList();
+        return checkpoints;
     }
 }

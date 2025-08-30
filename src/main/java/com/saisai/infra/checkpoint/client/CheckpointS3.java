@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.saisai.infra.checkpoint.dto.CheckpointInfo;
 import com.saisai.domain.common.exception.CustomException;
 import com.saisai.infra.aws.s3.S3Service;
+import com.saisai.infra.checkpoint.dto.response.Checkpoint;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -26,6 +27,20 @@ public class CheckpointS3 {
     // 체크포인트 정보 업로드
     public String upload(List<CheckpointInfo> checkpoints, String courseName) {
 
+        try {
+            String jsonContent = objectMapper.writeValueAsString(checkpoints);
+            String sanitizedCourseName = sanitizeFilename(courseName);
+
+            String filename = sanitizedCourseName + "_" +
+                UUID.randomUUID().toString().substring(0, 8) + CHECKPOINT_FILE_EXTENSION;
+
+            return s3Service.uploadContent(jsonContent, CHECKPOINT_DIRECTORY, filename, CONTENT_TYPE);
+        } catch (JsonProcessingException e) {
+            throw new CustomException(JSON_UNKNOWN_ERROR, e);
+        }
+    }
+
+    public String uploadRequestCourse(List<Checkpoint> checkpoints, String courseName) {
         try {
             String jsonContent = objectMapper.writeValueAsString(checkpoints);
             String sanitizedCourseName = sanitizeFilename(courseName);
