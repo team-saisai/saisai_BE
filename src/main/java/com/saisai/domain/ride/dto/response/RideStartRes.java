@@ -1,8 +1,8 @@
 package com.saisai.domain.ride.dto.response;
 
-import com.saisai.domain.checkpoint.dto.response.Checkpoint;
+import com.saisai.infra.checkpoint.dto.response.Checkpoint;
 import com.saisai.domain.course.entity.Course;
-import com.saisai.domain.gpx.dto.GpxPoint;
+import com.saisai.infra.gpx.dto.GpxPoint;
 import com.saisai.domain.ride.entity.Ride;
 import java.util.List;
 

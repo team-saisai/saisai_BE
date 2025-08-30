@@ -1,9 +1,9 @@
 package com.saisai.domain.course.dto.response;
 
 import com.saisai.domain.challenge.entity.ChallengeStatus;
-import com.saisai.domain.checkpoint.dto.response.Checkpoint;
+import com.saisai.infra.checkpoint.dto.response.Checkpoint;
 import com.saisai.domain.course.dto.projection.CourseDetailsProjection;
-import com.saisai.domain.gpx.dto.GpxPoint;
+import com.saisai.infra.gpx.dto.GpxPoint;
 import com.saisai.domain.ride.dto.response.RideCountRes;
 import com.saisai.domain.ride.dto.response.RideResumeRes;
 import java.time.LocalDate;

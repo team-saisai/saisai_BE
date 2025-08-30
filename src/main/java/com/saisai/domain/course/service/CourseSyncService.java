@@ -2,9 +2,9 @@ package com.saisai.domain.course.service;
 
 import static java.lang.Boolean.TRUE;
 
-import com.saisai.domain.checkpoint.client.CheckpointS3;
-import com.saisai.domain.checkpoint.dto.CheckpointInfo;
-import com.saisai.domain.checkpoint.service.CheckpointApiService;
+import com.saisai.infra.checkpoint.client.CheckpointS3;
+import com.saisai.infra.checkpoint.dto.CheckpointInfo;
+import com.saisai.infra.checkpoint.service.CheckpointApiService;
 import com.saisai.domain.common.exception.CustomException;
 import com.saisai.domain.course.api.DurunubiCourseApiService;
 import com.saisai.domain.course.api.dto.CourseItem;
@@ -13,9 +13,9 @@ import com.saisai.domain.course.api.dto.external.DurunubiApiResponse;
 import com.saisai.domain.course.api.dto.external.DurunubiItems;
 import com.saisai.domain.course.entity.Course;
 import com.saisai.domain.course.repository.CourseRepository;
-import com.saisai.domain.gpx.client.GpxS3;
-import com.saisai.domain.gpx.dto.GpxKeyPoints;
-import com.saisai.domain.gpx.service.GpxParser;
+import com.saisai.infra.gpx.client.GpxS3;
+import com.saisai.infra.gpx.dto.GpxKeyPoints;
+import com.saisai.infra.gpx.service.GpxParser;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;

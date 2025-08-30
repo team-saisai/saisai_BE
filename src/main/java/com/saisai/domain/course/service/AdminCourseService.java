@@ -5,16 +5,16 @@ import static com.saisai.domain.common.exception.ExceptionCode.JSON_SERIALIZATIO
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.saisai.domain.checkpoint.client.CheckpointS3;
-import com.saisai.domain.checkpoint.dto.CheckpointInfo;
+import com.saisai.infra.checkpoint.client.CheckpointS3;
+import com.saisai.infra.checkpoint.dto.CheckpointInfo;
 import com.saisai.domain.common.exception.CustomException;
 import com.saisai.domain.course.dto.request.CourseCreateReq;
 import com.saisai.domain.course.dto.response.CourseCreateRes;
 import com.saisai.domain.course.entity.Course;
 import com.saisai.domain.course.repository.CourseRepository;
-import com.saisai.domain.gpx.client.GpxS3;
-import com.saisai.domain.gpx.dto.GpxPoint;
-import com.saisai.domain.gpx.service.GpxParser;
+import com.saisai.infra.gpx.client.GpxS3;
+import com.saisai.infra.gpx.dto.GpxPoint;
+import com.saisai.infra.gpx.service.GpxParser;
 import java.io.IOException;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
