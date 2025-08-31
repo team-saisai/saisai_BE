@@ -63,6 +63,7 @@ public class Challenge extends BaseEntity {
 
     public void start () {
         this.status = ChallengeStatus.ONGOING;
+        this.course.markAsIsVisible();
     }
 
     public void end () {

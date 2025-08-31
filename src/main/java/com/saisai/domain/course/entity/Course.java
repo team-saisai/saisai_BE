@@ -161,4 +161,8 @@ public class Course extends BaseEntity {
     public void updateCheckpointPath(String newPath) {
         this.checkpointGpxPath = newPath;
     }
+
+    public void markAsIsVisible() {
+        this.isVisible = true;
+    }
 }
