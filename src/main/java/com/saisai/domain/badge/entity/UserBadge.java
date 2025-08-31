@@ -29,7 +29,7 @@ import org.hibernate.annotations.SQLDelete;
     )
 )
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@SQLDelete(sql = "UPDATE user_badge SET is_deleted = true, deleted_at = NOW() WHERE id = ?")
+@SQLDelete(sql = "UPDATE user_badges SET is_deleted = true, deleted_at = NOW() WHERE id = ?")
 @Filter(name = "notDeleted", condition = "is_deleted = :isDeleted")
 public class UserBadge extends BaseEntity {
 
