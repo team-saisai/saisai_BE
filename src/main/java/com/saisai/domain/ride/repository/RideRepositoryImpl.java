@@ -17,6 +17,7 @@ import com.saisai.domain.reward.entity.EventStatus;
 import com.saisai.domain.ride.constant.RideSortOption;
 import com.saisai.domain.ride.dto.response.RideRecordRes;
 import com.saisai.domain.ride.entity.RideStatus;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
@@ -71,7 +72,7 @@ public class RideRepositoryImpl implements RideRepositoryCustom {
                 course.image,
                 ride.status.eq(RideStatus.COMPLETED),
                 challenge.status,
-                challenge.endedAt,
+                Expressions.dateTemplate(LocalDate.class, "DATE({0})", challenge.endedAt),
                 new CaseBuilder()
                     .when(challenge.isNotNull()
                         .and(rewardEvent.isNotNull())

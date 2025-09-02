@@ -1,6 +1,7 @@
 package com.saisai.domain.ride.dto.response;
 
 import com.saisai.domain.challenge.entity.ChallengeStatus;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 public record RideRecordRes(
@@ -16,7 +17,7 @@ public record RideRecordRes(
     String imageUrl,
     Boolean isCompleted,
     ChallengeStatus challengeStatus,
-    LocalDateTime challengeEndedAt,
+    LocalDate challengeEndedAt,
     Boolean isEventActive
 ) {
 
