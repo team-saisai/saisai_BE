@@ -1,6 +1,7 @@
 package com.saisai.domain.ride.dto.response;
 
 import com.saisai.domain.challenge.entity.ChallengeStatus;
+import com.saisai.domain.ride.dto.query.RideRecordQuery;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
@@ -21,22 +22,27 @@ public record RideRecordRes(
     Boolean isEventActive
 ) {
 
-    public static RideRecordRes from (RideRecordRes originalDto, String imageUrl) {
+    public static RideRecordRes from (RideRecordQuery query, String imageUrl) {
+
+        LocalDate challengeEndedDate = (query.challengeEndedAt() == null)
+            ? null
+            : query.challengeEndedAt().toLocalDate();
+
         return new RideRecordRes(
-            originalDto.rideId(),
-            originalDto.courseId(),
-            originalDto.courseName(),
-            originalDto.sigun(),
-            originalDto.level(),
-            originalDto.lastRideDate(),
-            originalDto.distance(),
-            originalDto.durationSecond(),
-            originalDto.progressRate(),
+            query.rideId(),
+            query.courseId(),
+            query.courseName(),
+            query.sigun(),
+            query.level(),
+            query.lastRideDate(),
+            query.distance(),
+            query.durationSecond(),
+            query.progressRate(),
             imageUrl,
-            originalDto.isCompleted(),
-            originalDto.challengeStatus(),
-            originalDto.challengeEndedAt(),
-            originalDto.isEventActive()
+            query.isCompleted(),
+            query.challengeStatus(),
+            challengeEndedDate,
+            query.isEventActive()
         );
     }
 }

@@ -8,6 +8,7 @@ import com.saisai.domain.common.exception.CustomException;
 import com.saisai.domain.course.entity.Course;
 import com.saisai.domain.course.repository.CourseRepository;
 import com.saisai.domain.ride.constant.RideSortOption;
+import com.saisai.domain.ride.dto.query.RideRecordQuery;
 import com.saisai.domain.ride.dto.request.RideDeleteReq;
 import com.saisai.domain.ride.dto.response.RecentRideInfoRes;
 import com.saisai.domain.ride.dto.response.RideDeleteRes;
@@ -68,14 +69,14 @@ public class MyRideService {
     public Page<RideRecordRes> getMyRideRecords(Pageable pageable, RideSortOption sortOption,
                                                 Boolean ridingCourseOnly, AuthUserDetails authUserDetails)
     {
-        Page<RideRecordRes> page = rideRepository.findMyRideRecords(pageable, sortOption,
+        Page<RideRecordQuery> page = rideRepository.findMyRideRecords(pageable, sortOption,
             ridingCourseOnly, authUserDetails.userId());
 
         List<RideRecordRes> result = page.getContent().stream()
-            .map(dto -> {
-                String imageUrl = imageUtil.getImageUrl(dto.imageUrl());
+            .map(query -> {
+                String imageUrl = imageUtil.getImageUrl(query.imageUrl());
                 // 팩토리 메서드를 사용해 새로운 DTO 인스턴스 생성
-                return RideRecordRes.from(dto, imageUrl);
+                return RideRecordRes.from(query, imageUrl);
             })
             .toList();
 

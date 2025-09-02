@@ -15,9 +15,8 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.saisai.domain.challenge.entity.ChallengeStatus;
 import com.saisai.domain.reward.entity.EventStatus;
 import com.saisai.domain.ride.constant.RideSortOption;
-import com.saisai.domain.ride.dto.response.RideRecordRes;
+import com.saisai.domain.ride.dto.query.RideRecordQuery;
 import com.saisai.domain.ride.entity.RideStatus;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
@@ -48,7 +47,7 @@ public class RideRepositoryImpl implements RideRepositoryCustom {
     }
 
     @Override
-    public Page<RideRecordRes> findMyRideRecords(Pageable pageable, RideSortOption sortOption,
+    public Page<RideRecordQuery> findMyRideRecords(Pageable pageable, RideSortOption sortOption,
         Boolean ridingCourseOnly, Long userId) {
 
         BooleanExpression whereClause = ride.user.id.eq(userId)
@@ -58,8 +57,8 @@ public class RideRepositoryImpl implements RideRepositoryCustom {
             whereClause = whereClause.and(ride.status.ne(RideStatus.COMPLETED));
         }
 
-        List<RideRecordRes> content = jpaQueryFactory
-            .select(Projections.constructor(RideRecordRes.class,
+        List<RideRecordQuery> content = jpaQueryFactory
+            .select(Projections.constructor(RideRecordQuery.class,
                 ride.id,
                 course.id,
                 course.name,
@@ -72,7 +71,7 @@ public class RideRepositoryImpl implements RideRepositoryCustom {
                 course.image,
                 ride.status.eq(RideStatus.COMPLETED),
                 challenge.status,
-                Expressions.dateTemplate(LocalDate.class, "DATE({0})", challenge.endedAt),
+                challenge.endedAt,
                 new CaseBuilder()
                     .when(challenge.isNotNull()
                         .and(rewardEvent.isNotNull())
